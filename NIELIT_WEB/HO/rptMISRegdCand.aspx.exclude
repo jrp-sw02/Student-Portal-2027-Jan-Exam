@@ -1,0 +1,136 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPages/Report.master" AutoEventWireup="true" CodeFile="rptMISRegdCand.aspx.cs" Inherits="HO_Rpt_rptMISRegdCand" %>
+
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="asp" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+
+    <style type="text/css">
+        .error {
+            background-color: #EACFCE;
+            padding: 4px;
+            color: Red;
+            border: 1px solid maroon;
+            font-size: 11pt;
+        }
+
+        .head1 {
+            font: bold 13px arial;
+            background-color: #31597C;
+            color: #ffffff;
+            line-height: 20px;
+            padding-left: 2px;
+        }
+
+        .gdalternate1 {
+            font: normal 12px arial;
+            background-color: #E6F0F0;
+            color: #000000;
+            line-height: 18px;
+        }
+
+        .gdrow1 {
+            background-color: #c9d7e2;
+            font: normal 12px arial;
+            color: #000000;
+            line-height: 18px;
+        }
+
+        input[type="date"] {
+            padding: 4px;
+            font-family: Arial;
+            width: 126px;
+        }
+    </style>
+
+
+</asp:Content>
+
+
+<asp:Content ID="Content2" ContentPlaceHolderID="cpReportHeader" runat="server">
+    MIS Registered Candidates Stats
+</asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="cpButtons" runat="server">
+</asp:Content>
+
+<asp:Content ID="Content6" ContentPlaceHolderID="cpReportData" runat="server">
+    <div>
+        <table width="100%" border="0" cellpadding="2" cellspacing="0">
+
+            <tr class="gdrow1">
+                <td>
+                    <asp:Label ID="Label1" runat="server" Text="Project Based&lt;font color='RED'&gt;*&lt;/font&gt;"></asp:Label>
+                </td>
+                <td>
+                    <asp:DropDownList ID="ddlProjectBased" runat="server" Width="126px" AutoPostBack="true" SkinID="ddl250">
+                        <asp:ListItem Value="0">--Select One--</asp:ListItem>
+                        <asp:ListItem Value="Yes">Yes</asp:ListItem>
+                        <asp:ListItem Value="No">No</asp:ListItem>
+                    </asp:DropDownList>
+                </td>
+            </tr>
+
+
+            <tr class="gdalternate1">
+                <td colspan="2">
+                    <asp:Label runat="server" Text="Whether Candidate is : "></asp:Label>
+                    <asp:RadioButtonList ID="rCenter" runat="server" RepeatDirection="Horizontal" SkinID="ddl250">
+                        <asp:ListItem Value="CentreBased" Selected="True">Centre Based</asp:ListItem>
+                        <asp:ListItem Value="TPBased">TP Based</asp:ListItem>
+                    </asp:RadioButtonList>
+                </td>
+            </tr>
+
+
+            <tr class="gdrow1">
+                <td>
+                    <asp:ScriptManager ID="ScriptManager1" runat="server" />
+
+                    <asp:Label ID="Label3" runat="server" Text="Date From&lt;font color='RED'&gt;*&lt;/font&gt;"></asp:Label>
+                    <br />
+
+                    <asp:TextBox MaxLength="11" ID="rtxtDob1" runat="server" SkinID="txtDate" Width="99px"
+                        TabIndex="15" onpaste="return false;" oncopy="return false;" oncut="return false;"
+                        AutoPostBack="true">
+                    </asp:TextBox>
+                    <img id="imgDob1" runat="server" src="../../images/calendaricon.jpg" alt="Calandar" style="width: 20px; height: 22px; vertical-align: top;" />
+
+                    <asp:CalendarExtender ID="ceDOB" TargetControlID="rtxtDob1" PopupPosition="BottomLeft"
+                        Format="yyyy-MMM-dd" PopupButtonID="imgDob1" runat="server">
+                    </asp:CalendarExtender>
+
+                </td>
+                <td>
+
+                    <asp:Label ID="Label4" runat="server" Text="Date To&lt;font color='RED'&gt;*&lt;/font&gt;"></asp:Label>
+                    <br />
+                    <asp:TextBox MaxLength="11" ID="rtxtDob2" runat="server" SkinID="txtDate" Width="99px"
+                        TabIndex="15" onpaste="return false;" oncopy="return false;" oncut="return false;"
+                        AutoPostBack="true">
+                    </asp:TextBox>
+                    <img id="imgDob2" runat="server" src="../../images/calendaricon.jpg" alt="Calandar" style="width: 20px; height: 22px; vertical-align: top;" />
+
+                    <asp:CalendarExtender ID="ceDOB2" TargetControlID="rtxtDob2" PopupPosition="BottomLeft"
+                        Format="yyyy-MMM-dd" PopupButtonID="imgDob2" runat="server">
+                    </asp:CalendarExtender>
+
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center" style="padding-top: 10px;">
+                    <asp:Button ID="btnSubmit" runat="server" Text="Submit" OnClick="btnSubmit_Click" />
+                </td>
+            </tr>
+        </table>
+        <asp:Label ID="lblError" runat="server"
+            Text="Data Submitted Successfully !"
+            ForeColor="Green"
+            Font-Bold="True"
+            Style="font-size: 14px; background-color: #E6FFE6; padding: 5px; border: 1px solid green;"   Visible = "false">
+          
+        </asp:Label>
+
+    </div>
+</asp:Content>

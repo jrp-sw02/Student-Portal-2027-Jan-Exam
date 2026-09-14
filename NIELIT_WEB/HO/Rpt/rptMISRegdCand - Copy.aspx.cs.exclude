@@ -1,0 +1,122 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.IO;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using EConnect.DAL;
+
+
+public partial class HO_Rpt_rptMISRegdCand : BasePage
+{
+    //Int64 entityID = 0;
+
+    // string CentreCode = Session["CentreCode"].ToString();
+    //string CentreCode = "UTTADEH01";
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            //if (IsSessionAlive() == false)
+            //    Response.Redirect("../Index.aspx");
+
+            if (!IsPostBack)
+            {
+
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+
+    }
+
+
+
+    //Date Validation Code
+    /*
+    protected void txtDob_TextChanged(object sender, EventArgs e)
+    {
+        DateTime todaydate = DateTime.Now;
+        DateTime Inputdate = Convert.ToDateTime(txtDob.Text);
+        int countAge = DateTime.Compare(todaydate.AddYears(-18), Inputdate);
+        string applicantType = RdoUndergngDOEACC.SelectedValue.ToString();
+        if (courseType < 5)
+            bindDeclaration(applicantType, countAge);
+
+    }
+    */
+
+
+
+    protected bool isValidForm()
+    {
+        if (ddlProjectBased.SelectedValue == "0")
+        {
+            ShowAlert("Kindly choose a Project");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(rtxtDob1.Text) || string.IsNullOrWhiteSpace(rtxtDob2.Text))
+        {
+            ShowAlert("Please enter both dates.");
+            return false;
+        }
+
+        return true;
+    }
+
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+
+        if (!isValidForm())
+            return;
+
+
+        try
+        {
+            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["EConnectContext"].ToString()))
+            {
+                conn.Open();
+
+
+                using (var cmd = new SqlCommand("temp_sp_InsertProjectFilterLog", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@ProjectBased", ddlProjectBased.SelectedValue);
+                    cmd.Parameters.AddWithValue("@DateFrom", DateTime.Parse(rtxtDob1.Text));
+                    cmd.Parameters.AddWithValue("@CandidateType", rCenter.SelectedValue);
+                    cmd.Parameters.AddWithValue("@DateTo", DateTime.Parse(rtxtDob2.Text));
+
+
+                    cmd.ExecuteNonQuery();
+                }
+                //lblError.Text = "Data submitted successfully!";
+                //lblError.Visible = true;
+
+                // Clear the form
+                ddlProjectBased.SelectedIndex = 0;
+                rCenter.ClearSelection();
+                rtxtDob1.Text = "";
+                rtxtDob2.Text = "";
+
+                ShowAlert("Data Submitted Succesfully");
+
+
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert("Data Not uploaded");
+        }
+        
+    }
+
+}

@@ -1,0 +1,460 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="CoursePracticalAdmitCard.aspx.cs"
+    Inherits="CAND_CoursePracticalAdmitCard" Debug="false" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%@ Register Src="../UserControl/NormalHeader.ascx" TagName="NormalHeader" TagPrefix="uc2" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title></title>
+    <style type="text/css">
+        .style1
+        {
+            text-decoration: underline;
+        }
+        .style2
+        {
+            text-align: center;
+        }
+    </style>
+</head>
+<body style="background-color: #FFFFFF;">
+    <form id="form1" runat="server" style="margin-top: 10px;">
+    <table align="center" border="0" cellspacing="0" style="font-size:16px; font-family: Arial;"
+        width="955px">
+        <tr class="normal">
+            <td style="border: 0;">
+            </td>
+            <td style="border: 0;">
+            </td>
+            <td style="border: 0;">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center" valign="top" class="logo">
+                            <img runat="server" id="imgLogo" src="~/App_Themes/Blue/Images/Logo.jpg" alt="NIELIT" />
+                        </td>
+                        <td align="center" class="heading">
+                            <div id="tdHeaderBig" runat="server">
+                            </div>
+                            <div id="tdHeaderSmall" runat="server" class="heading_small">
+                            </div>
+                            <div id="tdheaderaddress" runat="server" style="font: normal 11px  verdana; color: #000000;
+                                padding: 2px 0 0 2px; width: 100%; text-align: center; margin-right: 45px;">
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" valign="middle" colspan="3">
+                <asp:ImageButton ID="BtnPrint" runat="server" Style="float: right; padding: 0;" OnClientClick="this.style.visibility='hidden';window.print();this.style.visibility='visible';return false;"
+                    ImageUrl="~/images/print.gif" ToolTip="Print Form" />
+            </td>
+        </tr>
+        <tr class="normal">
+            <td colspan="3" align="center" style="padding: 5px;">
+                <asp:Label ID="Lbename" Width="45%" Font-Bold="true" Font-Size="13pt" Style="text-align: right;"
+                    runat="server" Text="प्रायोगिक परीक्षा / PRACTICAL EXAMINATION "></asp:Label>
+                <br />
+                <asp:Label ID="Label1" Font-Bold="true" Font-Size="13pt" Style="margin-left: 100px;"
+                    runat="server" Text="प्रवेश-पत्र / ADMIT CARD "></asp:Label>
+                <span style="width: 110px; float: right; font-size: 12px;">Date:<%=DateTime.Now.ToString("dd-MMM-yyyy") %>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="border: 0px;">
+                <table width="100%" cellspacing="0" cellpadding="3" border="0" style="font-size:17px;">
+                    <tr>
+                        <td colspan="1" valign="top" width="30%">
+                            <asp:Label ID="Label2" runat="server" Text="कार्यालय संदर्भ / Office Reference:-"
+                                Style="font-weight: 700"></asp:Label>
+                            &nbsp;<asp:Label ID="lboffrefno" runat="server" Text=""></asp:Label>
+                        </td>
+                        <td colspan="2" width="70%">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" valign="top">
+                            <asp:Label ID="Label5" runat="server" Text="सेवा में / To," Font-Bold="true"></asp:Label>
+                            <br />
+                            <asp:Label ID="Lbcname" runat="server" Text=""></asp:Label><br />
+                            <asp:Label ID="lbstudaddress" runat="server" Text=""></asp:Label>
+                        </td>
+                        <td rowspan="1" align="right" height="100px">
+                            <asp:Image ID="ImgCandidatePhoto_prac" Width="100px" Height="120px" runat="server" Style="text-align: center;"
+                                ImageAlign="Middle" /><br /><asp:Image ID="ImgCandidatesignature_prac" Width="100px" Height="35px"
+                                    runat="server" Style="text-align: center;" ImageAlign="Middle" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" valign="top" style="text-align: justify;">
+                            आपके परीक्षा-प्रपत्र के आधार पर, नीचे दी गई तारीख, समय, एवं स्थान में आयोजित की
+                            जाने वाली निम्नलिखित प्रायोगिक परीक्षा मॉड्यूल में आपको उपस्थित होने की अंनतिम रूप
+                            से अनुमति दी गई है:
+                            <br />
+                            On the basis of your examination form, you have been provisionally permitted to
+                            appear in the following Practical Examination Module(s) scheduled to be held on
+                            the Date, Time and Venue as indicated below:
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="1" valign="top" width="30%">
+                            <asp:Label ID="Label3" runat="server" Text="नाम / Name:-" Style="font-weight: 700"></asp:Label>
+                        </td>
+                        <td colspan="2" width="70%">
+                            <asp:Label ID="Lbcname1" runat="server" Text=""></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="1" valign="top" width="40%">
+                            <asp:Label ID="Label4" runat="server" Text="पंजीकरण संख्या / Registration Number :-"
+                                Style="font-weight: 700"></asp:Label>
+                        </td>
+                        <td colspan="2" width="60%">
+                            <asp:Label ID="Lbregno" runat="server" Text=""></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="1" valign="top" width="40%">
+                            <asp:Label ID="Label6" runat="server" Text="स्थान / Venue:-" Style="font-weight: 700"></asp:Label>
+                        </td>
+                        <td colspan="2" valign="top" width="60%">
+                            <asp:Label ID="Lbinstname" runat="server" Text=""></asp:Label><br />
+                            <asp:Label ID="Lbinstaddress" runat="server" Text=""></asp:Label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" align="left" style="padding: 0px; border: 1px; vertical-align: top;
+                            font-size: 16px;">
+                            <br />
+                            <div id="divReportData" runat="server" style="width: 100%;">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: justify;" valign="top">
+                            <br />
+                            आपको रा.इ.सू.प्रौ.सं. द्वारा जारी प्रवेश-पत्र एवं पहचान-पत्र के साथ ऊपर उल्लिखित
+                            दिनांक एवं समय–स्लॉट को प्रायोगिक परीक्षा स्थान में परीक्षा प्रारंभ होने के कम से
+                            कम आधे घंटे पहले रिपोर्ट करना आवश्यक है। रा.इ.सू.प्रौ.सं.प्रायोगिक परीक्षाओं के
+                            पृष्ठ की दूसरी ओर प्रायोगिक परीक्षा का पाठ्यविवरण तथा अभ्यर्थियों द्वारा अनुपालन
+                            किए जाने वाले अनुदेश उपलब्ध कराए गए है।
+                            <br />
+                            You are required to report at the Practical Examination Venue on the Date(s) and
+                            Time-Slot as mentioned above along with this Admit Card and the Identity Card issued
+                            by the NIELIT at least HALF AN HOUR before commencement of Practical Exams. Syllabus
+                            of Practical Examination and Instructions to be followed by the candidates at NIELIT
+                            Practical Examinations are provided overleaf.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" valign="top" align="right">
+                            <asp:Image ID="Imgofficesignature" runat="server" Style="text-align: center; padding-bottom: 2px;
+                                padding-top: 2px;" ImageAlign="Middle" Width="100px" Height="30px" ImageUrl="~/images/ExamDirectorSignature.jpg" />
+                            <br />
+                            उप निदेशक (प्रशासन)
+                            <br />
+                            Dy. Director (Admn)
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="font-size: 14px;height:300px;text-align:center; vertical-align:bottom;">
+                <strong><span style="text-decoration: underline;">केंद्र / शाखाएँ / क्षेत्रीय कार्यालय / Centers / Branch / Regional Offices</span></strong><br />
+                <strong>अगरतला, एजवाल, औरंगाबाद, कालीकट, (दक्षिण क्षेत्रीय कार्यालय पुदुकोट्टई के साथ),
+                    चंडीगढ़ (शाखाएँ: दिल्ली, लखनऊ, शिमला), चेन्नै, गंगटोक, गोरखपुर (पूर्वी क्षेत्रीय
+                    कार्यालय पटना के साथ), इम्फ़ाल, ईटानगर, कोलकत्ता, कोहिमा/ चुचुयिमलांग, शिलांग, श्रीनगर/
+                    जम्मू, गुवाहाटी/ तेज़पुर तथा अजमेर Agartala, Aizwal, Aurangabad, Calicut (with Southern
+                    Regional Office at Puddukottai), Chandigarh (Branches: Delhi, Lucknow, Shimla),
+                    Chennai, Gangtok, Gorakhpur (with Eastern Regional Office at Patna), Imphal, Itanagar,
+                    Kolkata, Kohima/ Chuchuyimlang, Shillong, Srinagar/Jammu, Guwahati/ Tezpur and Ajmer
+                </strong>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <div style="height: 130px;">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" align="center" valign="top" style="border-bottom: 1px solid #000000;">
+                <strong>रा.इ.सू.प्रौ.सं. प्रायोगिक परीक्षाओं में अभ्यर्थियों द्वारा अनुपालन किए जाने
+                    वाले अनुदेश
+                    <br />
+                    Instructions to be followed by the candidates at NIELIT Practical Examinations
+                </strong>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" align="left" valign="top" width="100%" style="font-size: 12px; text-align: justify;">
+                अभ्यर्थी परीक्षा के दौरान अनुशासन एवं आचार-व्यवहार से संबंधित निम्नलिखित अनुदेशों
+                का कड़ाई से अनुपालन करें। / Candidates must strictly observe the following instructions
+                relating to discipline and conduct during exam:
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="padding: 0px; font-size: 12px;">
+                <table width="100%" cellpadding="1" cellspacing="0" border="0">
+                    <tr>
+                        <td style="text-align: left; width: 50%; vertical-align: top; border-bottom: 1px solid #000000;">
+                            <table>
+                                <tr>
+                                    <td style="text-align: left; width: 1%; vertical-align: top;">
+                                        &nbsp;
+                                    </td>
+                                    <td style="text-align: left; width: 1%; vertical-align: top;">
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;" width="48%">
+                                        • परीक्षा में उपस्थिति साक्ष्य के रूप में परीक्षा प्रारंभ होने से पूर्व, प्रायोगिक
+                                        परीक्षक से प्राप्त उपस्थिति–मय-मूल्यांकन शीट में सभी अभ्यर्थियों को हस्ताक्षर करना
+                                        अनिवार्य है। उपस्थिति शीट में हस्ताक्षर न करने पर, उन्हें अनुपस्थित समझा जा सकता
+                                        है।<br />
+                                        It is mandatory for all candidates to sign the ‘Attendance-cum-Evaluation’ Sheet
+                                        available with the Practical Examiner before commencement of examination, as a proof
+                                        of having attended the examination. Those who fail to sign the Attendance Sheet
+                                        will be treated as Absent.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; vertical-align: top;">
+                                        &nbsp;
+                                    </td>
+                                    <td style="text-align: left; vertical-align: top;">
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;">
+                                        • अभ्यर्थियों को परीक्षा प्रारंभ होने के 10 मिनट पहले व 15 मिनट बाद परीक्षा कक्ष/प्रयोगशाला
+                                        में प्रवेश की अनुमति नहीं दी जाएगी। 
+                                        <br />
+                                        Candidates shall be permitted to enter the examination
+                                        hall/lab not more than 10 minutes before and 15 minutes after commencement of the
+                                        examinations.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; vertical-align: top;">
+                                        &nbsp;
+                                    </td>
+                                    <td style="text-align: left; vertical-align: top;">
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;">
+                                        • परीक्षा प्रारंभ होने के बाद, किसी भी अभ्यर्थी को 30 मिनट पहले परीक्षा कक्ष/प्रयोगशाला
+                                        छोडने की अनुमति नहीं होगी। 
+                                        <br />
+                                        No candidates shall be permitted to leave the examination
+                                        hall/lab earlier than 30 minutes after commencement of examinations.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; vertical-align: top;">
+                                        &nbsp;
+                                    </td>
+                                    <td style="text-align: left; vertical-align: top;">
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;">
+                                        • अभ्यर्थियों को परीक्षा-कक्ष/प्रयोगशाला से बाहर प्रश्नपत्र और कार्यशीट ले जाने/लेने
+                                        की अनुमति नहीं है। इसे परीक्षा कक्ष/प्रयोगशाला को छोडने से पहले प्रायोगिक परीक्षक
+                                        को वापिस करें। 
+                                        <br />
+                                        Candidates are not allowed to carry/take the Question Paper cum Work-Sheet
+                                        out of examination hall/lab. The same must be returned to the Practical Examiner
+                                        before leaving the exam hall/lab.
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="text-align: left; width: 50%; vertical-align: top; border-bottom: 1px solid #000000;">
+                            <table>
+                                <tr>
+                                    <td style="text-align: left; width: 1%; vertical-align: top;">
+                                        &nbsp;
+                                    </td>
+                                    <td style="text-align: left; width: 1%; vertical-align: top;">
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;" width="48%">
+                                        • प्रत्येक परीक्षा की समय-अवधि तीन घंटा है। अधिकतम अंक 100 है जिसमें से 80 अंको
+                                        का प्रायोगिक अभ्यास तथा 20 अंकों की मौखिक परीक्षा है। अभ्यर्थी को विशिष्ट प्रायोगिक
+                                        परीक्षा में अर्हता प्राप्त/उत्तीर्ण करने के लिए अधिकतम अंकों का 50 प्रतिशत अंक प्राप्त
+                                        करना आवश्यक है।
+                                        <br />
+                                        The duration of each exam is three hours. Maximum Marks are 100,
+                                        out of which 80 Marks are assigned to Practical Exercises and 20 Marks to Viva Voce.
+                                        A candidate is required to secure 50 percent of the Maximum Marks to qualify/pass
+                                        a particular Practical Examination. 
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; vertical-align: top;">
+                                        &nbsp;
+                                    </td>
+                                    <td style="text-align: left; vertical-align: top;">
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;">
+                                        • परीक्षा कक्ष/प्रयोगशाला में किताब, कागज, ब्रोशर, मोबाइल फोन, आई- पोड्स, पेन-ड्राइव
+                                        अथवा अन्य इलेक्ट्रॉनिकी उपकरणों को ले जाने की अनुमति नहीं है।<br />
+                                        Book, Papers, Brochures,
+                                        Mobile Phones, I-Pods, Pen Drive or any other electronics device are not allowed
+                                        in the examination hall/lab.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left; vertical-align: top;">
+                                        &nbsp;
+                                    </td>
+                                    <td style="text-align: left; vertical-align: top;">
+                                    </td>
+                                    <td style="vertical-align: top; text-align: justify;" rowspan="2">
+                                        • जो अन्य अभ्यर्थी को नकल करने की अनुमति देते है। अथवा किसी भी रूप में प्रश्नपत्र
+                                        के उत्तर में सहायता प्राप्त की हो। अथवा किसी भी तरह अनुचित साधनों का प्रयोग किया
+                                        गया हों। ऐसे अभ्यर्थियों के विरुद्ध कड़ाई से अनुशासनात्मक कार्रवाई की जाएगी।<br />
+                                        Strict
+                                        disciplinary action shall be taken against a candidate who is found copying from
+                                        another candidate or allows other candidate to copy or has obtained assistance of
+                                        any form in answering the question paper, or has adopted unfair mean of any kind
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" align="center">
+                <br />
+                 <span style="text-align:center;font-weight:bold; font-size:12pt; text-decoration:underline;">प्रायोगिक परीक्षा का पाठ्यविवरण / Syllabus of Practical Examination</span>
+                <br />
+                <span style="text-align:left; font-weight: bold; font-size:11pt;">प्रश्नपत्र में निम्नलिखित पर आधारित तीन प्रश्न शामिल होंगे / The question paper shall consist of three questions based on the following: </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <table width="100%" cellpadding="5" cellspacing="0" border="1px" align="center" style="font-size:14px;">
+                    <tr id="trolevel" runat="server" valign="top">
+                        <td colspan="3">
+                            <span style="font-size: 14px; padding-left: 385px;" class="style1"><strong>`ओ` स्तर
+                                / O-Level (O-PR-R4)</strong></span>
+                            <br />
+                            इनमें से केवल दो प्रश्न / Any two questions out of:
+                            <br />
+                            M1-R4: IT Tools and Business Systems
+                            <br />
+                            M2-R4: Internet Technology and Web Design
+                            <br />
+                            M3-R4: Programming & Problem Solving through ‘C’ Language
+                            <br />
+                            <span style="font-size: 14px; padding-left: 415px;">तथा / AND </span>
+                            <br />
+                            सैद्धांतिक परीक्षा में अभ्यर्थी द्वारा चुने गए मॉड्यूल पर आधारित निम्नलिखित विकल्पों
+                            से केवल एक प्रश्न /
+                            <br />
+                            Any one question from the following choices based on the module opted by the candidate
+                            in the theory exam
+                            <br />
+                            M4.1-R4: Application of .NET Technology/ M4.2-R4: Introduction to Multimedia/ M4.3-R4:
+                            Introduction to ICT Resources
+                        </td>
+                    </tr>
+                    <tr id="tralevel" runat="server">
+                        <td colspan="1" width="45%" valign="top">
+                            <span class="style1" style="font-size: 14px; padding-left:10px;"><strong>`ए` स्तर / A-Level (A-PR-I-R4)/ बी स्तर / B-Level (B-PR-I-R4)</strong></span><br />
+                            A1-R4: IT Tools and Business Systems.
+                            <br />
+                            A2-R4: Internet Technology and Web Design.<br />
+                            A3-R4: Programming & Problem Solving through ‘C’Language.
+                            <br />
+                            A4-R4: Computer System Architecture.
+                        </td>
+                        <td colspan="2" width="55%" valign="top">
+                            <span class="style1" style="font-size: 14px; padding-left:55px;"><strong>`ए` स्तर / A-Level (A-PR-II-R4)/ बी स्तर / B-Level (B-PR-II-R4)</strong></span><br />
+                            इनमें से कोई दो प्रश्न / Any two question out of:<br />
+                            A5-R4: Structured System Analysis & Design.
+                            <br />
+                            A6-R4: Data Structure through C++.
+                            <br />
+                            A7-R4: Introduction to Data Base Management Systems.<br />
+                            A8-R4: Basics of OS, Unix & Shell Programming.<br />
+                            A9-R4: Data Communication and Network Technologies.<br />
+                            <span style="font-size: 14px; padding-left: 175px;">तथा / AND</span>
+                            <br />
+                            सैद्धांतिक परीक्षाओं में अभ्यर्थी द्वारा चुने गए विषयों पर आधारित निम्नलिखित विकल्पों
+                            से कोई भी एक प्रश्न / Any one question from the following choices based on the subjects
+                            opted by the candidate in the theory examinations.
+                            <br />
+                            A10.1-R4: Introduction to Object Oriented Programming through JAVA.<br />
+                            A10.2-R4: Software Testing and Quality Management.
+                        </td>
+                    </tr>
+                    <tr id="trblevel" runat="server">
+                        <td colspan="1" width="45%" valign="top">
+                            <span style="font-size: 14px; padding-left: 115px; font-weight: 700; text-decoration: underline;">
+                                `बी` स्तर / B-Level (B-PR-III-R4)</span>
+                            <br />
+                            B3.3-R4: Software Engineering & CASE Tools.
+                            <br />
+                            B3.4-R4: Operating Systems.
+                            <br />
+                            B3.5-R4: Visual Programming.
+                        </td>
+                        <td colspan="2" width="55%" valign="top">
+                            <span style="font-size: 14px; padding-left: 175px;" class="style1"><strong>`बी` स्तर
+                                / B-Level (B-PR-IV-R4)</strong></span>
+                            <br />
+                            B4.3-R4: Object Oriented DBMS.
+                            <br />
+                            B4.4-R4: Computer Graphics & Multimedia
+                            <br />
+                            B4.5-R4: Internet Technologies and Web Services.
+                        </td>
+                    </tr>
+                    <tr id="trclevel1" runat="server">
+                        <td colspan="1" width="45%" valign="top">
+                            <span style="font-size: 14px; padding-left: 115px;" class="style1"><strong>`सी` स्तर
+                                / C-Level (C-PR-I-R4)</strong></span>
+                            <br />
+                            C1-R4 : Advanced Computer Graphics.
+                            <br />
+                            C3-R4 : Mathematical Methods for Computing.
+                        </td>
+                        <td colspan="2" width="55%" valign="top">
+                            <span style="font-size: 14px; padding-left: 175px;" class="style1"><strong>`सी` स्तर
+                                / C-Level (C-PR-II-R4)</strong></span>
+                            <br />
+                            C2-R4 : Advanced Computer Networks.
+                            <br />
+                            C5-R4 : Data Warehousing and Data Mining.
+                        </td>
+                    </tr>
+                    <tr id="trclevel2" runat="server">
+                        <td colspan="1" width="45%" valign="top">
+                            <span style="font-size: 14px; padding-left: 115px;" class="style1"><strong>`सी` स्तर
+                                / C-Level (C-PR-III-R4)</strong></span>
+                            <br />
+                            C6-R4 : Multimedia Systems.
+                            <br />
+                            C7-R4 : Digita Image Processing and Computer Vision.
+                        </td>
+                        <td colspan="2" width="55%" valign="top">
+                            <span style="font-size: 14px; padding-left: 175px;" class="style1">`<strong>सी` स्तर
+                                / C-Level (C-PR-IV-R4)</strong></span>
+                            <br />
+                            C8-R4 : Information Security.
+                            <br />
+                            C9-R4 : Soft Computing.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    </form>
+</body>
+</html>

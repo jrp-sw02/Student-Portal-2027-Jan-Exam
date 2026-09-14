@@ -1,0 +1,36 @@
+ <div class="row" style="background-color:sandybrown">
+
+                         
+        <button type="button"  class="btn btn-info  active navbar-btn"  > <a href="#3">CSS3</a>HOME</a></button>  
+        <button type="button"  class="btn btn-info  navbar-btn" >ABOUT COURSE</button>  
+        <button type="button" class="btn btn-info  navbar-btn">TRAINING</button>  
+        <button type="button"  class="btn btn-info  navbar-btn h"> ASSESSMENT</button>  
+        <button type="button"  class="btn btn-info  navbar-btn">CONTACT US</button>  
+        <button type="button" style="background-color:lightblue" class="btn btn-info navbar-btn">Link Button</button> 
+              <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Action
+  </button >#002c45
+             
+             <%--<div class="btn-group">
+  <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Action
+  </button>
+  <div class="dropdown-menu">
+    <a class="dropdown-item" href="#">Action</a>
+    <a class="dropdown-item" href="#">Another action</a>
+    <a class="dropdown-item" href="#">Something else here</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="#">Separated link</a>
+  </div>
+</div>--%>
+            
+         </div> 
+    <div class="dropdown-menu">
+    <a class="dropdown-item" href="#">Action</a>
+    <a class="dropdown-item" href="#">Another action</a>
+    <a class="dropdown-item" href="#">Something else here</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="#">Separated link</a>
+  </div>
+            
+   <%-- <button class="btn btn-danger navbar-btn">Button</button>--%>

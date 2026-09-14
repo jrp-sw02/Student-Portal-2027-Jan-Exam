@@ -1,0 +1,699 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Objects;
+using System.Data.OleDb;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Web.UI.WebControls;
+using EConnect.DAL;
+using EConnect.NIELIT;
+using EConnect.URM;
+
+public partial class ExamCentreUpload : BasePage
+{
+    UserType loginUserType;
+    Int64 entityID = 0;
+    Int32 currentRoleId = 0;
+    Int32 loginUserNo = 0;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        lblError.Text = ""; InvalidCity.Text = "";
+        try
+        {
+            if (IsSessionAlive() == false)
+                Response.Redirect("../Index.aspx");
+            currentRoleId = Convert.ToInt32(Session["RoleID"]);
+            loginUserNo = Convert.ToInt32(Session["UserID"]);
+            if (!UserManager.HasRight(currentRoleId, enmRight.View))
+            {
+                Response.Write("Sorry! You don't have rights  to view this page");
+                Response.End();
+            }
+            loginUserType = (UserType)Session["UserType"];
+            entityID = Convert.ToInt64(Session["EntityID"]);
+
+            if (!IsPostBack)
+            {
+                if (!String.IsNullOrEmpty(Request.QueryString["Key"]))
+                {
+                    BindCourseCategory();
+                    ShowEditMode();
+                }
+                else
+                {
+
+                    FillFilterCourses();
+                    if (Request.QueryString["CourseID"] != null && Request.QueryString["ExamID"] != null)
+                    {
+                        ddlflCourse.SelectedValue = Request.QueryString["CourseID"];
+                        ddlflCourse_SelectedIndexChanged(ddlflCourse, EventArgs.Empty);
+                        ddlflExamCycle.SelectedValue = Request.QueryString["ExamCycleID"];
+                        ddlflExamCycle_SelectedIndexChanged(ddlflExamCycle, EventArgs.Empty);
+                        ddlflExamYear.SelectedValue = Request.QueryString["ExamYear"];
+                        ddlflExamYear_SelectedIndexChanged(ddlflExamYear, EventArgs.Empty);
+                        ddlflExam.SelectedValue = Request.QueryString["ExamID"];
+                        ddlflExam_SelectedIndexChanged(ddlflExam.SelectedValue, EventArgs.Empty);
+                        ddlRegionalCentre.SelectedValue = Request.QueryString["RegCentreID"];
+                        BreadCrumb1.RemoveLastBreadCrumbItem();
+                        BreadCrumb1.RemoveLastBreadCrumbItem();
+                        BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("Upload Exam Centre Data: " + ddlflCourse.SelectedItem.Text + "-" + "(" + ddlflExam.SelectedItem.Text + ")", "Admin/AdmitCardUpload.aspx?CourseID=" + ddlflCourse.SelectedValue + "&ExamCycleID=" + ddlflExamCycle.SelectedValue + "&ExamYear=" + ddlflExamYear.SelectedValue + "&ExamID=" + ddlflExam.SelectedValue + "&RegCentreID=" + ddlRegionalCentre.SelectedValue, ""));
+                        BreadCrumb1.Render();
+                        BindGridView();
+                    }
+                    else
+                    {
+                        BreadCrumb1.RemoveLastBreadCrumbItem();
+                        BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("Upload / View Exam Centre Available", "Exam/ExamCentreUpload.aspx", ""));
+                        BreadCrumb1.Render();
+                    }
+                    if (gvMain.Rows.Count <= 0)
+                    {
+                        lblError.Text = "Please Select Filter Criteria For View Result";
+                        lblError.Visible = true;
+                    }
+                }
+
+            }
+            BreadCrumb1.Render();
+        }
+        catch (Exception ex)
+        {
+            lblError.Text = ex.Message;
+        }
+
+    }
+
+    private void BindRegionalCentre()
+    {
+        using (var context = new EConnectContext())
+        {
+            ListItem lst = new ListItem("--Select One--", "0");
+            var Rclist = context.RegionalCenters.Select(c => new { ValueField = c.ID, TextField = c.Name });
+
+            EConnect.Utils.Common.ControlUtility.BindListObject(ddlRegionalCentre, Rclist, lst);
+        }
+    }
+    private void BindCourseCategory()
+    {
+        try
+        {
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                var courses = from s in context.CourseCategories
+                              select new { ValueField = s.ID, TextField = s.Name };
+
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlCourseCategry, courses.Distinct(), lst);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+
+    }
+    protected void ddlCourseCategry_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+
+            int courseCatId = Convert.ToInt32(ddlCourseCategry.SelectedValue);
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                var courses = from s in context.Courses
+                              where s.CourseCategoryID == courseCatId
+                              select new { ValueField = s.ID, TextField = s.Name };
+
+                courses = courses.Distinct();
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlCourseName, courses, lst);
+            }
+            ddlCourseName.SelectedValue = "0";
+            ddlCourseName_SelectedIndexChanged(ddlCourseName, EventArgs.Empty);
+
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ddlCourseName_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            Int32 cid = Convert.ToInt32(ddlCourseName.SelectedValue);
+            ListItem lst = new ListItem("--Select One--", "0");
+            using (EConnectContext context = new EConnectContext())
+            {
+                Course cr = context.Courses.Find(cid);
+                if (cr != null)
+                {
+                    var courses = from s in context.ExaminationCycles
+                                  join a in context.ApplicationTypes on s.Course.CourseTypeID equals a.CourseTypeID
+                                  where s.CourseID == cid
+                                  select new { ValueField = s.ID, TextField = s.Name };
+                    EConnect.Utils.Common.ControlUtility.BindListObject(ddlExamCycle, courses.Distinct(), lst);
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ddlExamCycle_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            int courseId = Convert.ToInt32(ddlCourseName.SelectedValue);
+            int ExamCycleId = Convert.ToInt32(ddlExamCycle.SelectedValue);
+
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                if (courseId > 0 && ExamCycleId > 0)
+                {
+                    Course currentcourse = context.Courses.Find(courseId);
+
+                    var courses = (from s in context.Exams
+                                   where s.CourseID == courseId && s.ExaminationCycleID == ExamCycleId && s.DateOfPublishingOfTimeTable <= System.Data.Entity.DbFunctions.TruncateTime(DateTime.Now)
+                                   select new { ValueField = s.ExamYear, TextField = s.ExamYear }).Distinct();
+                    courses = courses.OrderByDescending(s => s.ValueField);
+                    courses = courses.OrderByDescending(s => s.ValueField);
+                    EConnect.Utils.Common.ControlUtility.BindListObject(ddlExamYear, courses, lst);
+                    ddlExamYear_SelectedIndexChanged(ddlExamYear, EventArgs.Empty);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ddlExamYear_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            int courseId = Convert.ToInt32(ddlCourseName.SelectedValue);
+            int ExamCycleId = Convert.ToInt32(ddlExamCycle.SelectedValue);
+            int examYear = Convert.ToInt32(ddlExamYear.SelectedValue);
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                if (courseId > 0 && examYear > 0 && ExamCycleId > 0)
+                {
+
+                    var courses = (from s in context.Exams
+                                   where s.CourseID == courseId && s.ExaminationCycleID == ExamCycleId && s.ExamYear == examYear
+                                   && s.DateOfPublishingOfTimeTable <= System.Data.Entity.DbFunctions.TruncateTime(DateTime.Now)
+                                   select new { ValueField = s.ID, TextField = s.Name }).Distinct();
+                    courses = courses.OrderByDescending(s => s.ValueField);
+                    EConnect.Utils.Common.ControlUtility.BindListObject(ddlExamName, courses, lst);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void ddlflCourse_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+    protected void ddlflExamCycle_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+    protected void ddlflExamYear_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+    protected void ddlflExam_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    protected void BindGridView()
+    {
+        EConnectContext context = new EConnectContext();
+        try
+        {
+            Int32 cid = 0;
+            lblError.Visible = false;
+            if (!String.IsNullOrEmpty(Request.QueryString["CourseId"]))
+            {
+                cid = Convert.ToInt32(Request.QueryString["CourseId"]);
+            }
+            Int64 CourseID = 0;
+            Int64 ExamID = 0;
+            Int64 ExamYear = 0;
+            Int64 ExamCycleID = 0;
+            Int64 regcentreID = 0;
+            if (ddlRegionalCentre.SelectedValue != "0")
+                regcentreID = Convert.ToInt64(ddlRegionalCentre.SelectedValue);
+            if (ddlflCourse.SelectedValue != "0")
+                CourseID = Convert.ToInt64(ddlflCourse.SelectedValue);
+            if (ddlflExamCycle.SelectedValue != "0")
+                ExamCycleID = Convert.ToInt64(ddlflExamCycle.SelectedValue);
+            if (ddlflExamYear.SelectedValue != "0")
+                ExamYear = Convert.ToInt64(ddlflExamYear.SelectedValue);
+            if (ddlflExam.SelectedValue != "0")
+                ExamID = Convert.ToInt64(ddlflExam.SelectedValue);
+
+            var ExamResults = from s in context.ExamCentreAvailableStats
+                              where s.RegionalCentreId == regcentreID && s.ExamId == ExamID
+                              select new
+                              {
+                                  ID = s.ID,
+                                  RcName = s.RegionalCenter.Name,
+                                  CityName = s.CityCode,
+                                  CentreCode = s.CentreCode,
+                                  ExamDates = "NA"
+                              };
+
+
+            PagingBar1.Bind(ExamResults, ref gvMain);
+            uPnlGrid.Update();
+            uPnlNavigation.Update();
+            if (gvMain.Rows.Count <= 0)
+            {
+                lblError.Text = "No Record Found";
+                lblError.Visible = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            context.Dispose();
+        }
+
+    }
+    protected void ToggleViewMode_Changed(object sender, EventArgs e)
+    {
+        if (btnMode.ViewMode == ToggleView.Mode.New)
+        {
+            BindCourseCategory();
+            BindRegionalCentre();
+            btnMode.ViewMode = ToggleView.Mode.List;
+            mltvTab.ActiveViewIndex = 1;
+            pnlFilter.Visible = false;
+
+            BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("New Admit Cards Details", "", ""));
+        }
+        else
+        {
+            //BreadCrumb1.RemoveLastBreadCrumbItem();
+            if (Request.QueryString["CourseID"] != null && Request.QueryString["ExamID"] != null)
+            {
+                Response.Redirect("ExamCentreUpload.aspx?CourseID=" + Request.QueryString["CourseID"] + "&ExamID=" + Request.QueryString["ExamID"] + "&ExamCycleID=" + Request.QueryString["ExamCycleID"] + "&ExamYear=" + Request.QueryString["ExamYear"] + "&RegCentreID=" + Request.QueryString["RegCentreID"], true);
+            }
+            else
+            {
+                Response.Redirect("ExamCentreUpload.aspx", true);
+            }
+        }
+    }
+    protected void AllyFilter(object sender, EventArgs e)
+    {
+        try
+        {
+            if (ddlflCourse.SelectedValue != "0" && ddlflExam.SelectedValue != "0")
+            {
+                //BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("Certificate Exam Result: " + ddlflCourse.SelectedItem.Text + "-" + "(" + ddlflExam.SelectedItem.Text + ")", "Admin/ResultImports.aspx?CourseID=" + ddlflCourse.SelectedValue + "&ExamID=" + ddlflExam.SelectedValue, ""));
+                BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("Upload Admit Card Data: " + ddlflCourse.SelectedItem.Text + "-" + "(" + ddlflExam.SelectedItem.Text + ")", "Admin/AdmitCardUpload.aspx?CourseID=" + ddlflCourse.SelectedValue + "&ExamCycleID=" + ddlflExamCycle.SelectedValue + "&ExamYear=" + ddlflExamYear.SelectedValue + "&ExamID=" + ddlflExam.SelectedValue + "&RegCentreID=" + ddlRegionalCentre.SelectedValue, ""));
+                BreadCrumb1.Render();
+                //upBread.Update();
+            }
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ResetFilterPanel(object sender, EventArgs e)
+    {
+        try
+        {
+            ddlflCourse.SelectedValue = "0";
+            ddlflExamCycle.SelectedValue = "0";
+            ddlflExamYear.SelectedValue = "0";
+            ddlflExam.SelectedValue = "0";
+            ddlRegionalCentre.SelectedValue = "0";
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+            BindGridView();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void btnUpload_Click(object sender, EventArgs e)
+    {
+        Int32 CourseCategoryID = Convert.ToInt32(ddlCourseCategry.SelectedValue);
+        Int32 CourseID = Convert.ToInt32(ddlCourseName.SelectedValue);
+        Int32 ExamCycleID = Convert.ToInt32(ddlExamCycle.SelectedValue);
+        Int32 ExamID = Convert.ToInt32(ddlExamName.SelectedValue);
+        Int32 regCentreID = Convert.ToInt32(ddlRegionalCentre.SelectedValue);
+        //--------Check Already uploaded-------------------------
+        try
+        {
+            using (var context = new EConnectContext())
+            {
+                var uploadeddata = (from p in context.ExamCentreAvailableStats
+                                   where p.ExamId == ExamID && p.RegionalCentreId == regCentreID
+                                   select p).Count();
+                if (uploadeddata > 0)
+                {
+                    throw new Exception("Data has been already uploaded");
+                }
+            }
+        }
+        catch (Exception ex) { ShowAlert(ex.Message); }
+        //--------------------------------------------------------
+
+        StringBuilder sb = new StringBuilder();
+
+        string filepath = Server.MapPath("../UploadedFiles");
+        flUpload.SaveAs(filepath + "/" + flUpload.FileName);
+        string path = (filepath + "/" + flUpload.FileName);
+        string ext = System.IO.Path.GetExtension(this.flUpload.PostedFile.FileName);
+        string accessConnectionString = "";
+        if (ext.ToUpper() == ".MDB")
+        { //accessConnectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0};Persist Security Info=False;", path);
+            accessConnectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};Persist Security Info=False;", path);
+        }
+        else if (ext.ToUpper() == ".ACCDB")
+        {
+            //accessConnectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0};Persist Security Info=False;", path);
+            accessConnectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};Persist Security Info=False;", path);
+        }
+        else
+        {
+            ShowAlert("Please Choose .MDB/.ACCDB Extension Database", true);
+            return;
+        }
+
+        OleDbConnection connection = new OleDbConnection();
+        connection.ConnectionString = accessConnectionString;
+        connection.Open();
+        //[MS Access;Database=" + Access + "].[Exam_Database]", connection);
+        OleDbCommand command = new OleDbCommand("select * from [MS Access;Database=" + path + "].[Exam_Centre]", connection);
+        OleDbDataReader dr = command.ExecuteReader();
+       
+        OleDbCommand command1 = new OleDbCommand("select * from [MS Access;Database=" + path + "].[Exam_Centre_Dates]", connection);
+        OleDbDataReader dr1 = command1.ExecuteReader();
+        int TotalRecords = 0;
+
+        EConnect.Connections.SqlCon con = new EConnect.Connections.SqlCon();
+        try
+        {
+            var context = new EConnectContext();
+            if (!CheckDuplicateCentre(path, ext))
+            {
+               
+                while (dr.Read())
+                {
+
+                    TotalRecords = TotalRecords + 1;
+                    if (!String.IsNullOrEmpty(dr["City_Code"].ToString()) && !String.IsNullOrEmpty(dr["Centre_Code"].ToString()) && !String.IsNullOrEmpty(dr["Centre_Address"].ToString()) && !String.IsNullOrEmpty(dr["Batch_Size"].ToString()) && !String.IsNullOrEmpty(dr["Batch_BufferSize"].ToString()) && !String.IsNullOrEmpty(dr["Regional_Centre"].ToString()))
+                    {
+                        ExamCentreAvailableStat objnew = new ExamCentreAvailableStat();
+
+                        objnew.ExamId = ExamID;
+                        objnew.RegionalCentreId = regCentreID;
+                        objnew.CityCode = dr["City_Code"].ToString();
+                        objnew.CentreCode = dr["Centre_Code"].ToString();
+                        objnew.CentreCCCId = Convert.ToInt64(dr["CCC_No"]);
+                        objnew.CentreBatchSize = Convert.ToInt16(dr["Batch_Size"]);
+                        objnew.CentreBatchBufferSize = Convert.ToInt16(dr["Batch_BufferSize"]);
+                        objnew.CentreAddress = dr["Centre_Address"].ToString();
+                        objnew.CentreContactPerson = dr["Centre_Contact_Person"].ToString();
+                        objnew.CentreContactEmail = dr["Centre_Contact_Email"].ToString();
+                        objnew.CentreContactMobile = Convert.ToInt64(dr["Centre_Contact_Mobile"]);
+                        objnew.CreatedByID = entityID;
+                        objnew.CreatedOn = DateTime.Now;
+
+                        context.ExamCentreAvailableStats.Add(objnew);
+                        context.SaveChanges();
+                    }
+                }
+                lblTotalRecords.Text = TotalRecords.ToString();
+
+                while (dr1.Read())
+                {
+                    ExamCentreExamDate objdate = new ExamCentreExamDate();
+                    objdate.ExamId = ExamID;
+                    objdate.RegionalCentreId = regCentreID;
+                    //objdate.CityCode = dr["City_Code"].ToString();
+                    objdate.CentreCode = dr1["Centre_Code"].ToString();
+                    objdate.ExamDate = Convert.ToDateTime(dr1["Exam_Date"]);
+                    objdate.CreatedByID = entityID;
+                    objdate.CreatedOn = DateTime.Now;
+
+                    context.ExamCentreExamDates.Add(objdate);
+                    context.SaveChanges();
+                }
+
+            }
+            //else { throw new Exception("Invalid / Duplicate City_Code or Centre_Code are not allowed"); }
+
+        }
+
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+        finally
+        {
+            sb.Clear();
+            dr.Close();
+            dr.Dispose();
+            command.Dispose();
+            connection.Close();
+            con.Close();
+            connection.Dispose();
+            System.IO.File.Delete(path);
+            dr1.Close();
+            dr1.Dispose();
+            command1.Dispose();
+        }
+
+    }
+    protected bool CheckDuplicateCentre(string path, string ext)
+    {
+        StringBuilder ErrorMsg = new StringBuilder();
+        InvalidCity.Text = "";
+        Int32 CourseCategoryID = Convert.ToInt32(ddlCourseCategry.SelectedValue);
+        Int32 CourseID = Convert.ToInt32(ddlCourseName.SelectedValue);
+        Int32 ExamCycleID = Convert.ToInt32(ddlExamCycle.SelectedValue);
+        Int32 ExamID = Convert.ToInt32(ddlExamName.SelectedValue);
+        Int32 regCentreID = Convert.ToInt32(ddlRegionalCentre.SelectedValue);
+
+        //------------------------------------------------------------------------
+        using (var context = new EConnectContext())
+        {
+            int CentreList = context.ExamCentreAvailableStats.Where(s => s.ExamId == ExamID && s.RegionalCentreId == regCentreID).Count();
+            if (CentreList > 0)
+            {
+                ErrorMsg.Append("Centre List For the <br/>Regional Centre: <b>" + ddlRegionalCentre.SelectedItem.Text + "</b> <br/> Courese Name: <b>" + ddlCourseName.SelectedItem.Text + "</b> <br/> Exam Name: <b>" + ddlExamName.SelectedItem.Text + "</b> is already uploaded.");
+                InvalidCity.Text = ErrorMsg.ToString();
+                return true;
+            }
+        }
+        //------------------------------------------------------------------------
+
+
+        string accessConnectionString = "";
+        if (ext.ToUpper() == ".MDB")
+        { //accessConnectionString = string.Format("Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0};Persist Security Info=False;", path);
+            accessConnectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};Persist Security Info=False;", path);
+        }
+        else if (ext.ToUpper() == ".ACCDB")
+            accessConnectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};Persist Security Info=False;", path);
+        OleDbConnection connection = new OleDbConnection();
+        connection.ConnectionString = accessConnectionString;
+        connection.Open();
+        EConnect.Connections.SqlCon con = new EConnect.Connections.SqlCon();
+
+        try
+        {
+            //[MS Access;Database=" + Access + "].[Exam_Centre]", connection);
+            OleDbCommand command = new OleDbCommand("select City_Code, Centre_Code, Batch_Size, Batch_BufferSize, Centre_Address, Centre_Contact_Person, Centre_Contact_Email, Centre_Contact_Mobile from [MS Access;Database=" + path + "].[Exam_Centre]", connection);
+            OleDbDataAdapter dtadpt = new OleDbDataAdapter(command);
+            DataTable UploadDataSheet = new DataTable();
+            dtadpt.Fill(UploadDataSheet);
+            //---------------Check 0-----Blank FIle----------------------------
+            if (UploadDataSheet.Rows.Count == 0)
+            {
+                ErrorMsg.Append("<b>Uploaded file has Zero records. Please see the Uploaded data!</b>");
+                InvalidCity.Text = ErrorMsg.ToString();
+                return true;
+            }
+            //---------------------------------------------------------------------
+            //------------------Check 1 ---Check Null int the table----------------
+            foreach (DataColumn column in UploadDataSheet.Columns)
+            {
+                if (UploadDataSheet.Rows.OfType<DataRow>().Any(r => r.IsNull(column)))
+                {
+                    ErrorMsg.Append("<b>Uploaded files cannot have null or empty</b></br>  ");
+                    InvalidCity.Text = ErrorMsg.ToString();
+                    return true;
+                }
+            }
+            //-----------------------------------------------------------------------
+            //------------------CHECK 2---CentreCode pattern with respect to CityCode------Valid Pattern <CityCode + Number>------
+            var InvalidCentrePattern = from tbl in UploadDataSheet.AsEnumerable()
+                                       let CityCode = tbl.Field<string>("City_Code")
+                                       let CentreCode = tbl.Field<string>("Centre_Code")
+                                       where !Regex.IsMatch(CentreCode, CityCode + @"(\d+)")
+                                       select new { CityCode, CentreCode };
+
+            if (InvalidCentrePattern.Count() > 0)
+            {
+
+                ErrorMsg.Append("<b>InValid CentreCode Pattern:</b></br>  ");
+                foreach (var InvalidCentre in InvalidCentrePattern)
+                {
+                    ErrorMsg.Append(InvalidCentre.CentreCode + ", ");
+                }
+                InvalidCity.Text = ErrorMsg.ToString();
+                return true;
+            }
+            //-----------------------------------------------------------------------------
+            //------------------CHECK 3-----------------------------------------------
+            IEnumerable<string> DuplicateCentre = UploadDataSheet.AsEnumerable().GroupBy(r => r["Centre_Code"], (key, g) => new { CentreCode = key.ToString(), Count = g.Count() }).Where(s => s.Count > 1).Select(p => p.CentreCode);
+            if (DuplicateCentre.Count() > 0)
+            {
+                ErrorMsg.Append("<b>Duplicate Centre_Code in your Uploaded File: </b></br>  ");
+                foreach (string Centres in DuplicateCentre)
+                {
+                    ErrorMsg.Append(Centres + ", ");
+                }
+                InvalidCentre.Text = ErrorMsg.ToString();
+                return true;
+            }
+            //----------------- -------------------------------------------------------
+            //-------------------CHECK 4-----------------------------------------------
+            OleDbCommand command1 = new OleDbCommand("select Centre_Code, Exam_Date  from [MS Access;Database=" + path + "].[Exam_Centre_Dates]", connection);
+            OleDbDataAdapter dtadpt1 = new OleDbDataAdapter(command1);
+            DataTable UploadDateSheet = new DataTable();
+            dtadpt1.Fill(UploadDateSheet);
+            if (UploadDateSheet.Rows.Count == 0)
+            {
+                ErrorMsg.Append("<b>Uploaded Exam_Centre_Dates file has Zero records. Please see the Uploaded data!</b>");
+                InvalidCity.Text = ErrorMsg.ToString();
+                return true;
+            }
+            foreach (DataColumn column in UploadDateSheet.Columns)
+            {
+                if (UploadDateSheet.Rows.OfType<DataRow>().Any(r => r.IsNull(column)))
+                {
+                    ErrorMsg.Append("<b>Uploaded Exam_Centre_Dates file cannot have null or empty</b></br>  ");
+                    InvalidCity.Text = ErrorMsg.ToString();
+                    return true;
+                }
+            }
+            var CentreCode1 = from tbl in UploadDataSheet.AsEnumerable() let CentreCode = tbl.Field<string>("Centre_Code") select new { CentreCode };
+            var CentreCode2 = from tbl in UploadDateSheet.AsEnumerable() let CentreCode = tbl.Field<string>("Centre_Code") select new { CentreCode };
+            var difference1 = CentreCode1.Except(CentreCode2);
+
+            if (difference1.Count() > 0)
+            {
+                ErrorMsg.Append("<b>Uploaded Exam_Centre_Dates file does not have all the Centre-Code available in Exam_Centre table</b></br>  ");
+                InvalidCity.Text = ErrorMsg.ToString();
+                return true;
+            }
+            var difference2 = CentreCode2.Except(CentreCode1);
+
+            if (difference2.Count() > 0)
+            {
+                ErrorMsg.Append("<b>Uploaded Exam_Centre file does not have all the Centre-Code available in Exam_Centre_Dates table</b></br>  ");
+                InvalidCity.Text = ErrorMsg.ToString();
+                return true;
+            }
+            //-------------------------------------------------------------------------
+            return false;
+        }
+        catch (Exception ex) { throw ex; }
+        finally
+        {
+            con.Close();
+            connection.Close();
+            connection.Dispose();
+        }
+    }
+    protected void PageIndexChanged(Int32 NewPageIndex)
+    {
+        try
+        {
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+            if (ddlflCourse.SelectedValue != "0" && ddlflExam.SelectedValue != "0")
+            {
+                BindGridView();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void gvMain_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        try
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                e.Row.Cells[0].Text = ((e.Row.RowIndex + 1)).ToString();
+            }
+        }
+        catch (Exception ex) { ShowAlert(ex.Message); }
+    }
+    protected void FillFilterCourses()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                Int32 CourseTypeID = Convert.ToInt32(enmCourseType.CertificationExam);
+                ListItem lst = new ListItem("--Select One--", "0");
+                var CourseList = from p in context.Courses
+                                 where p.CourseTypeID == CourseTypeID
+                                 select new { ValueField = p.ID, TextField = p.Name };
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlflCourse, CourseList, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void ShowEditMode()
+    {
+        try
+        {
+            btnMode.ViewMode = ToggleView.Mode.List;
+            mltvTab.ActiveViewIndex = 1;
+            pnlFilter.Visible = false;
+            lblHeading.Text = "Upload/View Exam Centre Available";
+            //tbls2.Visible = false;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+}

@@ -1,0 +1,390 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F05961F2-856A-4D19-8009-13CF030912FF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EConnect</RootNamespace>
+    <AssemblyName>EConnect</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\EConnect.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\EConnect.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\FTP\santosh\FinalisedPages\NIELITBin\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Address.cs" />
+    <Compile Include="AddressUpdateTemp.cs" />
+    <Compile Include="ApplicantType.cs" />
+    <Compile Include="Candidate_Personal_UpdateTemp.cs" />
+    <Compile Include="Candidate_Qualifications_UpdateTemp.cs" />
+    <Compile Include="CaptchaImage.cs" />
+    <Compile Include="CastCategory.cs" />
+    <Compile Include="CommonFunctions.cs" />
+    <Compile Include="Connections\SqlClientCon.cs" />
+    <Compile Include="DaakReceiptDispatchMode.cs" />
+    <Compile Include="DAL\EConnectContext.cs" />
+    <Compile Include="DAL\GenericRepository.cs" />
+    <Compile Include="DAL\NIELITMISContext.cs" />
+    <Compile Include="DebarredCandidate.cs" />
+    <Compile Include="EducationalQualification.cs" />
+    <Compile Include="EnumCollection.cs" />
+    <Compile Include="HRMS\Employee.cs" />
+    <Compile Include="HRMS\Organization.cs" />
+    <Compile Include="NIELIT\aadhaarResponse.cs" />
+    <Compile Include="NIELIT\AccCourseCompletionDate.cs" />
+    <Compile Include="NIELIT\AccresditationDetailHistory.cs" />
+    <Compile Include="NIELIT\AffInstitute.cs" />
+    <Compile Include="NIELIT\ApaarRequest.cs" />
+    <Compile Include="NIELIT\apaarResponseRecd.cs" />
+    <Compile Include="NIELIT\ApplicationStatus.cs" />
+    <Compile Include="NIELIT\ApplicationStatusMapping.cs" />
+    <Compile Include="NIELIT\ApplicationType.cs" />
+    <Compile Include="NIELIT\AuthMode.cs" />
+    <Compile Include="NIELIT\Batch.cs" />
+    <Compile Include="NIELIT\BatchItem.cs" />
+    <Compile Include="NIELIT\batchSize.cs" />
+    <Compile Include="NIELIT\CandidateContactHistory.cs" />
+    <Compile Include="NIELIT\CandidateHistory.cs" />
+    <Compile Include="NIELIT\CandidateRequest.cs" />
+    <Compile Include="NIELIT\CandidateRequestType.cs" />
+    <Compile Include="NIELIT\BatchItemDeficiencyDetail.cs" />
+    <Compile Include="NIELIT\CandidateScholarship.cs" />
+    <Compile Include="NIELIT\centreTrgCalendar.cs" />
+    <Compile Include="NIELIT\CertificateCourseType.cs" />
+    <Compile Include="NIELIT\CertificateENCAddh.cs" />
+    <Compile Include="NIELIT\CertificateExamApplication.cs" />
+    <Compile Include="NIELIT\CertificateExamApplicationHistory.cs" />
+    <Compile Include="NIELIT\CertificateOABCPhoto.cs" />
+    <Compile Include="NIELIT\CHMTProjectManualEntry.cs" />
+    <Compile Include="NIELIT\cityType.cs" />
+    <Compile Include="NIELIT\companyMaster.cs" />
+    <Compile Include="NIELIT\companyMasterHistory.cs" />
+    <Compile Include="NIELIT\CourseENCAaddhar.cs" />
+    <Compile Include="NIELIT\CourseExamVafAcf.cs" />
+    <Compile Include="NIELIT\CourseFeeType.cs" />
+    <Compile Include="NIELIT\CourseLevelDurations.cs" />
+    <Compile Include="NIELIT\CourseMappingWithNSQFCoursecode.cs" />
+    <Compile Include="NIELIT\CourseProjectApplication.cs" />
+    <Compile Include="NIELIT\CourseProjectApplicationDetail.cs" />
+    <Compile Include="NIELIT\CourseWiseAmtPerPaperForOnlinePuraskarApp.cs" />
+    <Compile Include="NIELIT\CourseWiseOccupationMapping.cs" />
+    <Compile Include="NIELIT\CourseWiseUserMapping.cs" />
+    <Compile Include="NIELIT\DeficiencyCode.cs" />
+    <Compile Include="NIELIT\CourseExamApplication.cs" />
+    <Compile Include="NIELIT\CourseExamApplicationDetail.cs" />
+    <Compile Include="NIELIT\CourseManager.cs" />
+    <Compile Include="NIELIT\CourseRegistrationPolicy.cs" />
+    <Compile Include="NIELIT\CSCCharges.cs" />
+    <Compile Include="NIELIT\CutOffDate.cs" />
+    <Compile Include="NIELIT\DisabilityType.cs" />
+    <Compile Include="NIELIT\DLCExemptedStates.cs" />
+    <Compile Include="NIELIT\DocumentMas.cs" />
+    <Compile Include="NIELIT\Downloadable.cs" />
+    <Compile Include="NIELIT\DownloadableHistory.cs" />
+    <Compile Include="NIELIT\Email.cs" />
+    <Compile Include="NIELIT\Exam.cs" />
+    <Compile Include="NIELIT\CourseWiseState.cs" />
+    <Compile Include="NIELIT\CSCTransaction.cs" />
+    <Compile Include="NIELIT\DemandDraftTransaction.cs" />
+    <Compile Include="NIELIT\DemandNote.cs" />
+    <Compile Include="NIELIT\ExamCentreAlternate.cs" />
+    <Compile Include="NIELIT\ExamCentreAvailableStat.cs" />
+    <Compile Include="NIELIT\ExamCentreChoiceRefilling.cs" />
+    <Compile Include="NIELIT\ExamCentreChoiceStat.cs" />
+    <Compile Include="NIELIT\ExamCentreExamDate.cs" />
+    <Compile Include="NIELIT\ExamCycleExceptionalFeatures.cs" />
+    <Compile Include="NIELIT\ExaminationCycle.cs" />
+    <Compile Include="NIELIT\ExamSuperintendent.cs" />
+    <Compile Include="NIELIT\ExamTimeTable.cs" />
+    <Compile Include="NIELIT\ExamVenue.cs" />
+    <Compile Include="NIELIT\ExamWiseExamCenter.cs" />
+    <Compile Include="NIELIT\ExemptionRule.cs" />
+    <Compile Include="NIELIT\Feedback.cs" />
+    <Compile Include="NIELIT\FeeDetail.cs" />
+    <Compile Include="NIELIT\feeTypeMas.cs" />
+    <Compile Include="NIELIT\Fee_Type.cs" />
+    <Compile Include="NIELIT\CourseExamSession.cs" />
+    <Compile Include="NIELIT\IncomeCategory.cs" />
+    <Compile Include="NIELIT\InstituteWithdrawal.cs" />
+    <Compile Include="NIELIT\LearningModeMas.cs" />
+    <Compile Include="NIELIT\MercyCase_UploadedDocs.cs" />
+    <Compile Include="NIELIT\MercyDocumentStatus.cs" />
+    <Compile Include="NIELIT\MISCourse_Registraton_Policy.cs" />
+    <Compile Include="NIELIT\MISQualification_Eligibility.cs" />
+    <Compile Include="NIELIT\ModuleCertificateBatch.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NIELIT\ModuleCertificateRequest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NIELIT\ModulePracticalEligibility.cs" />
+    <Compile Include="NIELIT\NEFTBankTransaction.cs" />
+    <Compile Include="NIELIT\NEFTRefund.cs" />
+    <Compile Include="NIELIT\NEFTTransaction.cs" />
+    <Compile Include="NIELIT\NielitCentreBatch.cs" />
+    <Compile Include="NIELIT\NielitCentreBatchFee.cs" />
+    <Compile Include="NIELIT\NielitCentreCourse.cs" />
+    <Compile Include="NIELIT\NielitCentreCourseCategory.cs" />
+    <Compile Include="NIELIT\NielitCentres.cs" />
+    <Compile Include="NIELIT\NielitCentreStudent.cs" />
+    <Compile Include="NIELIT\NielitCourseDuration.cs" />
+    <Compile Include="NIELIT\NielitProjCourses.cs" />
+    <Compile Include="NIELIT\NielitProjects.cs" />
+    <Compile Include="NIELIT\NielitSectors.cs" />
+    <Compile Include="NIELIT\NIELITStudentFeePaid.cs" />
+    <Compile Include="NIELIT\NielitTrgSpecialization.cs" />
+    <Compile Include="NIELIT\NonAffiliatedInstituteCoursesDetail.cs" />
+    <Compile Include="NIELIT\NonAffiliatedInstituteCoursesDetailHistory.cs" />
+    <Compile Include="NIELIT\NonAffInstitute.cs" />
+    <Compile Include="NIELIT\NonWorkingDays.cs" />
+    <Compile Include="NIELIT\NoticeEvent.cs" />
+    <Compile Include="NIELIT\NSQFCertPhasePrintDetail.cs" />
+    <Compile Include="NIELIT\NSQFFreeCourseGrant.cs" />
+    <Compile Include="NIELIT\NSQFFreeCourseMapping.cs" />
+    <Compile Include="NIELIT\NSQFModuleCandidateMarks.cs" />
+    <Compile Include="NIELIT\OnlineExamCenter.cs" />
+    <Compile Include="NIELIT\OnlineProtsahanExamModules.cs" />
+    <Compile Include="NIELIT\OnlineRefund.cs" />
+    <Compile Include="NIELIT\OnlineTransaction.cs" />
+    <Compile Include="NIELIT\Online_ChargeBackTransaction.cs" />
+    <Compile Include="NIELIT\Parity.cs" />
+    <Compile Include="NIELIT\BankHashMismatch.cs" />
+    <Compile Include="NIELIT\PGErrorCodes.cs" />
+    <Compile Include="NIELIT\PaymentGateways.cs" />
+    <Compile Include="NIELIT\perfoCriteriaMas.cs" />
+    <Compile Include="NIELIT\perfoCriteriaMasNewSOP.cs" />
+    <Compile Include="NIELIT\perfoReport.cs" />
+    <Compile Include="NIELIT\PracAllowedMarksEntry.cs" />
+    <Compile Include="NIELIT\PracExamCenter.cs" />
+    <Compile Include="NIELIT\PracticalCandidateMarks.cs" />
+    <Compile Include="NIELIT\projCriteriaMaster.cs" />
+    <Compile Include="NIELIT\projDataUploadAllowed.cs" />
+    <Compile Include="NIELIT\ProjectCategoryMaster.cs" />
+    <Compile Include="NIELIT\ProjectDocumentMaster.cs" />
+    <Compile Include="NIELIT\ProjectEligibility.cs" />
+    <Compile Include="NIELIT\ProjectFee.cs" />
+    <Compile Include="NIELIT\projectMainCentre.cs" />
+    <Compile Include="NIELIT\projectSubCentre.cs" />
+    <Compile Include="NIELIT\projEmailMobExempt.cs" />
+    <Compile Include="NIELIT\projStudentMaster.cs" />
+    <Compile Include="NIELIT\PuraskarAppDocsVerificationAndDeclarationByInstt.cs" />
+    <Compile Include="NIELIT\PuraskarApplicationForm.cs" />
+    <Compile Include="NIELIT\PuraskarApplicationStatus.cs" />
+    <Compile Include="NIELIT\PuraskarAppMobileEmailOtpVerificationDetail.cs" />
+    <Compile Include="NIELIT\PuraskarFeeReimbursementInstalment.cs" />
+    <Compile Include="NIELIT\PuraskarFeeReimbursementMaster.cs" />
+    <Compile Include="NIELIT\QualificationEligibility.cs" />
+    <Compile Include="NIELIT\QualificationLevel.cs" />
+    <Compile Include="NIELIT\CertificateExamResult.cs" />
+    <Compile Include="NIELIT\ReceivedSms.cs" />
+    <Compile Include="NIELIT\regdIcard.cs" />
+    <Compile Include="NIELIT\RegistrationDetail.cs" />
+    <Compile Include="NIELIT\RegistrationStatus.cs" />
+    <Compile Include="NIELIT\RegistrationType.cs" />
+    <Compile Include="NIELIT\RegnExamCourseBridge.cs" />
+    <Compile Include="NIELIT\RegnICardCandidatePhotos.cs" />
+    <Compile Include="NIELIT\Remarks.cs" />
+    <Compile Include="NIELIT\ResultGrade.cs" />
+    <Compile Include="NIELIT\SemesterDetail.cs" />
+    <Compile Include="NIELIT\SemesterFeeMaster.cs" />
+    <Compile Include="NIELIT\SemesterFeePaid.cs" />
+    <Compile Include="NIELIT\SemesterMaster.cs" />
+    <Compile Include="NIELIT\semesterResultMaster.cs" />
+    <Compile Include="NIELIT\SemesterSubjectMaster.cs" />
+    <Compile Include="NIELIT\SentEmail.cs" />
+    <Compile Include="NIELIT\SentSMS.cs" />
+    <Compile Include="NIELIT\SessionMas.cs" />
+    <Compile Include="NIELIT\SMS.cs" />
+    <Compile Include="NIELIT\studentPlacementDetail.cs" />
+    <Compile Include="NIELIT\StudentSemesterAcademicDetails.cs" />
+    <Compile Include="NIELIT\SubjectMaster.cs" />
+    <Compile Include="NIELIT\tblExemption.cs" />
+    <Compile Include="NIELIT\tblGender.cs" />
+    <Compile Include="NIELIT\TblSmsEmailBulk.cs" />
+    <Compile Include="NIELIT\teachingLanguage.cs" />
+    <Compile Include="NIELIT\tempExamResultPub.cs" />
+    <Compile Include="NIELIT\TimeTablePattern.cs" />
+    <Compile Include="NIELIT\UmcDecisionType.cs" />
+    <Compile Include="NIELIT\UnfairMeansCase.cs" />
+    <Compile Include="NIELIT\UpdateFields.cs" />
+    <Compile Include="NIELIT\UploadedDocs.cs" />
+    <Compile Include="NIELIT\UploadedDocsHistory.cs" />
+    <Compile Include="NIELIT\verifyStatusMas.cs" />
+    <Compile Include="NIELIT\virtualAcademyCalendar.cs" />
+    <Compile Include="NIELIT\VirtualAcademyCentreCourse.cs" />
+    <Compile Include="NIELIT\virtualAcademyCourseImages.cs" />
+    <Compile Include="NIELIT\virtualAcademyCourseProspectus.cs" />
+    <Compile Include="NIELIT\VirtualAcademyCourseServiceID.cs" />
+    <Compile Include="NIELIT\VirtualAcademyCutOffDate.cs" />
+    <Compile Include="NIELIT\VirtualAcademyDemandNote.cs" />
+    <Compile Include="NIELIT\virtualAcademyOnlineRefund.cs" />
+    <Compile Include="NIELIT\VirtualAcademyOnlineTransaction.cs" />
+    <Compile Include="NIELIT\VirtualAcademyOtpVerification.cs" />
+    <Compile Include="NIELIT\virtualAcademyRegistration.cs" />
+    <Compile Include="NotificationEvent.cs" />
+    <Compile Include="OnlineLocation.cs" />
+    <Compile Include="OnlineLocationType.cs" />
+    <Compile Include="PaymentStatus.cs" />
+    <Compile Include="PracLocation.cs" />
+    <Compile Include="PracLocationType.cs" />
+    <Compile Include="RevisionChoice.cs" />
+    <Compile Include="URM\UserLoginOtpDetail.cs" />
+    <Compile Include="URM\UserManager.cs" />
+    <Compile Include="Language.cs" />
+    <Compile Include="Location.cs" />
+    <Compile Include="LocationType.cs" />
+    <Compile Include="MaritalStatus.cs" />
+    <Compile Include="ModuleType.cs" />
+    <Compile Include="NIELIT\AccreditationDetail.cs" />
+    <Compile Include="NIELIT\AccreditationStatus.cs" />
+    <Compile Include="NIELIT\Activity.cs" />
+    <Compile Include="NIELIT\Candidate.cs" />
+    <Compile Include="NIELIT\CandidateContactDetail.cs" />
+    <Compile Include="NIELIT\CandidateQualificationDetail.cs" />
+    <Compile Include="NIELIT\Course.cs" />
+    <Compile Include="NIELIT\CourseCategory.cs" />
+    <Compile Include="NIELIT\CourseRegistrationApplication.cs" />
+    <Compile Include="NIELIT\CourseRevision.cs" />
+    <Compile Include="NIELIT\CourseType.cs" />
+    <Compile Include="NIELIT\EnumCollection.cs" />
+    <Compile Include="NIELIT\ExamCenter.cs" />
+    <Compile Include="NIELIT\ExamSession.cs" />
+    <Compile Include="NIELIT\Institute.cs" />
+    <Compile Include="NIELIT\Module.cs" />
+    <Compile Include="NIELIT\RegionalCenter.cs" />
+    <Compile Include="NIELIT\SelectionType.cs" />
+    <Compile Include="NIELIT\UploadedFile.cs" />
+    <Compile Include="Occupation.cs" />
+    <Compile Include="PaymentMode.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Religion.cs" />
+    <Compile Include="URM\EnumCollection.cs" />
+    <Compile Include="URM\ExternalEntity.cs" />
+    <Compile Include="URM\LoginLog.cs" />
+    <Compile Include="URM\MenuObject.cs" />
+    <Compile Include="URM\MenuObjectType.cs" />
+    <Compile Include="URM\User.cs" />
+    <Compile Include="AddressType.cs" />
+    <Compile Include="URM\Right.cs" />
+    <Compile Include="URM\Role.cs" />
+    <Compile Include="URM\UserRole.cs" />
+    <Compile Include="URM\UsersType.cs" />
+    <Compile Include="Utils\Common\ControlUtility.cs" />
+    <Compile Include="Utils\Common\EnumUtility.cs" />
+    <Compile Include="Utils\Common\ExceptionUtility.cs" />
+    <Compile Include="Utils\Common\Validation.cs" />
+    <Compile Include="Utils\Conversion\ConvertionUtility.cs" />
+    <Compile Include="Utils\Data\DatalUtility.cs" />
+    <Compile Include="Utils\Security\CryptoHelper.cs" />
+    <Compile Include="Utils\Security\Decryption.cs" />
+    <Compile Include="Utils\Security\Encryption.cs" />
+    <Compile Include="Utils\Security\QuertStringModule.cs" />
+    <Compile Include="Utils\Security\RandomPassword.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Release\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <Fakes Include="Fakes\BouncyCastle.Cryptography.fakes" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\Debug\BouncyCastle.Cryptography.dll" />
+    <Content Include="bin\Debug\EConnect.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,45 @@
+ Volume in drive F is New Volume
+ Volume Serial Number is 2C66-389E
+
+ Directory of F:\NIELIT_WEB_2012\NIELIT_WEB
+
+08/02/2020  10:14 PM    <DIR>          .
+08/02/2020  10:14 PM    <DIR>          ..
+07/21/2020  05:16 PM    <DIR>          Admin
+11/19/2018  06:19 PM    <DIR>          App_Browsers
+05/28/2020  05:06 PM    <DIR>          App_Code
+11/19/2018  06:19 PM    <DIR>          App_Data
+04/02/2018  04:15 PM    <DIR>          App_LocalResources
+11/19/2018  06:19 PM    <DIR>          App_Themes
+11/19/2018  06:19 PM    <DIR>          aspnet_client
+05/28/2020  05:06 PM    <DIR>          Bin
+03/13/2020  02:10 PM    <DIR>          CAND
+07/26/2019  02:44 PM    <DIR>          CertExamAdmitCard
+02/25/2020  12:23 PM    <DIR>          Common
+11/19/2018  06:19 PM    <DIR>          CSS
+11/19/2018  06:19 PM    <DIR>          Dashboard
+08/01/2020  02:55 PM    <DIR>          download
+11/19/2018  06:19 PM    <DIR>          Download_delete_command
+11/19/2018  06:19 PM    <DIR>          EH
+11/19/2018  06:19 PM    <DIR>          Exam
+11/19/2018  06:19 PM    <DIR>          Handlers
+05/28/2020  05:12 PM    <DIR>          HO
+07/19/2020  05:01 PM    <DIR>          images
+11/19/2018  06:19 PM    <DIR>          MasterPages
+05/06/2020  06:17 PM    <DIR>          nsqf
+01/28/2020  01:02 PM    <DIR>          nsqf_config_file
+02/27/2020  02:51 PM    <DIR>          nsqf_live
+11/19/2018  06:19 PM    <DIR>          offline
+05/28/2020  06:00 PM    <DIR>          Script
+11/19/2018  06:19 PM    <DIR>          sms
+07/09/2020  04:54 PM    <DIR>          StandardFileFormat
+11/19/2018  06:19 PM    <DIR>          Templates
+07/31/2020  04:30 PM    <DIR>          TempPhoto
+08/02/2020  04:39 PM    <DIR>          Temp_Docs
+08/01/2020  06:12 PM    <DIR>          UploadedFiles
+11/19/2018  06:19 PM    <DIR>          UserControl
+11/28/2018  06:07 PM    <DIR>          WEB
+11/19/2018  06:19 PM    <DIR>          WebImages
+11/19/2018  06:19 PM    <DIR>          WS
+               0 File(s)              0 bytes
+              38 Dir(s)  279,381,524,480 bytes free

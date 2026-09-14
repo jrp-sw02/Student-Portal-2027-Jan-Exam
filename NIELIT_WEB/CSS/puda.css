@@ -1,0 +1,59 @@
+body{margin:0; padding:0; background:#333333;}
+
+.logo{
+	background:url(../images/logo.jpg) no-repeat;
+	width:73px;
+	height:73px;
+	position:absolute;
+	left: 139px;
+	z-index:1000;
+	top: -1px;
+}
+
+.heading{background:#f2f2f2; font:normal 18px arial; color:#484848; /*padding:0 0 0 14px;*/ height:54px;}
+
+.hyperlink{font:normal 13px arial; color:#333333; text-decoration:none;}
+
+.hyperlink a{font:normal 12px arial; color:#333333; text-decoration:none; padding:5px 0 0 5px;}
+
+.hyperlink a:hover{font:normal 12px arial; color:#FF0000; text-decoration:none; padding:5px 0 0 5px;}
+
+.module_txt{font:normal 13px arial; color:#1d3b5f; height:20px;}
+
+.heading2{font:normal 18px arial; color:#1d3b5f;}
+
+.main_background{background:url(../images/background.jpg) repeat-x top #cce9f9; width:980px;}
+
+.main_bg_bottom{background:url(../images/main_background_bottom.jpg) repeat-x; width:980px; height:9px;}
+
+.dashboard_header{font:normal 18px arial; color:#6a6c6e; padding:10px 0 0 10px; border-bottom:1px solid #989c9e;}
+
+.dashbord_bg{background:url(../images/background2.jpg) repeat-x bottom;}
+
+.dashboard_txt{font:normal 13px arial; color:#666a6d; padding:10px 0 0 10px;}
+
+.hyperlink2{font:normal 13px arial; color:#a21504;}
+
+.hyperlink2 a{font:normal 13px arial; color:#a21504; text-decoration:none;}
+
+.hyperlink2 a:hover{font:normal 13px arial; color:#860e00; text-decoration:none;}
+
+.search{border:1px solid #bdbdbd; width:229px;}
+
+.search_header{background:#d0ebfe; font:normal 18px arial; color:#6a6c6e; height:30px; padding:0 0 0 10px;}
+
+.serch_box{background:#d0ebfe; padding:10px 10px 10px 10px; width:190px; text-align:left; height:70px;}
+
+.serch_txtbox{width:175px; height:15px; margin-top:5px;}
+
+.btn_search{background:#b1defe; border:1px solid #99b6cc; font:normal 12px arial; color:#475966; padding:2px 2px 2px 2px; float:right; margin:10px 10px 0 0;}
+
+.btn_search:hover{background:#86ccfe; border:1px solid #99b6cc; font:normal 12px arial; color:#475966; padding:2px 2px 2px 2px; float:right; margin:10px 10px 0 0;}
+
+.clear{clear:both; width:200px; height:20px;}
+
+.search_result{background: #cce9f9 url('../images/result_background.jpg') repeat-x 50% top; 
+width:716px; 
+border:1px solid #cdd2d6; margin-bottom:10px;
+} 
+

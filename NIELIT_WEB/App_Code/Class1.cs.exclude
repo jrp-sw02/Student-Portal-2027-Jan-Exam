@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace esms_client
+{
+    class NewClient
+    {
+        static String username = "msdgsms";
+        static String password = "cdacmumbai";
+
+
+        static String senderid = "MBSEVA";
+        static String message = "Welcome to CDAC Mumbai(.Net Code)!!!!";
+        //   static String Unicodemessage = "????? ??? ????? ????? ?????? ????? ?????? ???";
+        static String mobileNo = "9930236264";//"7709381378";
+        static String mobileNos = "9594348382";
+        static String UnicodeOTPmsg = "नमस्ते";
+        static String secureKey = "630c7aa7-d696-43da-b658-907dfdc569ae";
+
+
+        static void Main(string[] arg)
+        {
+            SMSHttpPostClient smsPost = new SMSHttpPostClient();
+            //Console.Write(smsPost.sendSingleSMS(username, password, senderid, mobileNo, message, secureKey));
+            Console.Write(smsPost.sendUnicodeOTPSMS(username, password, senderid, mobileNos, UnicodeOTPmsg, secureKey));
+        }
+    }
+}

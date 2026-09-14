@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class Admin_Default2 : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+    }
+
+
+    protected void ddlProcname_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (ddlWheatherPojectStu.SelectedIndex == 0)
+            return;
+
+        bindCastCategory();
+        int x = checkAspirationalDistrict();
+        if (x == 0)
+        {
+            ShowAlert("Correspondence district is not an Aspirational District,Check Project/District");
+            ddlcordistrict.Focus();
+            return;
+        }
+        DataTable dt = checkProjectMapping();
+        //DataRow row;
+
+        if (dt.Rows.Count > 0)
+        {
+            //trCertificateHead.Visible = true;
+            // trCertificate.Visible = true;
+            GridView1.DataSource = dt;
+            GridView1.DataBind();
+            GridView1.Visible = true;
+            updPanel1.Update();
+
+        }
+        else
+        {
+
+            GridView1.DataSource = null;
+
+            GridView1.DataBind();
+            updPanel1.Update();
+        }
+
+    }
+}

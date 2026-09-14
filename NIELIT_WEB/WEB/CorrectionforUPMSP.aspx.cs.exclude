@@ -1,0 +1,168 @@
+﻿using System;
+using System.Linq;
+using System.Web.UI;
+using EConnect;
+using EConnect.DAL;
+using EConnect.NIELIT;
+
+public partial class CorrectionForUPMSP : BasePage
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+    //        //if (Request.UrlReferrer == null)
+				//if ((Request.UrlReferrer == null || Request.UrlReferrer.AbsoluteUri.ToString().Substring(0, 29).Trim() != "https://student.nielit.gov.in" ) && (Request.UrlReferrer == null  || Request.UrlReferrer.AbsoluteUri.ToString().Substring(0, 20).Trim() != "https://nielit.gov.in"))
+    //        {
+    //            Response.Write(GeInvalidRequestMessage("Goto Home Page", ("../Index.aspx")));
+    //            Response.End();
+    //            return;
+    //        }
+            if (!Page.IsPostBack)
+            {
+                //if (!String.IsNullOrEmpty(Request.QueryString["id"]))
+                //{
+                //    Int32 courseID = Convert.ToInt32(Request.QueryString["id"]);
+                //    RenderPage(courseID);
+                //    showsidelink(courseID);
+                //}
+                //GenerateNewCaptchaImage();
+                //txtcode.Text = "";
+            }
+            base.ReWriteAction(this.Form);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void RenderPage(Int32 CourseID)
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                string tt = Convert.ToString(Session["ModuleID"]);
+
+                Course currentCourse = context.Courses.Find(CourseID);
+                if (currentCourse.enmCourseType == enmCourseType.CertificationCourse && (Request.QueryString["type"] == Convert.ToString(3)))
+                {
+                    if (Request.UrlReferrer.ToString().ToLower().Contains("aboutcourse.aspx"))
+                        BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("View Course Status", "WEB/CCStatus.aspx?ID=" + Request.QueryString["id"], ""));
+                    else
+                        BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("View Course Status", "WEB/CCStatus.aspx?ID=" + Request.QueryString["id"], ""));
+                    lblheading.Text = "View Course Status ";
+                    Lblsubheading.Text = "Course Name";
+                    Lblcname.Text = currentCourse.Name;
+                    Sidelink.Items.Add(new SideLinkItem("Apply Online", "../CAND/FrmExamForm.aspx?ID=" + Request.QueryString["id"].ToString(), "../images/Apply_Online.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("View Filled Application", "FilledForm.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/Get_Filled_Form.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("Download Admit Card", "DownloadAdmitCard.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/Print_Admit_Card.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("View Result", "Result.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Result.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("Search Accredited Centre", "FrmAccredetedCentre.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Certificate_Status.jpg"));
+                    Sidelink.SideLinkType = SideLinkItem.SideLinkType.ButtonWithImageLink;
+                    Sidelink.Render();
+                }
+                else if (currentCourse.enmCourseType == enmCourseType.CertificationCourse)
+                {
+                    if (Request.UrlReferrer.ToString().ToLower().Contains("aboutcourse.aspx"))
+                        BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("View Course Status", "WEB/CCStatus.aspx?ID=" + Request.QueryString["id"], ""));
+                    else
+                        BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("View Course Status", "WEB/CCStatus.aspx?ID=" + Request.QueryString["id"], ""));
+                    lblheading.Text = "View Course Status";
+                    Lblsubheading.Text = "Course Name";
+                    Lblcname.Text = currentCourse.Name;
+                    Sidelink.Items.Add(new SideLinkItem("Apply Online", "RulesForOnlineRegistration.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/Apply_Online.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("View Filled Application", "FilledForm.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/Get_Filled_Form.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("Check Application Status", "ApplicationStatus.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Application_Status.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("View Result", "Result.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Result.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("Search Accredited Centre", "FrmAccredetedCentre.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Certificate_Status.jpg"));
+                    Sidelink.SideLinkType = SideLinkItem.SideLinkType.ButtonWithImageLink;
+                    Sidelink.Render();
+                }
+                else
+                {
+                    if (Request.UrlReferrer.ToString().ToLower().Contains("aboutcourse.aspx"))
+                        BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("View Certificate Status", "WEB/CCStatus.aspx?ID=" + Request.QueryString["id"], ""));
+                    else
+                        BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("View Certificate Status", "WEB/CCStatus.aspx?ID=" + Request.QueryString["id"], ""));
+                    lblheading.Text = "View Certificate Status";
+                    Lblsubheading.Text = "Course Name";
+                    Lblcname.Text = currentCourse.Name;
+                    Sidelink.Items.Add(new SideLinkItem("Apply Online", "RulesForOnlineRegistration.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/Apply_Online.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("View Filled Form", "FilledForm.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/Get_Filled_Form.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("Check Form Status", "ApplicationStatus.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Application_Status.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("Download Admit Card", "DownloadAdmitCard.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/Print_Admit_Card.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("View Result", "Result.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Result.jpg"));
+                    Sidelink.Items.Add(new SideLinkItem("Search Centre", "FrmAccredetedCentre.aspx?ID=" + Request.QueryString["id"].ToString() + "&type=" + tt + "", "../images/View_Certificate_Status.jpg"));
+                    Sidelink.SideLinkType = SideLinkItem.SideLinkType.ButtonWithImageLink;
+                    Sidelink.Render();
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void ImgBtnRefresh_Click(object sender, ImageClickEventArgs e)
+    {
+        try
+        {
+            GenerateNewCaptchaImage();
+            txtcode.Text = "";
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+    protected void GenerateNewCaptchaImage()
+    {
+        try
+        {
+            ViewState["CaptchCode"] = EConnect.CommonFunctions.GenerateRandomNumber(6);
+            HfCaptcha.Value = ViewState["CaptchCode"].ToString();           
+            EConnect.CaptchaImage captcha = new CaptchaImage(HfCaptcha.Value, 200, 50, "Century Schoolbook");
+            imgcap.Src = captcha.ImageSource;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+    protected void showsidelink(int courseID)
+    {
+        try
+        {            
+            Sidelink1.SideLinkType = SideLinkItem.SideLinkType.DownloadLink;
+            using (EConnectContext context = new EConnectContext())
+            {
+                Int32 ccatId = context.Courses.Find(courseID).CourseCategoryID;
+
+                IQueryable<Downloadable> files = context.Downloadables;
+                var downloadables = files.Where(s => s.CourseID == courseID).Select(s => new { FileID = s.DownloadableFileID.Value, LinkName = s.LinkName })
+                                     .Union(files.Where(s => s.CourseCategoryID == ccatId && s.CourseID == null).Select(s => new { FileID = s.DownloadableFileID.Value, LinkName = s.LinkName }))
+                                     .Union(files.Where(s => s.CourseID == null && s.CourseCategoryID == null).Select(s => new { FileID = s.DownloadableFileID.Value, LinkName = s.LinkName }))
+                                     .Distinct();
+
+                foreach (var file in downloadables)
+                {
+                    Sidelink1.Items.Add(new SideLinkItem(file.LinkName, "../Handlers/UploadedFileHandler.ashx?ID=" + file.FileID.ToString(), "", "_blank"));
+                }
+                Sidelink1.Render();
+            };
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+    protected void BtnReset_Click(object sender, EventArgs e)
+    {
+        BreadCrumb1.Render();
+        Txtregno.Text = "";
+        TxtDOB.Text = "";
+        txtcode.Text = "";
+        GenerateNewCaptchaImage();
+    }
+}

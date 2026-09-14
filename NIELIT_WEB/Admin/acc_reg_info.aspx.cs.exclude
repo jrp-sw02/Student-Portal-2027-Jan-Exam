@@ -1,0 +1,725 @@
+﻿using System;
+using System.Linq;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using EConnect;
+using EConnect.URM;
+using EConnect.DAL;
+using EConnect.NIELIT;
+
+public partial class acc_reg_info : BasePage
+{
+    UserType loginUserType;
+    Int64 entityID = 0;
+    String strMessage = string.Empty;
+    Int32 currentRoleId = 0;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        lblError.Text = "";
+        lblError.Visible = false;
+        Response.CacheControl = "no-cache";
+        Response.AddHeader("Progra", "no-cache");
+        Response.Expires = -1500;
+        try
+        {
+            if (IsSessionAlive() == false)
+                Response.Redirect("../Index.aspx");
+            currentRoleId = Convert.ToInt32(Session["RoleID"]);
+            if (!UserManager.HasRight(currentRoleId, enmRight.View))
+            {
+                Response.Write("Sorry! You don't have rights  to view this page");
+                Response.End();
+            }
+            loginUserType = (UserType)Session["UserType"];
+            entityID = Convert.ToInt64(Session["EntityID"]);
+            if (!Page.IsPostBack)
+            {
+                FillApplicationTypes();
+
+                ViewState["SortField"] = "";
+                ViewState["SortOrder"] = "";
+                if (gvMain.Rows.Count <= 0)
+                {
+                    lblError.Text = "Please Select Filter Criteria For View Records";
+                    lblError.Visible = true;
+                }
+                if (Request.QueryString["ApplTypeID"] != null)
+                {
+                    ddlAppType.SelectedValue = Request.QueryString["ApplTypeID"];
+                    BreadCrumb1.RemoveLastBreadCrumbItem();
+                    BreadCrumb1.RemoveLastBreadCrumbItem();
+                    BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("Application Status:-" + ddlAppType.SelectedItem.Text, "Admin/acc_reg_info.aspx?ApplTypeID=" + ddlAppType.SelectedValue, ""));
+                    BreadCrumb1.Render();
+                    BindGridView();
+                }
+                else
+                {
+                    BreadCrumb1.RemoveLastBreadCrumbItem();
+                    BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("Application Status:Not Selected", "Admin/acc_reg_info.aspx", ""));
+                    BreadCrumb1.Render();
+                }
+            }
+            BreadCrumb1.Render();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void BindGridView()
+    {
+        try
+        {
+
+            lblError.Visible = false;
+            gvMain.Visible = true;
+            Int32 AppTypeID = Convert.ToInt32(ddlAppType.SelectedValue);
+            string sortOrder = ViewState["SortOrder"].ToString();
+            string sortField = ViewState["SortField"].ToString();
+
+            using (EConnectContext context = new EConnectContext())
+            {
+                Int32 sts = Convert.ToInt32(enmPaymentStatus.Pending);
+                Int32 paidButPending = Convert.ToInt32(enmPaymentStatus.PaidButNotVerified);
+                Int32 PaymentPaid = Convert.ToInt32(enmPaymentStatus.Paid);
+                Int32 applicantType = Convert.ToInt32(enmApplicantType.Institute);
+                Int32 AppliedButPendingForInstituteVerification = Convert.ToInt32(enmCertificateExamApplicationStatus.AppliedButPendingForInstituteVerification);
+                Int32 FeePaidByInstituteButApplicationPendingToDispatchToRegionalCentre = Convert.ToInt32(enmCertificateExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToRegionalCentre);
+                Int32 FeePaidByInstituteButApplicationPendingToDispatchToNIELIT = Convert.ToInt32(enmCourseApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT);
+                Int32 ApplicationDispatchedByTheInstituteToRegionalCentre = Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationDispatchedByTheInstituteToRegionalCentre);
+                Int32 ApplicationDispatchedByTheInstituteToNIELIT = Convert.ToInt32(enmCourseApplicationStatus.ApplicationDispatchedByTheInstituteToNIELIT);
+                Int32 ApplicationVerifiedByInstitute = Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationVerifiedByInstitute);
+
+                //for course exam application
+                Int32 ApplicationVerifiedByInstituteForCourseExamApplication = Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationVerifiedByInstitute);
+                Int16 ApplicationDispatchedByTheInstituteToNIELITForCourseExamApplicationStatus = Convert.ToInt16(enmCourseExamApplicationStatus.ApplicationDispatchedByTheInstituteToNIELIT);
+                Int16 FeePaidByInstituteButApplicationPendingToDispatchToNIELITForCourseExamApplication = Convert.ToInt16(enmCourseExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT);
+                Int32 AppliedButPendingForInstituteVerificationForCourseExamApplication = Convert.ToInt32(enmCourseExamApplicationStatus.AppliedButPendingForInstituteVerification);
+                Int32 ApplicationDispatchedByTheInstituteToNIELITForCourseExamApplication = Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationDispatchedByTheInstituteToNIELIT);
+                Int32 finalcourseregstatus = Convert.ToInt32(enmCourseApplicationStatus.ApplicationReceivedByNIELIT);
+                Int32 finalcourseexamstatus = Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationReceivedByNIELIT);
+                Int32 certificatefinalstatus = Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationReceivedByRegionalCentre);
+                Int32 VerifiedButVafAcfNotPaidByInstitute = Convert.ToInt32(enmVaf_AcfApplicationStatus.VerifiedButVafAcfNotPaidByInstitute);
+                Int32 VerifiedAndVafAcfPaidByInstitute = Convert.ToInt32(enmVaf_AcfApplicationStatus.VerifiedAndVafAcfPaidByInstitute);
+
+                //for course registration
+                Int32 feedepositedbycandidatebutappliedthroughinstitute = Convert.ToInt32(enmCourseApplicationStatus.FeeDepositedByCandidateButApplicationNotReceivedByNIELIT);
+
+                //forall
+                Int32 ApplicationRejectedbyInstitutecourseexam = Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationRejectedbyInstitute);
+                Int32 ApplicationRejectedbyInstitutecertificateeexam = Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationRejectedbyInstitute);
+                Int32 ApplicationRejectedbyInstitutecoursereg = Convert.ToInt32(enmCourseApplicationStatus.ApplicationRejectedbyInstitute);
+
+
+                Int32 ApplTypeVafAcf = Convert.ToInt32(enmApplicationType.CourseVafAcfApplication);
+
+                Int32 pending = Convert.ToInt32(enmPaymentStatus.Pending);
+
+
+
+                if (AppTypeID == Convert.ToInt32(enmApplicationType.CourseRegistrationApplication))
+                {
+                    var applications = (from s in context.CourseRegistrationApplications
+                                        where s.ApplicantTypeID == applicantType && s.InstituteID == entityID && s.ApplicableExamID != 0 && s.ApplicationStatusID != finalcourseregstatus
+                                        group s by new { s.CourseID, s.CourseCategoryID, s.Course.RegistrationServiceID, s.Course.Code, s.ApplicableExamID, s.ApplicableExam.Name, s.ApplicableExam.ExamYear, s.ApplicableExam.ExamMonth } into c
+                                        select new
+                                        {
+                                            ID = c.Key.CourseID,
+                                            CourseCategoryID = c.Key.CourseCategoryID,
+                                            ServiceID = c.Key.RegistrationServiceID,
+                                            ServiceIDvafacf = 0,
+                                            Examid = c.Key.ApplicableExamID,
+                                            Examyear = c.Key.ExamYear,
+                                            Exammonth = c.Key.ExamMonth,
+                                            DemandChkFlag0 = 0,
+                                            DemandChkFlag1 = 1,
+                                            Name = c.Key.Code + " Level \n(" + c.Key.Name + ")",
+                                            AppTypeID = applicantType,
+                                            Pverification = c.Count(p => p.IsVerifiedByInstitute == false && p.FinalSubmitted == true && (p.ApplicationStatusID == AppliedButPendingForInstituteVerification || p.ApplicationStatusID == feedepositedbycandidatebutappliedthroughinstitute)),
+                                            Pvaf_acf = 0,
+                                            VafAcf = 0,
+                                            Prejected = c.Count(p => (p.IsVerifiedByInstitute == false && p.FinalSubmitted == true && p.ApplicationStatusID == ApplicationRejectedbyInstitutecoursereg)),
+                                            PPstatus = c.Count(p => p.PaymentStatusID == sts && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == ApplicationVerifiedByInstitute && p.DemandNoteID == null),
+                                            PNotPaid = c.Count(p => p.PaymentStatusID == sts && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == FeePaidByInstituteButApplicationPendingToDispatchToNIELIT && p.DemandNoteID != null),
+                                            PSubmit = c.Count(p => (p.PaymentStatusID == PaymentPaid || p.PaymentStatusID == paidButPending) && p.IsVerifiedByInstitute == true && (p.ApplicationStatusID == FeePaidByInstituteButApplicationPendingToDispatchToNIELIT || p.ApplicationStatusID == ApplicationVerifiedByInstitute)),
+                                            PWaiting = c.Count(p => (p.PaymentStatusID == PaymentPaid || p.PaymentStatusID == paidButPending) && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == ApplicationDispatchedByTheInstituteToNIELIT),
+                                            ApplType = AppTypeID
+                                        });
+
+
+                    applications = applications.OrderByDescending(s => s.Examyear).ThenByDescending(s => s.Exammonth);
+                    if (!string.IsNullOrEmpty(sortOrder))
+                    {
+                        switch (sortField)
+                        {
+                            case "ID":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.ID);
+                                else
+                                    applications = applications.OrderBy(s => s.ID);
+                                break;
+                            case "Name":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.Name);
+                                else
+                                    applications = applications.OrderBy(s => s.Name);
+                                break;
+                            case "Pverification":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.Pverification);
+                                else
+                                    applications = applications.OrderBy(s => s.Pverification);
+                                break;
+                            case "Prejected":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.Prejected);
+                                else
+                                    applications = applications.OrderBy(s => s.Prejected);
+                                break;
+                            case "PPstatus":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.PPstatus);
+                                else
+                                    applications = applications.OrderBy(s => s.PPstatus);
+                                break;
+                            case "PSubmit":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.PSubmit);
+                                else
+                                    applications = applications.OrderBy(s => s.PSubmit);
+                                break;
+
+                            case "PWaiting":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.PWaiting);
+                                else
+                                    applications = applications.OrderBy(s => s.PWaiting);
+                                break;
+                            case "PNotPaid":
+                                if (sortOrder == "DESC")
+                                    applications = applications.OrderByDescending(s => s.PNotPaid);
+                                else
+                                    applications = applications.OrderBy(s => s.PNotPaid);
+                                break;
+                            default:
+                                applications = applications.OrderBy(s => s.ID);
+                                break;
+                        }
+                    }
+                    PagingBar1.Bind(applications, ref gvMain);
+                    uPnlGrid.Update();
+                    uPnlNavigation.Update();
+                    /////////////////// to hide the pending vaf - acf row in case of registrtion & certification & examination
+
+                    if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CertificateExamApplication || Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseRegistrationApplication || Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseExamApplication)
+                    {
+                        gvMain.Columns[4].Visible = false;
+                    }
+                    //BreadCrumb1.Render();
+                    //BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("Application Status:" + ddlAppType.SelectedItem.Text.ToString(), "Admin/acc_reg_info.aspx?" + Request.QueryString.ToString(), ""));   
+                }
+                if (AppTypeID == Convert.ToInt32(enmApplicationType.CertificateExamApplication))
+                {
+                    var CertificateExam = (from s in context.CertificateExamApplications
+                                           where s.ApplicantTypeID == applicantType && s.InstituteID == entityID && s.ExamID != 0 && s.ApplicationStatusID != certificatefinalstatus
+                                           group s by new { s.CourseID, s.CourseCategoryID, s.Course.ExaminationServiceID, s.Course.Code, s.ExamID, s.Exam.Name, s.Exam.ExamYear, s.Exam.ExamMonth } into c
+                                           select new
+                                           {
+                                               ID = c.Key.CourseID,
+                                               CourseCategoryID = c.Key.CourseCategoryID,
+                                               ServiceID = c.Key.ExaminationServiceID,
+                                               ServiceIDvafacf = 0,
+                                               Examid = c.Key.ExamID,
+                                               Examyear = c.Key.ExamYear,
+                                               Exammonth = c.Key.ExamMonth,
+                                               DemandChkFlag0 = 0,
+                                               DemandChkFlag1 = 1,
+                                               Name = c.Key.Code + "\n(" + c.Key.Name + ")",
+                                               AppTypeID = applicantType,
+                                               Pverification = c.Count(p => p.IsVerifiedByInstitute == false && p.FinalSubmitted == true && p.ApplicationStatusID == AppliedButPendingForInstituteVerification),
+                                               Pvaf_acf = 0,
+                                               VafAcf = 0,
+                                               Prejected = c.Count(p => (p.IsVerifiedByInstitute == false && p.ApplicationStatusID == ApplicationRejectedbyInstitutecertificateeexam)),
+                                               PPstatus = c.Count(p => p.PaymentStatusID == sts && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == ApplicationVerifiedByInstitute && p.DemandNoteID == null),
+                                               PNotPaid = c.Count(p => p.PaymentStatusID == sts && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == FeePaidByInstituteButApplicationPendingToDispatchToRegionalCentre && p.DemandNoteID != null),
+                                               PSubmit = c.Count(p => (p.PaymentStatusID == PaymentPaid || p.PaymentStatusID == paidButPending) && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == FeePaidByInstituteButApplicationPendingToDispatchToRegionalCentre),
+                                               PWaiting = c.Count(p => (p.PaymentStatusID == PaymentPaid || p.PaymentStatusID == paidButPending) && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == ApplicationDispatchedByTheInstituteToRegionalCentre),
+                                               ApplType = AppTypeID
+                                           });
+                    CertificateExam = CertificateExam.OrderByDescending(s => s.Examyear).ThenByDescending(s => s.Exammonth);
+                    if (!string.IsNullOrEmpty(sortOrder))
+                    {
+                        switch (sortField)
+                        {
+                            case "ID":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.ID);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.ID);
+                                break;
+                            case "Name":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.Name);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.Name);
+                                break;
+                            case "Pverification":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.Pverification);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.Pverification);
+                                break;
+                            case "Prejected":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.Prejected);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.Prejected);
+                                break;
+                            case "PPstatus":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.PPstatus);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.PPstatus);
+                                break;
+                            case "PSubmit":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.PSubmit);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.PSubmit);
+                                break;
+
+                            case "PWaiting":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.PWaiting);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.PWaiting);
+                                break;
+                            case "PNotPaid":
+                                if (sortOrder == "DESC")
+                                    CertificateExam = CertificateExam.OrderByDescending(s => s.PNotPaid);
+                                else
+                                    CertificateExam = CertificateExam.OrderBy(s => s.PNotPaid);
+                                break;
+                            default:
+                                CertificateExam = CertificateExam.OrderBy(s => s.ID);
+                                break;
+                        }
+                    }
+                    PagingBar1.Bind(CertificateExam, ref gvMain);
+                    uPnlGrid.Update();
+                    uPnlNavigation.Update();
+                    /////////////////// to hide the pending vaf - acf row in case of registrtion & certification & examination
+
+                    if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CertificateExamApplication || Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseRegistrationApplication || Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseExamApplication)
+                    {
+                        gvMain.Columns[4].Visible = false;
+                    }
+                    //BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("Application Status:" + ddlAppType.SelectedItem.Text.ToString(), "Admin/acc_reg_info.aspx?" + Request.QueryString.ToString(), ""));   
+                }
+                if (AppTypeID == Convert.ToInt32(enmApplicationType.CourseExamApplication))
+                {  //Shivam Comment for vaf_acf----------------------------------30/08/2024
+                    var courseExam = (from s in context.CourseExamApplications
+                                      where s.ApplicantTypeID == applicantType && s.InstituteID == entityID && s.ExamID != 0 && s.ApplicationStatusID != finalcourseexamstatus
+                                      group s by new { s.CourseID, s.CourseCategoryID, s.Course.ExaminationServiceID, s.Course.VAFACFServiceID, s.Course.Code, s.ExamID, s.Exam.Name, s.Exam.ExamYear, s.Exam.ExamMonth } into c
+                                      select new
+                                      {
+                                          ID = c.Key.CourseID,
+                                          CourseCategoryID = c.Key.CourseCategoryID,
+                                          ServiceID = c.Key.ExaminationServiceID,
+                                          ServiceIDvafacf = c.Key.VAFACFServiceID,
+                                          Examid = c.Key.ExamID,
+                                          Examyear = c.Key.ExamYear,
+                                          Exammonth = c.Key.ExamMonth,
+                                          VafAcf = 0,
+                                          DemandChkFlag0 = 0,
+                                          DemandChkFlag1 = 1,
+                                          Name = c.Key.Code + " Level \n(" + c.Key.Name + ")",
+                                          AppTypeID = applicantType,
+                                          Pverification = c.Count(p => (p.IsVerifiedByInstitute == false && p.FinalSubmitted == true && p.ApplicationStatusID == AppliedButPendingForInstituteVerificationForCourseExamApplication
+                                          && !context.CourseExamVafAcfs.Any(v => v.CandidateID == p.CandidateID
+                                                               && v.CourseID == p.CourseID
+                                                               && v.ExamID == p.ExamID
+                                                               && v.FinalSubmitted == false))),
+                                          //Pverification = c.Count(p => p.IsVerifiedByInstitute == false && p.FinalSubmitted == true && p.ApplicationStatusID == AppliedButPendingForInstituteVerificationForCourseExamApplication),
+                                          Prejected = c.Count(p => (p.IsVerifiedByInstitute == false && p.FinalSubmitted == true && p.ApplicationStatusID == ApplicationRejectedbyInstitutecourseexam)),
+                                          PPstatus = c.Count(p => p.PaymentStatusID == sts && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == ApplicationVerifiedByInstituteForCourseExamApplication && p.DemandNoteID == null),
+                                          PNotPaid = c.Count(p => p.PaymentStatusID == sts && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == FeePaidByInstituteButApplicationPendingToDispatchToNIELITForCourseExamApplication && p.DemandNoteID != null),
+                                          //VafAcfSts = VerifiedButVafAcfNotPaidByInstitute,
+                                          Pvaf_acf = 0,
+                                          //Pvaf_acf = (from v in context.CourseExamVafAcfs
+                                          //            where c.Select(p => p.CandidateID).Contains(v.CandidateID) &&
+                                          //                  v.FinalSubmitted == true && v.ApplicationStatusID == VerifiedButVafAcfNotPaidByInstitute && v.PaymentStatusID == sts
+                                          //            select v).Count(),
+                                          PWaiting = c.Count(p => (p.PaymentStatusID == PaymentPaid || p.PaymentStatusID == paidButPending) && p.IsVerifiedByInstitute == true && p.ApplicationStatusID == ApplicationDispatchedByTheInstituteToNIELITForCourseExamApplicationStatus),
+                                          PSubmit = c.Count(p => (p.PaymentStatusID == PaymentPaid || p.PaymentStatusID == paidButPending) && p.IsVerifiedByInstitute == true && (p.ApplicationStatusID == FeePaidByInstituteButApplicationPendingToDispatchToNIELITForCourseExamApplication || p.ApplicationStatusID == ApplicationVerifiedByInstituteForCourseExamApplication)),
+                                          ApplType = AppTypeID
+                                      });
+
+                    //---------------------------------------------Shivam comment end
+                    courseExam = courseExam.OrderByDescending(s => s.Examyear).ThenByDescending(s => s.Exammonth);
+                    if (!string.IsNullOrEmpty(sortOrder))
+                    {
+                        switch (sortField)
+                        {
+                            case "ID":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.ID);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.ID);
+                                break;
+                            case "Name":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.Name);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.Name);
+                                break;
+                            case "Pverification":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.Pverification);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.Pverification);
+                                break;
+                            case "Prejected":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.Prejected);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.Prejected);
+                                break;
+                            case "PPstatus":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.PPstatus);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.PPstatus);
+                                break;
+                            case "PSubmit":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.PSubmit);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.PSubmit);
+                                break;
+
+                            case "PWaiting":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.PWaiting);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.PWaiting);
+                                break;
+                            case "PNotPaid":
+                                if (sortOrder == "DESC")
+                                    courseExam = courseExam.OrderByDescending(s => s.PNotPaid);
+                                else
+                                    courseExam = courseExam.OrderBy(s => s.PNotPaid);
+                                break;
+                            default:
+                                courseExam = courseExam.OrderBy(s => s.ID);
+                                break;
+                        }
+                    }
+                    PagingBar1.Bind(courseExam, ref gvMain);
+                    uPnlGrid.Update();
+                    uPnlNavigation.Update();
+                    /////////////////// to hide the pending vaf - acf row in case of registrtion & certification & examination
+
+                    if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CertificateExamApplication || Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseRegistrationApplication || Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseExamApplication)
+                    {
+                        gvMain.Columns[4].Visible = false;
+                    }
+
+                }
+                if (AppTypeID == Convert.ToInt32(enmApplicationType.CourseVafAcfApplication))
+                {
+                    Int32 CourseExamAppl = Convert.ToInt32(enmApplicationType.CourseExamApplication);
+
+                    var VafAcf = (from s in context.CourseExamVafAcfs.AsNoTracking()
+                                  where s.InstituteID == entityID && s.ExamID != 0 && s.ApplicationStatusID != finalcourseexamstatus
+                                  group s by new { s.CourseID, s.CourseCategoryID, s.Course.VAFACFServiceID, s.Course.Code, s.ExamID, s.Exam.Name, s.Exam.ExamYear, s.Exam.ExamMonth } into c
+                                  select new
+                                  {
+                                      ID = c.Key.CourseID,
+                                      Name = c.Key.Code + " Level \n(" + c.Key.Name + ")",
+                                      CourseCategoryID = c.Key.CourseCategoryID,
+                                      ServiceID = c.Key.VAFACFServiceID,
+                                      ServiceIDvafacf = 0,
+                                      Examid = c.Key.ExamID,
+                                      Examyear = c.Key.ExamYear,
+                                      Exammonth = c.Key.ExamMonth,
+                                      DemandChkFlag0 = 0,
+                                      DemandChkFlag1 = 1,
+                                      ApplType = ApplTypeVafAcf,
+                                      AppTypeID = applicantType,
+                                      Prejected = 0,
+                                      Pverification = 0,
+                                      PPstatus = 0,
+                                      PWaiting = 0,
+                                      VafAcf = VerifiedButVafAcfNotPaidByInstitute,
+                                      PSubmit = c.Count(p => (p.PaymentStatusID == PaymentPaid || p.PaymentStatusID == paidButPending) && p.ApplicationStatusID == VerifiedAndVafAcfPaidByInstitute),
+                                      Pvaf_acf = c.Count(p => p.PaymentStatusID == pending && p.ApplicationStatusID == VerifiedButVafAcfNotPaidByInstitute && p.DemandNoteID == 0),
+                                      PNotPaid = c.Count(p => p.PaymentStatusID == pending && p.ApplicationStatusID == VerifiedButVafAcfNotPaidByInstitute && p.DemandNoteID != 0),
+                                  });
+                    VafAcf = VafAcf.OrderByDescending(s => s.Examyear).ThenByDescending(s => s.Exammonth);
+                    gvMain.Columns[2].Visible = false;
+                    gvMain.Columns[3].Visible = false;
+                    gvMain.Columns[5].Visible = false;
+                    gvMain.Columns[7].HeaderText = "Paid";
+                    gvMain.Columns[7].Visible = true;
+                    gvMain.Columns[8].Visible = false;
+                    if (!string.IsNullOrEmpty(sortOrder))
+                    {
+                        switch (sortField)
+                        {
+                            case "ID":
+                                if (sortOrder == "DESC")
+                                    VafAcf = VafAcf.OrderByDescending(s => s.ID);
+                                else
+                                    VafAcf = VafAcf.OrderBy(s => s.ID);
+                                break;
+                            case "Name":
+                                if (sortOrder == "DESC")
+                                    VafAcf = VafAcf.OrderByDescending(s => s.Name);
+                                else
+                                    VafAcf = VafAcf.OrderBy(s => s.Name);
+                                break;
+                            case "Pvaf_acf":
+                                if (sortOrder == "DESC")
+                                    VafAcf = VafAcf.OrderByDescending(s => s.Pvaf_acf);
+                                else
+                                    VafAcf = VafAcf.OrderBy(s => s.Pvaf_acf);
+                                break;
+                            case "PNotPaid":
+                                if (sortOrder == "DESC")
+                                    VafAcf = VafAcf.OrderByDescending(s => s.PNotPaid);
+                                else
+                                    VafAcf = VafAcf.OrderBy(s => s.PNotPaid);
+                                break;
+                            default:
+                                VafAcf = VafAcf.OrderBy(s => s.ID);
+                                break;
+                        }
+                    }
+                    PagingBar1.Bind(VafAcf, ref gvMain);
+                    uPnlGrid.Update();
+                    uPnlNavigation.Update();
+
+                }
+            };
+            if (gvMain.Rows.Count <= 0)
+            {
+                lblError.Text = "No record found.";
+                lblError.Visible = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void FillApplicationTypes()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                var ApplicationList = from p in context.ApplicationTypes
+                                      select new { ValueField = p.ID, TextField = p.Name };
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlAppType, ApplicationList, lst);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void PageIndexChanged(Int32 NewPageIndex)
+    {
+        try
+        {
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+            BindGridView();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void SearchBar_ApplySearch(object sender, EventArgs e)
+    {
+        try
+        {
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void SearchBar_Reset(object sender, EventArgs e)
+    {
+        try
+        {
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void AllyFilter(object sender, EventArgs e)
+    {
+        try
+        {
+            BreadCrumb1.UpdateLastBreadCrumbItem(new BreadCrumbItem("Application Status:" + ddlAppType.SelectedItem.Text.ToString(), "Admin/acc_reg_info.aspx?ApplTypeID=" + ddlAppType.SelectedValue, ""));
+            BreadCrumb1.Render();
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ResetFilterPanel(object sender, EventArgs e)
+    {
+        try
+        {
+            BreadCrumb1.Render();
+            ddlAppType.SelectedValue = "0";
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+            gvMain.Visible = false;
+            lblError.Text = "Please Select Filter Criteria For View Records";
+            lblError.Visible = true;
+            uPnlGrid.Update();
+            BreadCrumb1.RemoveLastBreadCrumbItem();
+            BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("Application Status:Not Selected", "Admin/acc_reg_info.aspx", ""));
+            BreadCrumb1.Render();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void gvMain_Sorting(object sender, GridViewSortEventArgs e)
+    {
+        try
+        {
+            ViewState["SortField"] = e.SortExpression;
+            if (ViewState["SortOrder"].ToString() == "DESC")
+                ViewState["SortOrder"] = "ASC";
+            else
+                ViewState["SortOrder"] = "DESC";
+            BindGridView();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void gvMain_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        try
+        {
+            //Shivam Comment for vaf_acf----------------------------------30/08/2024
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                //Encryption url of hypelink field
+                if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseVafAcfApplication)
+                {
+                    HyperLink hl3 = (HyperLink)e.Row.Cells[4].Controls[0];
+                    hl3.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl3.NavigateUrl + Convert.ToInt32(enmVaf_AcfApplicationStatus.VerifiedButVafAcfNotPaidByInstitute).ToString());// (enmCertificateExamApplicationStatus.ApplicationVerifiedByInstitute).ToString()) ;
+
+                    HyperLink hl5 = (HyperLink)e.Row.Cells[6].Controls[0];
+                    hl5.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl5.NavigateUrl + Convert.ToInt32(enmVaf_AcfApplicationStatus.VerifiedButVafAcfNotPaidByInstitute).ToString());
+
+                    HyperLink hl6 = (HyperLink)e.Row.Cells[7].Controls[0];
+                    hl6.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl6.NavigateUrl + Convert.ToInt32(enmVaf_AcfApplicationStatus.VerifiedAndVafAcfPaidByInstitute).ToString());
+
+
+                }
+                else
+                {
+
+                    HyperLink hl1 = (HyperLink)e.Row.Cells[2].Controls[0];
+                    if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CertificateExamApplication)
+                    {
+                        hl1.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl1.NavigateUrl + Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationRejectedbyInstitute).ToString());
+                    }
+                    else if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseExamApplication)
+                    {
+                        hl1.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl1.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationRejectedbyInstitute).ToString());
+                    }
+                    else if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseRegistrationApplication)
+                    {
+                        hl1.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl1.NavigateUrl + Convert.ToInt32(enmCourseApplicationStatus.ApplicationRejectedbyInstitute).ToString());
+                    }
+                    //else if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseVafAcfApplication)
+                    //{
+                    //    hl1.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl1.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationRejectedbyInstitute).ToString());
+                    //}
+                    HyperLink hl2 = (HyperLink)e.Row.Cells[3].Controls[0];
+                    if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseRegistrationApplication)
+                    {
+                        hl2.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl2.NavigateUrl + Convert.ToInt32(enmCourseApplicationStatus.AppliedButPendingForInstituteVerification).ToString() + "," + Convert.ToInt32(enmCourseApplicationStatus.FeeDepositedByCandidateButApplicationNotReceivedByNIELIT).ToString());
+                    }
+                    else
+                    {
+                        hl2.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl2.NavigateUrl + Convert.ToInt32(enmCertificateExamApplicationStatus.AppliedButPendingForInstituteVerification).ToString());
+                    }
+
+                    //HyperLink hl3 = (HyperLink)e.Row.Cells[4].Controls[0];
+                    //hl3.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl3.NavigateUrl + Convert.ToInt32(enmVaf_AcfApplicationStatus.VerifiedButVafAcfNotPaidByInstitute).ToString());// (enmCertificateExamApplicationStatus.ApplicationVerifiedByInstitute).ToString()) ;
+
+                    HyperLink hl4 = (HyperLink)e.Row.Cells[5].Controls[0];
+                    HyperLink hl5 = (HyperLink)e.Row.Cells[6].Controls[0];
+                    HyperLink hl6 = (HyperLink)e.Row.Cells[7].Controls[0];
+                    HyperLink hl7 = (HyperLink)e.Row.Cells[8].Controls[0];
+
+                    if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CertificateExamApplication)
+                    {
+                        hl4.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl4.NavigateUrl + Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationVerifiedByInstitute).ToString());
+                        hl5.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl5.NavigateUrl + Convert.ToInt32(enmCertificateExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToRegionalCentre).ToString());
+                        hl6.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl6.NavigateUrl + Convert.ToInt32(enmCertificateExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToRegionalCentre).ToString());
+                        hl7.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl7.NavigateUrl + Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationDispatchedByTheInstituteToRegionalCentre).ToString());
+
+                    }
+                    else if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseExamApplication)
+                    {
+                        hl4.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl4.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationVerifiedByInstitute).ToString());
+                        hl5.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl5.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT).ToString());
+                        hl6.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl6.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT).ToString() + "," + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationVerifiedByInstitute).ToString());
+                        hl7.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl7.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationDispatchedByTheInstituteToNIELIT).ToString());
+
+                    }
+                    //---------vaf acf------------------
+                    //else if (Convert.ToInt32(ddlAppType.SelectedValue) == (int)enmApplicationType.CourseVafAcfApplication)
+                    //{
+                    //    //hl4.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl4.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationVerifiedByInstitute).ToString());
+                    //    hl5.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl5.NavigateUrl + Convert.ToInt32(enmVaf_AcfApplicationStatus.VerifiedButVafAcfNotPaidByInstitute).ToString());
+                    //    //hl6.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl6.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT).ToString() + "," + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationVerifiedByInstitute).ToString());
+                    //    //hl7.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl7.NavigateUrl + Convert.ToInt32(enmCourseExamApplicationStatus.ApplicationDispatchedByTheInstituteToNIELIT).ToString());
+                    //}
+                    //---------end vaf acf----------------
+                    else
+                    {
+                        hl4.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl4.NavigateUrl + Convert.ToInt32(enmCourseApplicationStatus.ApplicationVerifiedByInstitute).ToString());
+                        hl5.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl5.NavigateUrl + Convert.ToInt32(enmCourseApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT).ToString());
+                        hl6.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl6.NavigateUrl + Convert.ToInt32(enmCourseApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT).ToString() + "," + Convert.ToInt32(enmCourseApplicationStatus.ApplicationVerifiedByInstitute).ToString());
+                        hl7.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl7.NavigateUrl + Convert.ToInt32(enmCourseApplicationStatus.ApplicationDispatchedByTheInstituteToNIELIT).ToString());
+
+                    }
+                }
+                e.Row.Cells[0].Text = ((e.Row.RowIndex + 1) + (PagingBar1.CurrentPageSize * PagingBar1.CurrentPageIndex)).ToString();
+
+
+            }
+            //---------------------------------------------Shivam comment end
+
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+}

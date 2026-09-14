@@ -1,0 +1,224 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPages/MyInfo.master" AutoEventWireup="true"
+    CodeFile="acc_reg_info.aspx.cs" Inherits="acc_reg_info" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="asp" %>
+<%@ Register Src="../UserControl/SearchBar.ascx" TagName="SearchBar" TagPrefix="uc1" %>
+<%@ Register Src="../UserControl/ToggleView.ascx" TagName="ToggleView" TagPrefix="uc2" %>
+<%@ Register Src="../UserControl/PagingBar.ascx" TagName="PagingBar" TagPrefix="uc3" %>
+<%@ Register Src="../UserControl/BreadCrumb.ascx" TagName="BreadCrumb" TagPrefix="uc1" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="chpHeading" runat="Server">
+    <asp:Label ID="lblHeading" runat="server" Text="Application Status"></asp:Label>
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="cphAddNew" runat="Server">
+    <asp:Panel runat="server" ID="pnlFilter" Visible="true">
+        <div id="filterContainer">
+            <a href="#" id="filterButton"><span></span><em></em></a>
+            <div style="clear: both">
+            </div>
+            <div id="filterBox" align="left">
+                <div id="filterPannel">
+                    <asp:UpdatePanel EnableViewState="true" RenderMode="Inline" ID="filterPnal_upnlFilter"
+                        UpdateMode="Conditional" runat="server">
+                        <ContentTemplate>
+                            <table cellpadding="0" id="body1" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="lblFiler" Width="60%" runat="server" Font-Bold="true" Font-Size="12pt"
+                                            Text="Filter Panel"></asp:Label>
+                                        <asp:Button runat="server" ID="btnReset" ToolTip="Reset Filter" ClientIDMode="Static"
+                                            Text="" OnClick="ResetFilterPanel" />
+                                        <asp:Button runat="server" ToolTip="Apply Filter" ID="btnFilter" ClientIDMode="Static"
+                                            Text="" OnClick="AllyFilter" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="lblFilter1" Width="100%" runat="server" Text="Application Type"></asp:Label>
+                                        <asp:DropDownList ID="ddlAppType" Width="100%" runat="server">
+                                            <asp:ListItem>--All--</asp:ListItem>
+                                        </asp:DropDownList>
+                                    </td>
+                                </tr>
+                            </table>
+                        </ContentTemplate>
+                    </asp:UpdatePanel>
+                </div>
+                <script language="javascript" type="text/javascript">
+                    var box = $('#filterBox');
+                    shortcut.add("Ctrl+Shift+F", function () {
+                        box.show();
+                    });
+                    shortcut.add("Esc", function () {
+                        box.hide();
+                    });
+                </script>
+            </div>
+        </div>
+    </asp:Panel>
+</asp:Content>
+<asp:Content ID="Content4" ContentPlaceHolderID="cphBreadScrum" runat="Server">
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>
+            <uc1:BreadCrumb ID="BreadCrumb1" runat="server" />
+        </ContentTemplate>
+        <Triggers>
+            <asp:AsyncPostBackTrigger ControlID="BreadCrumb1" />
+        </Triggers>
+    </asp:UpdatePanel>
+</asp:Content>
+<asp:Content ID="Content5" ContentPlaceHolderID="cphContents" runat="Server">
+    <asp:UpdatePanel EnableViewState="true" ID="uPnlGrid" UpdateMode="Conditional" runat="server">
+        <ContentTemplate>
+            <asp:Label Width="99%" EnableTheming="false" CssClass="error" ID="lblError" Visible="false"
+                runat="server"></asp:Label>
+            <asp:GridView ID="gvMain" runat="server" DataKeyNames="ID" OnSorting="gvMain_Sorting"
+                AutoGenerateColumns="False" Width="100%" OnRowDataBound="gvMain_RowDataBound" Font-Size="12px">
+                <Columns>
+                    <asp:BoundField HeaderText="#">
+                        <HeaderStyle Width="1%"></HeaderStyle>
+                    </asp:BoundField>
+                    <asp:BoundField DataField="Name" SortExpression="Name"  HeaderText="Course">
+                        <HeaderStyle Width="13%" />
+                        <ItemStyle HorizontalAlign="Center"  Font-Size="9" />
+                    </asp:BoundField>
+                    <asp:HyperLinkField DataNavigateUrlFields="ID,CourseCategoryID,ServiceID,ApplType,Examid,ServiceIDvafacf" DataNavigateUrlFormatString="CourseRegStudentStatus.aspx?CourseID={0}&CourseCategoryID={1}&ServiceID={2}&ApplTypeID={3}&Examid={4}&ServiceIDvafacf={5}&Status="
+                        DataTextField="Prejected" HeaderText="Rejected" SortExpression="Prejected"
+                        Target="_self">
+                        <HeaderStyle HorizontalAlign="left" Width="10%" />
+                        <ItemStyle HorizontalAlign="Right" />
+                    </asp:HyperLinkField>
+                    <asp:HyperLinkField DataNavigateUrlFields="ID,CourseCategoryID,ServiceID,ApplType,Examid,ServiceIDvafacf" DataNavigateUrlFormatString="CourseRegStudentStatus.aspx?CourseID={0}&CourseCategoryID={1}&ServiceID={2}&ApplTypeID={3}&Examid={4}&ServiceIDvafacf={5}&Status="
+                        DataTextField="Pverification" HeaderText="Pending to Verify" SortExpression="Pverification"
+                        Target="_self">
+                        <HeaderStyle HorizontalAlign="left" Width="15%" />
+                        <ItemStyle HorizontalAlign="Right" />
+                    </asp:HyperLinkField> 
+                     <asp:HyperLinkField DataNavigateUrlFields="ID,CourseCategoryID,ServiceID,ApplType,Examid,VafAcf,DemandChkFlag0,ServiceIDvafacf" DataNavigateUrlFormatString="CourseRegStudentStatus.aspx?CourseID={0}&CourseCategoryID={1}&ServiceID={2}&ApplTypeID={3}&Examid={4}&VafAcf={5}&DemandChkFlag={6}&ServiceIDvafacf={7}&Status="
+                         DataTextField="Pvaf_acf" HeaderText="Pending VAF ACF" SortExpression="Pvaf_acf"
+                         Target="_self">
+                         <HeaderStyle HorizontalAlign="left" Width="15%" />
+                         <ItemStyle HorizontalAlign="Right" />
+                     </asp:HyperLinkField> 
+                                                   
+                    <asp:HyperLinkField DataNavigateUrlFields="ID,CourseCategoryID,ServiceID,ApplType,Examid,ServiceIDvafacf" DataNavigateUrlFormatString="CourseRegStudentStatus.aspx?CourseID={0}&CourseCategoryID={1}&ServiceID={2}&ApplTypeID={3}&Examid={4}&ServiceIDvafacf={5}&Status="
+                        DataTextField="PPstatus" HeaderText="Pending To Pay" SortExpression="PPstatus"
+                        Target="_self">
+                        <HeaderStyle Width="16%" HorizontalAlign="left" />
+                        <ItemStyle HorizontalAlign="Right" />
+                    </asp:HyperLinkField>
+                    <asp:HyperLinkField DataNavigateUrlFields="ID,CourseCategoryID,ServiceID,ApplType,Examid,DemandChkFlag1,ServiceIDvafacf" DataNavigateUrlFormatString="CourseRegStudentStatus.aspx?CourseID={0}&CourseCategoryID={1}&ServiceID={2}&ApplTypeID={3}&st=mnp&Examid={4}&DemandChkFlag={5}&ServiceIDvafacf={6}&Status="
+                        DataTextField="PNotPaid" HeaderText="Marked But Not-Paid" SortExpression="PNotPaid"
+                        Target="_self">
+                        <HeaderStyle Width="18%" HorizontalAlign="left" />
+                        <ItemStyle HorizontalAlign="Right" />
+                    </asp:HyperLinkField>
+                    <asp:HyperLinkField DataNavigateUrlFields="ID,CourseCategoryID,ServiceID,ApplType,Examid,ServiceIDvafacf" DataNavigateUrlFormatString="CourseRegStudentStatus.aspx?CourseID={0}&CourseCategoryID={1}&ServiceID={2}&ApplTypeID={3}&Examid={4}&ServiceIDvafacf={5}&Status="
+                        DataTextField="PSubmit" HeaderText="Pending Dispatch" SortExpression="PSubmit"
+                        Target="_self">
+                        <HeaderStyle Width="16%" HorizontalAlign="left" />
+                        <ItemStyle HorizontalAlign="Right" />
+                    </asp:HyperLinkField>
+                    <asp:HyperLinkField DataNavigateUrlFields="ID,CourseCategoryID,ServiceID,ApplType,Examid,ServiceIDvafacf" DataNavigateUrlFormatString="CourseRegStudentStatus.aspx?CourseID={0}&CourseCategoryID={1}&ServiceID={2}&ApplTypeID={3}&Examid={4}&ServiceIDvafacf={5}&Status="
+                        DataTextField="PWaiting" HeaderText="Waiting Ackn." SortExpression="PWaiting"
+                        Target="_self">
+                        <HeaderStyle Width="16%" HorizontalAlign="left" />
+                        <ItemStyle HorizontalAlign="Right" />
+                    </asp:HyperLinkField>
+                </Columns>
+                <PagerSettings Visible="False" />
+            </asp:GridView>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <asp:HiddenField ID="hfActionID" runat="server" Value="" />
+    <div id="divNavigation" runat="server">
+        <asp:UpdatePanel RenderMode="Inline" ID="uPnlNavigation" UpdateMode="Conditional"
+            runat="server">
+            <ContentTemplate>
+                <uc3:PagingBar ID="PagingBar1" runat="server" OnPageIndexChanged="PageIndexChanged" />
+            </ContentTemplate>
+        </asp:UpdatePanel>
+    </div>
+    <%--<table cellspacing="1" cellpadding="4" border="0" id="cphContents_gvMain" 
+        style="width: 100%;">
+        <tr class="gdheader">
+            <th>
+                #
+            </th>
+            <th>
+                Course Name</th>
+            <th>
+                Pending Verification</th>
+            <th>
+                 Pending Payment
+            </th>
+            <th>
+                 Pending For Submission</th>
+            <th>
+                 Awaiting Registration </th>
+        </tr>
+        <tr class="gdrow">
+            <td>
+                1
+            </td>
+            <td>
+                O level(Computer S/w)</td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Pending Varification&course=O level(Computer S/w)&St=0&sts=f">20</a></td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Pending Payment&course=O level(Computer S/w)&St=0&sts=s">90</a></td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Pending For Forward&course=O level(Computer S/w)&St=0">21</a></td>
+            <td align="right">
+               <a href="FrmStudentList.aspx?status=for Total Registration&course=O level(Computer S/w)&St=0">1300</a></td>
+        </tr>
+        <tr class="gdalternate">
+            <td>
+                2
+            </td>
+            <td>
+                A level(Computer S/w)</td>
+            <td align="right">
+               <a href="FrmStudentList.aspx?status=for Pending Varification&course=A level(Computer S/w)&St=0&sts=f">50</a></td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Pending Payment&course=A level(Computer S/w)&St=0&sts=s">130</a></td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Pending For Forward&course=A level(Computer S/w)&St=0">23</a></td>
+            <td align="right">
+              <a href="FrmStudentList.aspx?status=for Total Registration&course=A level(Computer S/w)&St=0">3000</a></td>
+        </tr>
+        <tr class="gdrow">
+            <td >
+                3.</td>
+            <td >
+               B level(Computer S/w)</td>
+            <td align="right" >
+                <a href="FrmStudentList.aspx?status=for Pending Varification&course=B level(Computer S/w)&St=0&sts=f">21</a></td>
+            <td align="right" >
+                <a href="FrmStudentList.aspx?status=for Pending Payment&course=B level(Computer S/w)&St=0&sts=s">77</a></td>
+            <td align="right" >
+                <a href="FrmStudentList.aspx?status=for Pending For Forward&course=B level(Computer S/w)&St=0">20</a></td>
+            <td align="right" >
+               <a href="FrmStudentList.aspx?status=for Total Registration&course=B level(Computer S/w)&St=0">800</a></td>
+        </tr>
+        <tr class="gdalternate">
+            <td>
+                4</td>
+            <td>
+               C level(Computer S/w)</td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Pending Varification&course=C level(Computer S/w)&St=0&sts=f">23</a></td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Pending Payment&course=C level(Computer S/w)&St=0&sts=s">13</a></td>
+            <td align="right">
+               <a href="FrmStudentList.aspx?status=for Pending For Forward&course=C level(Computer S/w)&St=0">50</a></td>
+            <td align="right">
+                <a href="FrmStudentList.aspx?status=for Total Registration&course=C level(Computer S/w)&St=0">32334</a></td>
+        </tr>
+    </table>--%>
+</asp:Content>
+<asp:Content ID="Content6" ContentPlaceHolderID="cphNavigation" runat="Server">
+</asp:Content>
+<asp:Content ID="Content7" ContentPlaceHolderID="cthRightPannel" runat="Server">
+</asp:Content>

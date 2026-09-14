@@ -1,0 +1,414 @@
+﻿/*---------------------------------------------------------------------------------Search Bar-----------------------------------------------------------------------------*/
+
+#searchContainer {
+	position:relative;
+	float:right;
+	font-size:12px;
+	padding:4px 0 0 0px;
+	z-index:100;
+}
+
+/* Login Button */
+#searchButton { 
+	font:normal 10px verdana;
+	color:#FFFFFF;
+    display:inline-block;
+    float:right;
+    margin-top:14px;
+    position:relative;
+    cursor:pointer;
+}
+
+/* Login Button Text background:url(Images/arrow.png) no-repeat 80px 7px;*/
+#searchButton span {
+	background:url(Images/search_button.jpg) no-repeat; width:28px; height:28px;
+    color:#445058; 
+    font-weight:normal; 
+    padding:16px 5px 2px 28px;
+	width:28px;
+	height:28px;
+}
+
+#searchButton:hover {
+  /*  background:url(Images/arrow.png) no-repeat 80px 10px; */
+}
+
+/* Login Box */
+#searchBox {
+    position:absolute;
+    top:2px;
+    right:5px;
+    display:block ;
+    
+}
+
+/* If the Login Button has been clicked */    
+#searchButton.active {
+    border-radius:3px 3px 0 0;
+}
+
+#searchButton.active span {
+    background-position:53px -76px;
+}
+
+/* A Line added to overlap the border */
+#searchButton.active em {
+    position:absolute;
+    width:100%;
+    /*height:1px;
+    background:#d2e0ea;*/
+    bottom:-1px;
+}
+
+/* Login Form */
+#searchPannel {
+	background:#4f81ac;
+    padding:3px;
+	width:210px;
+	height:30px;
+}
+
+#searchPannel fieldset {
+    margin:0 0 12px 0;
+    display:block;
+    border:0;
+    padding:0;
+	height:25px;
+}
+
+fieldset#body {
+    background:#ffffff;
+    border-radius:3px;
+    -moz-border-radius:3px;
+    padding:5px 5px 5px 5px; 
+    margin:0;
+}
+
+#searchPannel #checkbox {
+    width:auto;
+    margin:1px 9px 0 0;
+    float:left;
+    padding:0;
+    border:0;
+    *margin:-3px 9px 0 0; /* IE7 Fix */
+}
+
+#body label {
+    color:#3a454d;
+    margin:9px 0 0 0;
+    display:block;
+    float:left;
+}
+
+#searchPannel #body fieldset label {
+    display:block;
+    float:none;
+    margin:0 0 6px 0;
+}
+
+#searchPannel input {
+	/*background:url(Images/search_background.png) no-repeat center;*/
+    font:normal 13px arial;
+	color:#333333;
+	width:150px;
+	height:18px;
+    border:1px solid #4f81ac;
+    padding:2px 2px 2px 2px;
+ }
+
+/* Sign In Button */
+#searchPannel #btnSearch {
+    background:url(Images/search_button_02.png) no-repeat; width:21px; height:21px;
+    color:#fff;
+    float:right;
+	width:21px;
+    border:none;
+    cursor:pointer;
+   }
+#searchPannel #btnClear {
+    background:url(Images/clear_serch.png) no-repeat; width:21px; height:21px;
+    color:#fff;
+    float:right;
+	width:21px;
+    border:none;
+    cursor:pointer;
+   }
+
+searchPannel #btnSearch:hover {
+    background:#566d2f;	
+    color:#fff;
+    float:left;
+	width:50px;
+    padding:2px 2px 2px 2px;
+    margin:0 10px 0 0;
+    border:none;
+    cursor:pointer;
+    *padding:2px 2px 2px 2px;
+   /**padding:7px 2px 8px 2px; *//* IE7 Fix */
+}
+
+searchPannel #btnClear:hover {
+    background:#566d2f;	
+    color:#fff;
+    float:left;
+	width:50px;
+    padding:2px 2px 2px 2px;
+    margin:0 10px 0 0;
+    border:none;
+    cursor:pointer;
+    *padding:2px 2px 2px 2px;
+   /**padding:7px 2px 8px 2px; *//* IE7 Fix */
+}
+
+
+/*---------------------------------------------------------------------------------Filter-----------------------------------------------------------------------------*/
+
+#filterContainer {
+	position:relative;
+	float:right;
+	font-size:12px;
+	padding:4px 0 0 0;
+	
+}
+
+/* Login Button */
+#filterButton { 
+	font:normal 10px verdana;
+	color:#FFFFFF;
+    display:inline-block;
+    float:right;
+    margin-top:14px;
+    position:relative;
+    z-index:30;
+    cursor:pointer;
+}
+
+/* Login Button Text background:url(Images/arrow.png) no-repeat 80px 7px;*/
+#filterButton span {
+	background:url(Images/filter_button.jpg) no-repeat; width:28px; height:28px;
+    color:#445058; 
+    font-weight:normal; 
+    padding:16px 5px 2px 28px;
+	width:28px;
+}
+
+#filterButton:hover {
+  /*  background:url(Images/arrow.png) no-repeat 80px 10px; */
+}
+
+/* Login Box */
+#filterBox 
+{
+    position:absolute;
+    top:2px;
+    right:37px;
+    display:none;
+    z-index:102;
+}
+
+/* If the Login Button has been clicked */    
+#filterButton.active {
+    border-radius:3px 3px 0 0;
+}
+
+#filterButton.active span {
+    background-position:53px -76px;
+}
+
+/* A Line added to overlap the border */
+#filterButton.active em {
+    position:absolute;
+    width:100%;
+    bottom:-1px;
+}
+
+/* Login Form */
+#filterPannel {
+    background:#4f81ac;
+    padding:6px;
+	width:260px;
+	height:auto;
+}
+
+#filterPannel #body1 {
+    background:#ffffff;
+    border-radius:3px;
+    -moz-border-radius:3px;
+    padding:10px 7px;
+    margin:0;
+}
+
+/* Sign In Button */
+#filterPannel #btnFilter {
+    background:url(Images/apply_filter.png) no-repeat; width:21px; height:21px;
+    color:#fff;
+    float:right;
+	width:21px;
+    border:none;
+    cursor:pointer;
+   }
+#filterPannel #btnReset {
+    background:url(Images/reset_filter.png) no-repeat; width:21px; height:21px;
+    color:#fff;
+    float:right;
+	width:21px;
+    border:none;
+    cursor:pointer;
+   }
+
+filterPannel #btnFilter:hover {
+    background:#566d2f;	
+    color:#fff;
+    float:left;
+	width:50px;
+    padding:2px 2px 2px 2px;
+    margin:0 10px 0 0;
+    border:none;
+    cursor:pointer;
+    *padding:2px 2px 2px 2px;
+   /**padding:7px 2px 8px 2px; *//* IE7 Fix */
+}
+
+filterPannel #btnReset:hover {
+    background:#566d2f;	
+    color:#fff;
+    float:left;
+	width:50px;
+    padding:2px 2px 2px 2px;
+    margin:0 10px 0 0;
+    border:none;
+    cursor:pointer;
+    *padding:2px 2px 2px 2px;
+   /**padding:7px 2px 8px 2px; *//* IE7 Fix */
+}
+
+
+/*---------------------------------------------------------------------------------List and New Mode-----------------------------------------------------------------------------*/
+
+.btnToggleNew{
+	background:url(Images/emp_button.jpg) no-repeat; width:28px; height:28px;
+    margin:2px 1px 0 0;
+    padding:4px 0 0 0;
+    width:28px;
+    float:right;
+	border:none;
+}
+
+.btnToggleList{
+	background:url(Images/list.png) no-repeat; width:28px; height:28px;
+    margin:2px 1px 0 0;
+    padding:4px 0 0 0;
+    float:right;
+    width:28px;
+	border:none;
+}
+
+/*---------------------------------------------------------------------------------Action-----------------------------------------------------------------------------*/
+
+#actionContainer {
+	position:relative;
+	float:right;
+	font-size:12px;
+	padding:4px 0 0 0;
+	
+}
+
+/* Login Button */
+#actionButton { 
+	font:normal 10px verdana;
+	color:#FFFFFF;
+    display:inline-block;
+    float:right;
+    margin-top:14px;
+    position:relative;
+    z-index:30;
+    cursor:pointer;
+}
+
+/* Login Button Text background:url(Images/arrow.png) no-repeat 80px 7px;*/
+#actionButton span {
+	background:url(Images/action_button.png) no-repeat; width:28px; height:28px;
+    color:#445058; 
+    font-weight:normal; 
+    padding:16px 5px 2px 28px;
+	width:28px;
+}
+
+#actionButton:hover {
+  /*  background:url(Images/arrow.png) no-repeat 80px 10px; */
+}
+
+/* Login Box */
+#actionBox 
+{
+    position:absolute;
+    top:-3px;
+    right:47px;
+    display:none;
+    z-index:103;
+}
+
+/* If the Login Button has been clicked */    
+#actionButton.active {
+    border-radius:3px 3px 0 0;
+}
+
+#actionButton.active span {
+    background-position:53px -76px;
+}
+
+/* A Line added to overlap the border */
+#actionButton.active em {
+    position:absolute;
+    width:100%;
+    bottom:-1px;
+}
+
+/* Login Form */
+#actionPanel {
+    background:#4f81ac;
+    padding:6px;
+	width:160px;
+	height:auto;
+}
+
+#actionPanel #actionBody {
+    background:#ffffff;
+    border-radius:3px;
+    -moz-border-radius:3px;
+    padding:10px 7px;
+    margin:0;
+}
+
+.navigator{background:url(Images/navigator_background.jpg) repeat-x; font:bold 13px arial; color:#ffffff; height:30px;}
+
+
+/* Bread Scrum */
+
+.breadScrum{font:normal 12px arial;	color:#000000; padding-left:7px; text-align:left; vertical-align:middle;}
+
+.breadScrum a{text-decoration:none; color:#3333FF; }
+
+.breadScrum a:hover{text-decoration:underline; font:normal 12px arial;	color:#3333FF}
+
+.nav {background:#FFFFFF; font:normal 12px sans-serif; color:#000000; border:1px solid #d8d8d8; text-align:left; margin: 4px 0 2px 0;} 
+.nav td #header{background:url(Images/header_background.jpg) repeat-x top left; font:normal 14px arial; height:34px; color:#ffffff; text-align: center; vertical-align:middle; line-height:30px;}
+.nav td { background:url(Images/nav_link.png) no-repeat left;  border-bottom:1px solid #d8d8d8; height:34px; }
+.nav td a {color:#000000; text-decoration:none; padding:0 0 0 32px;}
+.nav td a:hover {background:#f4f4f4 url(Images/nav_link.png) no-repeat left;color:#30638d; text-decoration:none; padding:9px 9px 9px 32px; display:block;}
+
+downloadLink {background:#FFFFFF; font:normal 12px sans-serif; color:#000000; border:1px solid #d8d8d8; text-align:left; margin: 4px 0 2px 0;} 
+.downloadLink td #header{background:url(Images/header_background.jpg) repeat-x top left; font:normal 14px arial; height:34px; color:#ffffff; text-align: center; vertical-align:middle; line-height:30px;}
+.downloadLink td { background:url(Images/pdf_icon.gif) no-repeat left;  border-bottom:1px solid #d8d8d8; height:34px; }
+.downloadLink td a {color:#000000; text-decoration:none; padding:0 0 0 32px;}
+.downloadLink td a:hover {background:#f4f4f4 url(Images/pdf_icon.gif) no-repeat left;color:#30638d; text-decoration:none; padding:9px 9px 9px 32px; display:block;}
+
+
+.report_header{font:normal 18px arial; color:#003399;  padding:0 0 3px 0; padding:0 5px 0 0; border-bottom:1px solid #000000;}
+.report_sub_header{font:normal 12px arial; color:#000000;  padding:0 0 3px 0; padding:5px 5px 0 0;}
+
+.download {background:#FFFFFF; font:normal 12px sans-serif; color:#000000; border:1px solid #d8d8d8; text-align:left; margin: 4px 0 2px 0;} 
+.download td #header{background:url(Images/header_background.jpg) repeat-x top left; font:normal 14px arial; height:34px; color:#ffffff; text-align: center; vertical-align:middle; line-height:30px;}
+.download td { background:url(Images/download_link.jpg) no-repeat left;  border-bottom:1px solid #d8d8d8; height:34px; }
+.download td a {color:#000000; text-decoration:none; padding:0 0 0 32px;}
+.download td a:hover {background:#f4f4f4 url(Images/download_link.jpg) no-repeat left;color:#30638d; text-decoration:none; padding:9px 9px 9px 32px; display:block;}

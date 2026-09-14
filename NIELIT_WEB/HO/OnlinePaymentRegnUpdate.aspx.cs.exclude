@@ -1,0 +1,116 @@
+﻿using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web.UI;
+using EConnect;
+using EConnect.DAL;
+using EConnect.NIELIT;
+
+public partial class OnlinePaymentRegnUpdate : BasePage
+{
+    protected String requestURL = "https://www.billdesk.com/pgidsk/PGIMerchantPayment";
+    protected String msg = "";
+    String merchantID = "NIELIT";
+    String SecurityID = "nielit";
+    String ServiceID = "";
+    String checkSumKey = "WYZZHkyZuU9K";
+    // protected String returnURL = "http://localhost:34453/NIELIT_WEB/OnlinePaymentResponseRegnUpdate.aspx";
+    protected String returnURL="http://localhost:34453/OnlinePaymentResponseRegnUpdate.aspx";
+   // protected String returnURL = "https://student.nielit.gov.in/OnlinePaymentResponse.aspx";
+
+
+    //public OnlinePaymentRegnUpdate(string returnURL)
+    //{
+    //    this.returnURL = returnURL;
+    //}
+
+    //protected String returnURL = "https://student.nielit.gov.in/OnlinePaymentResponseRegnUpdate.aspx";
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            if (!Page.IsPostBack)
+            {
+                if (Request.QueryString["DID"] == null)
+                {
+                    Response.Write("Invalid request parameters");
+                    Response.End();
+                }
+                else
+                {
+                    Int64 demandNoteID = Convert.ToInt64(Request.QueryString["DID"]);
+                    using (EConnectContext context = new EConnectContext())
+                    {
+                        UpdateRequestDemandNote demandNote = context.UpdateRequestDemandNotes.Find(demandNoteID);
+                        if (demandNote != null)
+                        {
+                            if (demandNote.enmPaymentStatus == enmPaymentStatus.Pending)
+                            {
+
+                            Int32 feeTypeId = 0;
+                            feeTypeId = Convert.ToInt32(enmFeeType.UpdationinCandidateData);
+                            if (demandNote.FeeTypeID == feeTypeId)
+                                {
+                                ServiceID = context.candidateUpdateRequest.Where(s => s.demandNoteID == demandNote.ID).FirstOrDefault().Course.UpdationServiceID;
+                                }
+                                else { throw new Exception("ServiceID not Found"); } 
+                                UpdateRequestOnlineTransaction objTransaction = new UpdateRequestOnlineTransaction();
+                                objTransaction.RequestDate = DateTime.Now;
+                                objTransaction.DemandNoteID = Convert.ToInt64(demandNoteID);
+                                objTransaction.Amount = Convert.ToDecimal(demandNote.Amount);
+                                objTransaction.RequestParameters = msg;
+                                context.UpdateRequestOnlineTransactions.Add(objTransaction);
+                                context.SaveChanges();
+                                msg = merchantID.ToUpper() + "|" + objTransaction.ID.ToString() + "|NA|" + demandNote.Amount.ToString("F") + "|NA|NA|NA|INR|NA|R|" + SecurityID.ToLower() + "|NA|NA|F|" + objTransaction.DemandNoteID.ToString() + "|" + ServiceID + "|NA|NA|NA|NA|NA|" + returnURL;
+                                SHASample dataprg = new SHASample();
+                                String hash = String.Empty;
+                                hash = dataprg.GetSHA256(msg + "|" + checkSumKey);
+                                msg = msg + "|" + hash.ToUpper();
+                                String msg1 = msg;
+                                if (msg1.Length > 200)
+                                    msg1 = msg1.Substring(0, 199).Trim();
+                                objTransaction.RequestParameters = msg1;
+                                context.Entry(objTransaction).State = System.Data.Entity.EntityState.Modified;
+                                context.SaveChanges();
+                            }
+                            else
+                                throw new Exception("Demand note number not found / Invalid demand note number / Demand note already paid.");
+                        }
+                        else
+                            throw new Exception("Demand note number not found / Invalid demand note number.");
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+            Response.Write("Online transaction can not be performed. Reason: " + "<br>Invalid request parameters./" + ex.Message + "<br>" + GeInvalidRequestMessage("Goto Home Page", "MainPage.aspx"));
+            Response.End();
+        }
+    }
+    public class SHASample
+    {
+        public SHASample() { }
+        public string GetSHA256(string text)
+        {
+            UTF8Encoding encoder = new UTF8Encoding();
+
+            byte[] hashValue;
+            byte[] message = encoder.GetBytes(text);
+
+            SHA256Managed hashString = new SHA256Managed();
+            string hex = "";
+
+            hashValue = hashString.ComputeHash(message);
+            foreach (byte x in hashValue)
+            {
+                hex += String.Format("{0:x2}", x);
+            }
+            return hex;
+        }
+
+    }
+}

@@ -1,0 +1,154 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPages/MyInfo.master" AutoEventWireup="true"
+    CodeFile="ExamCentreAllocation.aspx.cs" Inherits="Exam_ExamCentreAllocation" %>
+
+<%@ Register Src="../UserControl/BreadCrumb.ascx" TagName="BreadCrumb" TagPrefix="uc1" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="chpHeading" runat="Server">
+    Generate / View Centre Choice Statistics
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="cphAddNew" runat="Server">
+</asp:Content>
+<asp:Content ID="Content4" ContentPlaceHolderID="cphBreadScrum" runat="Server">
+    <uc1:BreadCrumb ID="BreadCrumb1" runat="server" />
+</asp:Content>
+<asp:Content ID="Content5" ContentPlaceHolderID="cphContents" runat="Server">
+    <script type="text/javascript" language="javascript">
+
+        function Validate() {
+            if (!isSelected("<%=ddlCourseCategry.ClientID %>", "Course Category"))
+                return false;
+            if (!isSelected("<%=ddlCourseName.ClientID %>", "Course Name"))
+                return false;
+            if (!isSelected("<%=ddlRegionalCentre.ClientID %>", "Regional Centre"))
+                return false;
+            if (!isSelected("<%=ddlExamCycle.ClientID %>", "Exam Cycle"))
+                return false;
+            if (!isSelected("<%=ddlExamYear.ClientID %>", "Exam Year"))
+                return false;
+            if (!isSelected("<%=ddlExamName.ClientID %>", "Exam Name"))
+                return false;
+
+        }
+    </script>
+
+    <asp:UpdatePanel EnableViewState="true" ID="UpdatePanel2" UpdateMode="Always" runat="server">
+        <ContentTemplate>
+            <asp:Label Width="99%" EnableTheming="false" CssClass="error" ID="lblError" Visible="false"
+                runat="server"></asp:Label>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <table class="sample2" width="100%" border="0" cellpadding="2" cellspacing="0">
+        <tr>
+            <td>
+                <asp:Label ID="Label2" runat="server" SkinID="CaptionLabel" Text="Course Category &lt;b class='mandatory'&gt;*&lt;/b&gt;"></asp:Label>
+            </td>
+            <td>
+                <asp:Label ID="Label3" runat="server" SkinID="CaptionLabel" Text="Course Name &lt;b class='mandatory'&gt;*&lt;/b&gt;"></asp:Label>
+            </td>
+            <td>
+                <asp:Label ID="Label4" runat="server" SkinID="CaptionLabel" Text="Regional Centre &lt;b class='mandatory'&gt;*&lt;/b&gt;"></asp:Label>
+            </td>
+        </tr>
+        <tr class="even">
+            <td>
+                <asp:DropDownList ID="ddlCourseCategry" runat="server" AutoPostBack="True" Height="22px"
+                    OnSelectedIndexChanged="ddlCourseCategry_SelectedIndexChanged" SkinID="ddl250">
+                    <asp:ListItem Value="0">--Select One--</asp:ListItem>
+                </asp:DropDownList>
+            </td>
+            <td>
+                <asp:UpdatePanel ID="UpdatePanel3" runat="server">
+                    <ContentTemplate>
+                        <asp:DropDownList ID="ddlCourseName" runat="server" AutoPostBack="True" Height="22px"
+                            OnSelectedIndexChanged="ddlCourseName_SelectedIndexChanged" SkinID="ddl250">
+                            <asp:ListItem Value="0">--Select One--</asp:ListItem>
+                        </asp:DropDownList>
+                    </ContentTemplate>
+                    <Triggers>
+                        <asp:AsyncPostBackTrigger ControlID="ddlCourseCategry" EventName="SelectedIndexChanged" />
+                    </Triggers>
+                </asp:UpdatePanel>
+            </td>
+            <td>
+                <asp:DropDownList ID="ddlRegionalCentre" runat="server" Height="22px" SkinID="ddl250">
+                    <asp:ListItem Value="0">--Select One--</asp:ListItem>
+                </asp:DropDownList>
+            </td>
+        </tr>
+        <tr id="TrExamHead" runat="server">
+            <td>
+                <asp:Label ID="Label5" runat="server" SkinID="CaptionLabel" Text="Exam Cycle &lt;b class='mandatory'&gt;*&lt;/b&gt;"></asp:Label>
+            </td>
+            <td>
+                <asp:Label ID="Label6" runat="server" SkinID="CaptionLabel" Text="Exam Year &lt;b class='mandatory'&gt;*&lt;/b&gt;"></asp:Label>
+            </td>
+            <td>
+                <asp:Label ID="Label7" runat="server" SkinID="CaptionLabel" Text="Exam Name &lt;b class='mandatory'&gt;*&lt;/b&gt;"></asp:Label>
+            </td>
+        </tr>
+        <tr id="TrExamInput" runat="server" class="even">
+            <td>
+                <asp:UpdatePanel ID="UpdatePanel4" runat="server">
+                    <ContentTemplate>
+                        <asp:DropDownList ID="ddlExamCycle" runat="server" AutoPostBack="True" Height="22px"
+                            OnSelectedIndexChanged="ddlExamCycle_SelectedIndexChanged" SkinID="ddl250">
+                            <asp:ListItem Value="0">--Select One--</asp:ListItem>
+                        </asp:DropDownList>
+                    </ContentTemplate>
+                    <Triggers>
+                        <asp:AsyncPostBackTrigger ControlID="ddlCourseName" EventName="SelectedIndexChanged" />
+                    </Triggers>
+                </asp:UpdatePanel>
+            </td>
+            <td>
+                <asp:UpdatePanel ID="UpdatePanel7" runat="server">
+                    <ContentTemplate>
+                        <asp:DropDownList ID="ddlExamYear" runat="server" SkinID="ddl250" AutoPostBack="true"
+                            OnSelectedIndexChanged="ddlExamYear_SelectedIndexChanged">
+                            <asp:ListItem Value="0">--Select One--</asp:ListItem>
+                        </asp:DropDownList>
+                    </ContentTemplate>
+                    <Triggers>
+                        <asp:AsyncPostBackTrigger ControlID="ddlExamCycle" EventName="SelectedIndexChanged" />
+                    </Triggers>
+                </asp:UpdatePanel>
+            </td>
+            <td>
+                <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+                    <ContentTemplate>
+                        <asp:DropDownList ID="ddlExamName" runat="server" SkinID="ddl250">
+                            <asp:ListItem Value="0">--Select One--</asp:ListItem>
+                        </asp:DropDownList>
+                    </ContentTemplate>
+                    <Triggers>
+                        <asp:AsyncPostBackTrigger ControlID="ddlExamYear" EventName="SelectedIndexChanged" />
+                    </Triggers>
+                </asp:UpdatePanel>
+            </td>
+        </tr>
+    </table>
+    <div style="text-align: right; margin-top: 10px">
+        <asp:UpdatePanel runat="server" ID="Panel">
+            <ContentTemplate>
+                <asp:Button ID="btnAllocate" runat="server" Text="Allocate Centre" OnClientClick="return Validate();"
+                    OnClick="btnAllocate_Click" />
+            </ContentTemplate>
+        </asp:UpdatePanel>
+    </div>
+    <div>
+        <asp:UpdateProgress ID="UpdateProgress1" runat="server">
+            <ProgressTemplate>
+                <div style = "position: fixed;z-index: 999;height: 100%;width: 100%;top: 0;background-color: Black;filter: alpha(opacity=60);opacity: 0.6;-moz-opacity: 0.8;">
+                    <div style = "z-index: 1000; margin: 300px auto; padding: 10px; width: 130px;background-color: White;border-radius: 10px;filter: alpha(opacity=100); opacity: 1; -moz-opacity: 1;">
+                        <img src="../images/indicator.gif" />
+                    </div>
+                </div>
+            </ProgressTemplate>
+        </asp:UpdateProgress>
+    </div>
+</asp:Content>
+<asp:Content ID="Content6" ContentPlaceHolderID="cphNavigation" runat="Server">
+</asp:Content>
+<asp:Content ID="Content7" ContentPlaceHolderID="cthRightPannel" runat="Server">
+</asp:Content>

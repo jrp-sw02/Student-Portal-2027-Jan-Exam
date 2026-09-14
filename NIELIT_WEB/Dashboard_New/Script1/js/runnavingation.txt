@@ -1,0 +1,40 @@
+<style type="text/css">
+	.navbar{
+		margin-top: 100px;
+       background-color: orangered;
+	}
+.navbar-default .navbar-nav > li > a {
+  color: black;
+}
+  .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+  color: black;
+}  
+</style>
+
+#69899f
+#d7e2e9
+
+  <nav class="navbar navbar-default" role="navigation" style="background-color:orangered">
+
+       <div class="collapse navbar-collapse" id="example-navbar-collapse" >
+            <ul class="nav navbar-nav"  style="background-color:orangered">
+                 <li class="active" style="background-color:orangered; Background:white " ><a href="#">HTML</a></li>
+                 <li style="background-color:orangered"><a href="#1">HTML5</a></li>
+                <li class="dropdown" style="background-color:orangered">
+                  <a href="#2" class="dropdown-toggle" data-toggle="dropdown">
+                     CSS 
+                     <b class="caret"></b>
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li><a href="#3">CSS3</a></li>
+                     <li><a href="#4">Bootstrap</a></li>
+                     <li><a href="#5">PHP</a></li>
+                     <li class="divider"></li>
+                     <li><a href="#">JAVA</a></li>
+                     <li class="divider"></li>
+                     <li><a href="#">SQL</a></li>
+                  </ul>
+               </li>
+            </ul>
+         </div>
+      </nav>

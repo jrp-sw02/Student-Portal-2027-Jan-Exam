@@ -1,0 +1,117 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="DispSqlData.aspx.cs" Inherits="DispSqlData"  Debug="false" %>
+
+<%@ Register Src="UserControl/PagingBar.ascx" TagName="PagingBar" TagPrefix="uc3" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+</head>
+<body style="background-color:#ffffff">
+    <form id="form1" runat="server">
+    <script type="text/javascript">
+        function getCheckedRadio() {
+            var radioButtons = document.getElementsByName("rdBtnSelection");
+            for (var x = 0; x < radioButtons.length; x++) {
+                if (radioButtons[x].checked) {
+                    if (radioButtons[x].id.indexOf('0') > 0) {
+                        // alert(document.getElementById("<%= lblQueryType.ClientID %>").value);
+                        document.getElementById("<%= lblQueryType.ClientID %>").innerHTML = "Select Data";
+                    }
+
+                    else {
+                        // alert(document.getElementById("<%= lblQueryType.ClientID %>").value);
+                        document.getElementById("<%= lblQueryType.ClientID %>").innerHTML = "Delete/Insert/Update";
+                    }
+
+                }
+            }
+        }
+    </script>
+    <asp:ScriptManager ID="ScriptManager1" runat="server">
+    </asp:ScriptManager>
+    <div style="text-align: center; width: 100%;">
+        <center>
+            <table id="tblMain" runat='server' width="1000px">
+                <tr>
+                    <td align="center" style="width: 100%">
+                        <asp:Label ID="lblErrMsg" runat="server" ForeColor="red"></asp:Label>
+                    </td>
+                </tr>
+                <tr id="trLogin" runat="server" visible="true">
+                    <td align="center" style="width: 100%">
+                        <table border="0" cellpadding="0" cellspacing="0" style="width: 50%" id="tbllogin"
+                            runat="server">
+                            <tr>
+                                <td align="center" width="20%" style="height: 24px" valign="middle">
+                                    <strong>Password :</strong>
+                                </td>
+                                <td align="center" width="40%" style="height: 24px" valign="middle">
+                                    <asp:TextBox ID="txtPassword" runat="server" TextMode="Password"></asp:TextBox>
+                                </td>
+                                <td align="center" style="height: 24px" valign="middle">
+                                    <asp:Button ID="btnLogin" runat="server" Text="Login" OnClick="btnLogin_Click" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr id="trQuery" runat="server" visible="false">
+                    <td align="left" style="width: 100%" id="tbldetail" runat="server">
+                        <table border="0" cellpadding="0" cellspacing="3" style="width: 100%">
+                            <tr>
+                                <td align="left" valign="top">
+                                    <asp:Label ID="lblHeader" Text="Display/Execute Utility" runat="server" CssClass="pageTitle"
+                                        Font-Bold="True"></asp:Label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="left" valign="top">
+                                    You want to :
+                                    <asp:RadioButtonList ID="rdBtnSelection" runat="server" RepeatDirection="Horizontal"
+                                        onchange="getCheckedRadio()">
+                                        <asp:ListItem Selected="True" Value="1">Select Data</asp:ListItem>
+                                        <asp:ListItem Value="2">Delete/Insert/Update</asp:ListItem>
+                                    </asp:RadioButtonList>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="left" valign="top">
+                                    <asp:Label ID="lblQueryType" runat="server" Text="Select Data"></asp:Label><br />
+                                    <asp:TextBox ID="txtQuery" runat="server" TextMode="multiLine" Rows="8" Columns="60"
+                                        Width="99%"></asp:TextBox>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right" valign="top" colspan="2">
+                                    <asp:Label EnableTheming="false" Style="float: left; color: Red; text-align: left;"
+                                        Width="200px" ID="lblCount" runat="server"></asp:Label>
+                                    <asp:Button ID="btnResetSelect" runat="server" Text="Reset" Font-Bold="True" OnClick="btnResetSelect_Click" />
+                                    <asp:Button ID="btnGo" runat="server" Text="Execute" Font-Bold="True" OnClick="btnGo_Click" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="divData" style="overflow: auto; border: 1px solid Red; height: 400px; width: 1000px;"
+                                        runat="server" visible="false">
+                                        <asp:DataGrid ID="dtgView" runat="server" PagerStyle-Visible="false" CellPadding="3"
+                                            Width="100%" CaptionAlign="Left" HeaderStyle-Font-Bold="true" HeaderStyle-HorizontalAlign="center"
+                                            BackColor="White" BorderColor="#999999" BorderStyle="Solid" BorderWidth="1px"
+                                            EnableTheming="True" ForeColor="Black" GridLines="Vertical">
+                                            <PagerStyle Visible="False" BackColor="#999999" ForeColor="Black" HorizontalAlign="Center" />
+                                            <AlternatingItemStyle BackColor="#CCCCCC" />
+                                            <FooterStyle BackColor="#CCCCCC" />
+                                            <HeaderStyle Font-Bold="True" HorizontalAlign="Center" BackColor="Black" ForeColor="White" />
+                                            <SelectedItemStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
+                                        </asp:DataGrid>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </center>
+    </div>
+    </form>
+</body>
+</html>

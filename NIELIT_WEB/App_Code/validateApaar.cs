@@ -1,0 +1,574 @@
+using EConnect.DAL;
+using EConnect.NIELIT;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Asn1.Ocsp;
+using RestSharp;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web;
+using ZXing.Aztec.Internal;
+
+/// <summary>
+/// Summary description for validateApaar
+/// </summary>
+public class validateApaar
+{
+
+
+    public validateApaar()
+    {
+        //
+        // TODO: Add constructor logic here
+        //
+    }
+    private static byte[] GetAes256Key(string key)
+    {
+        byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+
+        Array.Resize(ref keyBytes, 32); // AES-256 requires 32 bytes
+        return keyBytes;
+    }
+    public static string DecryptForApaar(string cipherTextBase64, string secretKey)
+    {
+        byte[] keyBytes = GetAes256Key(secretKey);
+
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = keyBytes;
+            aes.Mode = CipherMode.ECB;
+            aes.Padding = PaddingMode.PKCS7;
+
+            ICryptoTransform decryptor = aes.CreateDecryptor();
+
+            byte[] encryptedBytes = Convert.FromBase64String(cipherTextBase64);
+            byte[] decryptedBytes = decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+
+            string json = Encoding.UTF8.GetString(decryptedBytes);
+
+            return JsonConvert.DeserializeObject<string>(json);
+
+            //using (AesManaged aes = new AesManaged())
+            //{
+            //    aes.BlockSize = 128;
+            //    aes.KeySize = 256;
+            //    aes.Mode = CipherMode.ECB;
+            //   // aes.Padding = PaddingMode.PKCS7;
+
+            //    // Generate 32-byte key
+            //    byte[] keyBytes = generateAES256Key(secretKey);
+
+            //    // Ensure exactly 32 bytes
+            //    byte[] finalKey = new byte[32];
+            //    Array.Copy(keyBytes, finalKey, 32);
+
+            //    aes.Key = finalKey;
+
+            //    byte[] cipherBytes = Convert.FromBase64String(cipherTextBase64);
+
+            //    ICryptoTransform decryptor = aes.CreateDecryptor();
+
+            //    byte[] decryptedBytes =
+            //        decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+
+            //    return Encoding.UTF8.GetString(decryptedBytes);
+        }
+    }
+    public static string EncryptForApaar(string plainText, string secretKey)
+    {
+        byte[] keyBytes = GetAes256Key(secretKey);
+
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = keyBytes;
+            aes.Mode = CipherMode.ECB;
+            aes.Padding = PaddingMode.PKCS7;
+
+            ICryptoTransform encryptor = aes.CreateEncryptor();
+
+            byte[] dataBytes = Encoding.UTF8.GetBytes(plainText);
+            byte[] encryptedBytes = encryptor.TransformFinalBlock(dataBytes, 0, dataBytes.Length);
+
+            return Convert.ToBase64String(encryptedBytes);
+        }
+
+        //using (AesManaged aes = new AesManaged())
+        //{
+        //    aes.BlockSize = 128;
+        //    aes.KeySize = 256;
+        //    aes.Mode = CipherMode.ECB;
+        //   // aes.Padding = PaddingMode.PKCS7;
+
+        //    // Generate 32-byte key
+        //    byte[] keyBytes = generateAES256Key(secretKey);
+
+        //    // Ensure exactly 32 bytes
+        //    byte[] finalKey = new byte[32];
+        //    Array.Copy(keyBytes, finalKey, 32);
+
+        //    aes.Key = finalKey;
+
+        //    ICryptoTransform encryptor = aes.CreateEncryptor();
+
+        //    byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+
+        //    byte[] cipherBytes =
+        //        encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+
+        //    return Convert.ToBase64String(cipherBytes);
+        //}
+    }
+
+
+    public class ApaarAPIRequest
+    {
+        public string apaar_id { get; set; }
+        public string aadhaar_name { get; set; }
+        public string year_of_birth { get; set; }
+        public string gender { get; set; }
+        public string txn_id { get; set; }
+        public bool is_provider_present { get; set; }
+        public ProviderArtifact provider_artifact { get; set; }
+    }
+
+    public class ProviderArtifact
+    {
+        public Provider provider { get; set; }
+    }
+
+    public class Provider
+    {
+        public string name { get; set; }
+        public string authentication_mode { get; set; }
+        public string authentication_id_no { get; set; }
+        public string consent_relation { get; set; }
+        public string consent_date { get; set; }
+        public string consent_time { get; set; }
+        public string consent_place { get; set; }
+    }
+
+    public static string ConvertApaarDatatoJSONandEncrypt(
+    string apaarId,
+    string aadhaarName,
+    string dobText,
+    string gender,
+    string providerName,
+    string ProviderAuthMode,
+    string providerUID,
+        string consentRelation,
+        string consentPlace,
+    string declText,
+    out long apaarRequestId
+)
+    {
+        try
+        {
+            DateTime dob = Convert.ToDateTime(dobText);
+
+            int age = DateTime.Today.Year - dob.Year;
+
+            if (dob.Date > DateTime.Today.AddYears(-age))
+            {
+                age--;
+            }
+
+            // default values
+            string name = "";
+            string authentication_mode = "";
+            string authentication_id_no = "";
+            string consent_relation = "";
+            string consent_date = "";
+            string consent_time = "";
+            string consent_place = "";
+            string txnId = "";
+
+
+            if (age >= 18)
+            {
+                name = aadhaarName;
+                authentication_mode = ProviderAuthMode;
+                authentication_id_no = apaarId;
+                consent_relation = consentRelation;
+                consent_date = DateTime.Today.ToString("dd/MM/yyyy");
+                consent_time = DateTime.Now.ToString("HH:mm:ss");
+                consent_place = consentPlace;
+            }
+            else
+            {
+                // Guardian data
+                name = providerName;
+                authentication_mode = ProviderAuthMode;
+                authentication_id_no = providerUID;
+                consent_relation = consentRelation;
+                consent_date = DateTime.Today.ToString("dd/MM/yyyy");
+                consent_time = DateTime.Now.ToString("HH:mm");
+                consent_place = consentPlace;
+            }
+
+            using (EConnectContext context = new EConnectContext())
+            {
+                ApaarRequest objapaarrequest = new EConnect.NIELIT.ApaarRequest();
+
+                objapaarrequest.apaarId = apaarId;
+
+                objapaarrequest.cname = aadhaarName;
+
+                objapaarrequest.genderID =
+                    gender.ToUpper() == "M" ? 1 :
+                    gender.ToUpper() == "F" ? 2 : 3;
+
+                objapaarrequest.dob = dob;
+
+
+                objapaarrequest.transactionID = "";
+
+                objapaarrequest.providerName = name;
+
+                objapaarrequest.authModeID =
+                    Convert.ToInt64(
+                        context.AuthMode
+                            .Where(a => a.authCode.ToLower() == ProviderAuthMode.ToLower())
+                            .Select(a => a.ID)
+                            .FirstOrDefault()
+                    );
+
+                objapaarrequest.authModeIDNo = authentication_id_no;
+
+                objapaarrequest.consentRelation = consent_relation;
+
+                objapaarrequest.consentDate = DateTime.Today;
+
+                objapaarrequest.consentTime =
+                    TimeSpan.Parse("15:33");
+
+                objapaarrequest.consentPlace = consent_place;
+
+                objapaarrequest.undertakingTextChecked = declText;
+
+
+                objapaarrequest.enterBy = 99;
+
+                objapaarrequest.enterDate = DateTime.Now;
+
+                context.ApaarRequest.Add(objapaarrequest);
+
+                context.SaveChanges();
+
+                apaarRequestId = objapaarrequest.ID;
+
+                // numeric date + time
+                string consentDateNumber = DateTime.Now.ToString("ddMMyyyy");
+                string consentTimeNumber = DateTime.Now.ToString("HHmmss");
+
+                // txn id = ApaarRequestID + date + time
+                txnId =
+                   apaarRequestId.ToString() +
+                   consentDateNumber +
+                   consentTimeNumber;
+
+                // UPDATE transactionID
+                objapaarrequest.transactionID = txnId;
+
+                context.SaveChanges();
+            }
+            if (consent_date.Contains("-"))
+                consent_date = consent_date.Replace('-', '/');
+
+            ApaarAPIRequest request = new ApaarAPIRequest
+            {
+                apaar_id = apaarId,
+
+                aadhaar_name = aadhaarName,
+
+                year_of_birth = dob.Year.ToString(),
+
+                gender = gender,
+
+                txn_id = txnId,
+
+                is_provider_present = true,
+
+                provider_artifact = new ProviderArtifact
+                {
+                    provider = new Provider
+                    {
+                        name = name,
+
+                        authentication_mode = authentication_mode,
+
+                        authentication_id_no = authentication_id_no,
+
+                        consent_relation = consent_relation,
+
+                        consent_date = consent_date,
+
+                        consent_time = consent_time,
+
+                        consent_place = consent_place
+                    }
+                }
+            };
+
+            //string json_data = "abc";
+            //// JsonConvert.SerializeObject(request);
+
+            //// token
+            //string token = getToken();
+            //token = "abc";
+
+            //if (string.IsNullOrEmpty(token))
+            //{
+            //    throw new Exception("Unable to generate token");
+            //}
+
+            //tokenV tokenvalue =
+            //    JsonConvert.DeserializeObject<tokenV>(token);
+
+            //// encrypt
+            //string encryptedData =
+            //    EncryptForApaar(
+            //        json_data,
+            //        tokenvalue.encrypt_key
+            //    );
+            ////  string appKey = ConfigurationManager.AppSettings["APAAR_KEY"].ToString();
+            ////   string encKey = CryptoClass.DecryptForApaar(tokenvalue.encrypt_key, appKey);
+            //// api call
+            //string Encryptedresponse =
+            //    ValidateApaarDataNew(encryptedData, token);
+
+            //if (Encryptedresponse.Contains('['))
+            //{
+            //    string response = Encryptedresponse;//CryptoClass.DecryptForApaar(Encryptedresponse, tokenvalue.encrypt_key);
+            //    JArray arr = JArray.Parse(Encryptedresponse);
+            //    JObject obj = (JObject)arr[0];
+            //    return obj.ToString();
+            //}
+            //// save raw response
+
+
+            //JObject apiObj = JObject.Parse(Encryptedresponse);
+
+            //// Try encrypted field
+            //JToken encryptedToken = apiObj["encryptedApaarData"];
+
+            //if (encryptedToken == null)
+            //{
+            //    // API returned error JSON
+            //    return Encryptedresponse;
+            //}
+
+            //string encryptedPayload =
+            //    encryptedToken.ToString();
+
+            //if (string.IsNullOrWhiteSpace(encryptedPayload))
+            //{
+            //    return Encryptedresponse;
+            //}
+
+            //// check if valid base64 before decrypting
+            //bool isBase64 = true;
+
+            //try
+            //{
+            //    Convert.FromBase64String(encryptedPayload);
+            //}
+            //catch
+            //{
+            //    isBase64 = false;
+            //}
+
+            //if (!isBase64)
+            //{
+            //    return Encryptedresponse;
+            //}
+
+            // decrypt actual encrypted data
+            string rsp = "";
+            //DecryptForApaar(
+            //    encryptedPayload,
+            //    tokenvalue.encrypt_key
+            //);
+
+
+            // test response
+            rsp = @"{
+                ""status"": ""success"",
+                ""status_code"": ""200"",
+                ""message_code"": ""s-100"",
+                ""message"": ""record found successfully"",
+                ""abc_account_id"": ""628796197419"",
+                ""cname"": ""MANU PATHAK"",
+                ""gender"": ""M"",
+                ""DOB"": ""02/05/1990"",
+                ""created_date"": ""2021-07-29 12:10:02"",
+                ""university_name"": ""na"",
+                ""course_name"": ""na"",
+                ""program_name"": ""na"",
+                ""enrollment_no"": ""na"",
+                ""roll_no"": ""na"",
+                ""regn_no"": ""na""
+            }";
+
+            //            rsp = @"{
+            //    ""status"": ""fail"",
+            //    ""status_code"": ""400"",
+            //    ""message"": ""Records Not found"",
+            //    ""message_code"": ""E-006"",
+            //""txn_id"": ""123123132"",
+            //""apaar_id"": ""123412341234"",
+
+            //}";
+
+            return rsp;
+
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    public static string getToken()
+    {
+        string token = "";
+        try
+        {
+
+            string appKey = ConfigurationManager.AppSettings["APAAR_KEY"].ToString();
+            string clientID = ConfigurationManager.AppSettings["APAAR_CLIENT_ID"].ToString();
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            /*var options = new RestRequest ("https://nadapi.digilocker.gov.in")
+            {
+                MaxTimeout = -1,
+            };*/
+            var client = new RestClient("https://nadapi.digilocker.gov.in");
+            var request1 = new RestRequest("/v1/oauth?customer_id=" + clientID + "&customer_secret_key=" + appKey, Method.POST);
+            // string req = "/v1/AbcAccountsBasicDetails?abc_account_id=" + apaarid;
+            // request1.Parameters.Clear();
+            //request1.AddParameter("application/json", body, ParameterType.RequestBody);
+            request1.Timeout = 500000;
+            // string req=client+"/v1/oauth?customer_id="+clientID +"&customer_secret_key="+appKey;
+            // var request = new RestRequest(req, Method.POST);
+            request1.AddHeader("Accept", "application/json");
+            request1.AddHeader("Content-Type", "application/json");
+            IRestResponse response = client.Execute(request1);
+            /*client.ExecuteAsync<string>(request, (response) =>
+            {
+                callback(response.Data);
+            });*/
+            // await client.ExecuteAsync<string>(request,response );
+            token = response.Content;
+        }
+        catch (Exception ex)
+        {
+            token = ex.Message;
+        }
+        return token;
+    }
+
+
+    public static string getApaarData(string apaarid, string token)
+    {
+        string ApaarData = "";
+        try
+        {
+            var body = new
+            {
+                abc_account_id = apaarid
+            };
+            tokenV tokenvalue = JsonConvert.DeserializeObject<tokenV>(token);
+            // using System.Net;
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            // Use SecurityProtocolType.Ssl3 if needed for compatibility reasons
+            var client = new RestClient("https://nadapi.digilocker.gov.in"); ;
+            //var client = new RestClient(options);
+            var request1 = new RestRequest("/v1/AbcAccountsBasicDetails?abc_account_id=" + apaarid, Method.POST);
+            // string req = "/v1/AbcAccountsBasicDetails?abc_account_id=" + apaarid;
+            request1.Parameters.Clear();
+            request1.AddParameter("application/json", body, ParameterType.RequestBody);
+            request1.Timeout = 500000;
+            //var request = new RestRequest(req, Method.POST);
+            string auth = "Bearer " + tokenvalue.access_token;
+            request1.AddHeader("Authorization", auth);
+            IRestResponse response = client.Execute(request1);
+            ApaarData = response.Content;
+        }
+        catch (Exception ex)
+        {
+            ApaarData = "error";
+        }
+        return ApaarData;
+
+
+    }
+    public static string ValidateApaarDataNew(string encryptedData, string token)
+    {
+        string ApaarData = "";
+
+        try
+        {
+            var body = new
+            {
+                encryptedApaarData = encryptedData
+            };
+
+            tokenV tokenvalue =
+                JsonConvert.DeserializeObject<tokenV>(token);
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            var client =
+                new RestClient("https://nadapi.digilocker.gov.in");
+            // string appKey = ConfigurationManager.AppSettings["APAAR_KEY"].ToString();
+
+            var request =
+                new RestRequest("/v1/VerifyApaar", Method.POST);
+            request.AddHeader("'X-APISETU-APIKEY:", tokenvalue.encrypt_key);
+            // request.AddHeader("Accept", "application/json");
+
+            request.AddHeader("ContentType", "application/json");
+
+            request.Parameters.Clear();
+            request.AddParameter(
+                "application/json",
+                JsonConvert.SerializeObject(body),
+                ParameterType.RequestBody
+            );
+            request.Timeout = 500000;
+
+            // string auth = "Bearer " + tokenvalue.access_token;
+            string auth = "Bearer " + tokenvalue.access_token;
+
+            request.AddHeader("Authorization", auth);
+            //  request.AddHeader("Content-Type", "application/json");
+
+            IRestResponse response = client.Execute(request);
+
+            ApaarData = response.Content;
+        }
+        catch (Exception ex)
+        {
+            ApaarData = ex.Message;
+        }
+
+        return ApaarData;
+    }
+
+
+
+
+    public class tokenV
+    {
+        public string access_token;
+        public string encrypt_key;//added on 11052026 
+    }
+
+}

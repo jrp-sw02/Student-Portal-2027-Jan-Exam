@@ -1,0 +1,15 @@
+<table>
+	<tr class="head1">
+		<th align="center" colspan="14" width="100%"> UnUploaded Data</th>
+	</tr><tr class="head1">
+		<th align="center" colspan="14" width="100%"> Generated on: Wednesday, July 16, 2025</th>
+	</tr><tr class="head1">
+		<th align="center" width="1%">#</th><th align="center" width="10%">Id</th><th align="center" width="15%">School Code</th><th align="center" width="5%">Class</th><th align="center" width="15%">Roll Number</th><th align="center" width="15%">Field 4</th><th align="center" width="15%">Field 5</th><th align="center" width="20%">Name</th><th align="center" width="20%">Date of Birth</th><th align="center" width="5%">Reason</th>
+	</tr><tr class="gdalternate1">
+		<td align="center" width="1%">1</td><td align="left" width="4%">10535</td><td align="center" width="5%">asdf</td><td align="center" width="5%">45</td><td align="center" width="5%">2</td><td align="left" width="4%">asdf1</td><td align="left" width="4%">upmsp-10001</td><td align="center" width="5%">Amit</td><td align="center" width="20%">5/10/2002 12:00:00 AM</td><td align="center" width="15%">Invalid Board - Only alphabets and spaces allowed</td>
+	</tr><tr class="gdrow1">
+		<td align="center" width="1%">2</td><td align="left" width="4%">10537</td><td align="center" width="5%">asdf</td><td align="center" width="5%">45</td><td align="center" width="5%">2</td><td align="left" width="4%">asdf</td><td align="left" width="4%">upmsp-10001</td><td align="center" width="5%">Amit</td><td align="center" width="20%">5/12/2002 12:00:00 AM</td><td align="center" width="15%">Record already exist.</td>
+	</tr><tr class="gdalternate1">
+		<td align="center" width="1%">3</td><td align="left" width="4%">10538</td><td align="center" width="5%">asdf</td><td align="center" width="5%">45</td><td align="center" width="5%">2</td><td align="left" width="4%">asdf</td><td align="left" width="4%">upmsp-10001</td><td align="center" width="5%">Amit</td><td align="center" width="20%">5/13/2002 12:00:00 AM</td><td align="center" width="15%">Record already exist.</td>
+	</tr>
+</table>

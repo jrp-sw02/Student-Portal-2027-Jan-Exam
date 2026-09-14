@@ -1,0 +1,1166 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Objects;
+using System.Data.OleDb;
+using System.IO;
+using System.Linq;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using EConnect;
+using EConnect.DAL;
+using EConnect.NIELIT;
+using EConnect.URM;
+using EConnect.Utils.Data;
+using System.Data .SqlClient ;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using iTextSharp.text.html.simpleparser;
+using System.Web;
+using System.Configuration;
+using System.Collections.Generic;
+using System.Web;
+using System.Transactions;
+using EConnect.Utils.Common;
+using System.Drawing;
+
+public partial class rptSchoolProject : BasePage
+{
+    Table tbl = new Table();
+    
+    EConnectContext context;
+    UserType loginUserType;
+    Int64 entityID = 0;
+    Int32 applicantTypeID = 0;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            //if (!IsSessionAlive())
+            //{
+            //    Response.Redirect("~/index.aspx");
+            //}
+            //loginUserType = (UserType)Session["UserType"];
+            //entityID = Convert.ToInt64(Session["EntityID"]);
+            if (!Page.IsPostBack)
+            {
+                FillCategories();
+                FillCourses();
+                FillExamCycle();
+                FillSessionExam();
+              
+                tbl.CssClass = "sample3";
+                tbl.BorderStyle  = BorderStyle .Solid ;
+                
+                
+                tbl.CellPadding = 2;
+                tbl.CellSpacing = 1;
+                tbl.Width = Unit.Percentage(100);
+                
+              //  divReportData.Controls.Add(tbl);
+                
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+    protected void ShowTableHeader()
+    {
+        if (ddlcourse.SelectedValue.ToString().Equals("0"))
+            return;
+
+        if (ddlcoursecategory.SelectedValue.ToString().Equals("0"))
+            return;
+
+        if (ddlExamCycle.SelectedValue.ToString().Equals("0"))
+            return;
+
+        if (ddlSessionExam.SelectedValue.ToString().Equals("0"))
+            return;
+      
+        try
+        {
+            TableHeaderRow th1 = new TableHeaderRow();
+            th1.CssClass = "head1";
+
+            TableHeaderCell tc1 = new TableHeaderCell();
+            tc1.Width = Unit.Percentage(100);
+        
+            
+            tc1.ColumnSpan = 15;
+            tc1.Text = "Report of Students Applied for Online Protsahan Puraskar in " + ddlcourse.SelectedItem.Text + " Course for " + ddlSessionExam.SelectedItem.Text + " Session";
+               
+            tc1.HorizontalAlign = HorizontalAlign.Center;
+            th1.Cells.Add(tc1);
+
+            tbl.Rows.Add(th1);
+            
+            TableHeaderRow th2 = new TableHeaderRow();
+            th2.CssClass = "head1";
+
+            TableHeaderCell tc2 = new TableHeaderCell();
+            tc2.Width = Unit.Percentage(100);
+                     
+            tc2.ColumnSpan = 15;
+            tc2.Text = "Report Generated on: " + System .DateTime .Now.ToLongDateString ();
+            tc2.HorizontalAlign = HorizontalAlign.Right;
+            th2.Cells.Add(tc2);
+
+            tbl.Rows.Add(th2);
+
+           
+            TableHeaderRow th = new TableHeaderRow();
+            th.CssClass = "head1";
+
+            TableHeaderCell tcCol = new TableHeaderCell();
+            tcCol.Width = Unit.Percentage(1);
+            tcCol.Text = "#";
+            tcCol.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol);
+
+        
+            TableHeaderCell tcCol2 = new TableHeaderCell();
+            tcCol2.Width = Unit.Percentage(4);
+            tcCol2.Text = "Exam Cycle";
+            tcCol2.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol2);
+
+           
+            TableHeaderCell tcCol3 = new TableHeaderCell();
+            tcCol3.Width = Unit.Percentage(5);
+            tcCol3.Text = "Regn No.";
+            tcCol3.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol3);
+
+            TableCell tdRow113 = new TableCell();
+            tdRow113.Width = Unit.Percentage(5);
+            tdRow113.Text = "Regn Date";
+            tdRow113.HorizontalAlign = HorizontalAlign.Center;
+
+            th.Cells.Add(tdRow113);
+
+            TableHeaderCell tcCol4 = new TableHeaderCell();
+            tcCol4.Width = Unit.Percentage(25);
+            tcCol4.Text = "Name";
+            tcCol4.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol4);
+
+            TableHeaderCell tcCol5 = new TableHeaderCell();
+            tcCol5.Width = Unit.Percentage(15);
+            tcCol5.Text = "Parent / Guardian Name";
+            tcCol5.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol5);
+
+            TableHeaderCell tcCol6 = new TableHeaderCell();
+            tcCol6.Width = Unit.Percentage(5);
+            tcCol6.Text = "Date of Birth";
+            tcCol6.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol6);
+
+            TableHeaderCell tcCol7 = new TableHeaderCell();
+            tcCol7.Width = Unit.Percentage(5);
+            tcCol7.Text = "Gender";
+            tcCol7.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol7);
+
+            TableHeaderCell tcCol8 = new TableHeaderCell();
+            tcCol8.Width = Unit.Percentage(5);
+            tcCol8.Text = "Caste";
+            tcCol8.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol8);
+
+            TableHeaderCell tcCol9 = new TableHeaderCell();
+            tcCol9.Width = Unit.Percentage(5);
+            tcCol9.Text = "Physically Handicapped";
+            tcCol9.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol9);
+
+            TableHeaderCell tcCol10 = new TableHeaderCell();
+            tcCol10.Width = Unit.Percentage(10);
+            tcCol10.Text = "Exams Appeared";
+            tcCol10.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol10);
+
+            TableHeaderCell tcCol11 = new TableHeaderCell();
+            tcCol11.Width = Unit.Percentage(10);
+            tcCol11.Text = "Exams Passed";
+            tcCol11.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol11);
+
+            TableHeaderCell tcCol12 = new TableHeaderCell();
+            tcCol12.Width = Unit.Percentage(5);
+            tcCol12.Text = "Verifcation Status";
+            tcCol12.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol12);
+
+
+            TableHeaderCell tcCol13 = new TableHeaderCell();
+            tcCol13.Width = Unit.Percentage(5);
+            tcCol13.Text = "Rejection Reason(if rejected)";
+            tcCol13.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol13);
+
+            TableHeaderCell tcCol14 = new TableHeaderCell();
+            tcCol14.Width = Unit.Percentage(5);
+            tcCol14.Text = "Application Status";
+            tcCol14.HorizontalAlign = HorizontalAlign.Center;
+            th.Cells.Add(tcCol14);
+
+
+            tbl.Rows.Add(th);
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+    public DataTable PreviousExamRecordView(Int64 regno, Int64 CandidateID)
+    {
+        string constr = ConfigurationManager.ConnectionStrings["EConnectContext"].ConnectionString;
+        DataTable myDt = new DataTable();
+        using (SqlConnection con = new SqlConnection(constr))
+        {
+            using (SqlCommand cmd = new SqlCommand("getExamCandForPuraskarRecordView", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+               
+                cmd.Parameters.Add(new SqlParameter("@Regno", SqlDbType.BigInt));
+                cmd.Parameters["@Regno"].Value = regno;
+                cmd.Parameters.Add(new SqlParameter("@CandidateID", SqlDbType.BigInt));
+                cmd.Parameters["@CandidateID"].Value = CandidateID;
+                //cmd.Parameters.Add(new SqlParameter("@pExamID", SqlDbType.BigInt));
+                //cmd.Parameters["@pExamID"].Value = ExamID;
+                //cmd.Parameters.Add(new SqlParameter("@Lvlcode", SqlDbType.VarChar));
+                //cmd.Parameters["@Lvlcode"].Value = levelcode;
+                cmd.Parameters.Add(new SqlParameter("@View", SqlDbType.Int));
+                cmd.Parameters["@View"].Value = 2;
+                con.Open();
+                using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                {
+                    sda.Fill(myDt);
+                }
+            }
+        }
+        return myDt;
+    }
+    public DataTable FillGridViewRecord()
+    {
+        string constr = ConfigurationManager.ConnectionStrings["EConnectContext"].ConnectionString;
+        DataTable myDt = new DataTable();
+        using (SqlConnection con = new SqlConnection(constr))
+        {
+            using (SqlCommand cmd = new SqlCommand("getExamCandForPuraskarRecordView", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.Add(new SqlParameter("@Regno", SqlDbType.BigInt));
+                cmd.Parameters["@Regno"].Value = 1;
+                cmd.Parameters.Add(new SqlParameter("@CandidateID", SqlDbType.BigInt));
+                cmd.Parameters["@CandidateID"].Value = 1;
+                //cmd.Parameters.Add(new SqlParameter("@pExamID", SqlDbType.BigInt));
+                //cmd.Parameters["@pExamID"].Value = ExamID;
+                //cmd.Parameters.Add(new SqlParameter("@Lvlcode", SqlDbType.VarChar));
+                //cmd.Parameters["@Lvlcode"].Value = levelcode;
+                cmd.Parameters.Add(new SqlParameter("@View", SqlDbType.Int));
+                cmd.Parameters["@View"].Value = 1;
+                con.Open();
+                using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                {
+                    sda.Fill(myDt);
+                }
+            }
+        }
+        return myDt;
+    }
+   // protected void ShowData()
+   // {      
+   //     try
+   //     {
+   //         String PreviousExamAppeared = "", PreviousExamPassed = "", PExamCycle="";
+   //         ShowTableHeader();
+
+   //         if (ddlcourse.SelectedValue.ToString().Equals("0"))
+   //         {
+   //             ShowAlert("Select Course");
+   //             return;
+   //         }
+
+   //         if (ddlcoursecategory.SelectedValue.ToString().Equals("0"))
+   //         {
+   //             ShowAlert("Select Course Type");
+   //             return;
+   //         }
+
+   //         if (ddlExamCycle.SelectedValue.ToString().Equals("0"))
+   //         {
+   //             ShowAlert("Select Exam Cycle");
+   //             return;
+   //         }
+
+   //         if (ddlSessionExam.SelectedValue.ToString().Equals("0"))
+   //             return;
+
+          
+   //         Int64 gtot = 0;
+            
+   //         EConnect.Connections.SqlCon con = new EConnect.Connections.SqlCon();
+   //         //SqlCommand scCommand = new SqlCommand("getExamCandForPuraskar", new SqlConnection(con.ConnectionString));
+   //         //scCommand.CommandType = CommandType.StoredProcedure;
+   //         //scCommand.Parameters.Add("@pExamID", SqlDbType.Int).Value = Convert.ToInt32(ddlSessionExam.SelectedValue);
+   //         //scCommand.Parameters.Add("@pVerificationStatus", SqlDbType.Int).Value = Convert.ToInt32(ddlVerificationStatus.SelectedValue);
+   //         SqlCommand scCommand = new SqlCommand("getExamCandForPuraskarRecordView", new SqlConnection(con.ConnectionString));
+   //         scCommand.CommandType = CommandType.StoredProcedure;
+   //         scCommand.Parameters.Add("@View", SqlDbType.Int).Value = 1;
+   //         scCommand.Parameters.Add("@Regno", SqlDbType.Int).Value = 1;
+   //         scCommand.Parameters.Add("@CandidateID", SqlDbType.Int).Value = 1;
+   //         scCommand.CommandTimeout = 50000;
+   //         if (scCommand.Connection.State == ConnectionState.Closed)
+   //         {
+   //             scCommand.Connection.Open();
+   //         }
+
+   //         SqlDataAdapter da = new SqlDataAdapter(scCommand);
+   //         DataSet ds = new DataSet();
+
+   //         da.Fill(ds);
+
+   //         if (ds.Tables[0].Rows.Count > 0)
+   //         {
+   //             int i;
+   //             for (i = 0; i < ds.Tables[0].Rows.Count; i++)
+   //             {
+   //                 TableRow tr = new TableRow();
+   //                 if (i % 2 == 0)
+   //                     tr.CssClass = "gdalternate1";
+   //                 else
+   //                     tr.CssClass = "gdrow1";
+
+   //                 PreviousExamAppeared = "";
+   //                 PreviousExamPassed = "";
+   //                 PExamCycle = "";
+   //             TableCell tdRow = new TableCell();
+   //             tdRow.Width = Unit.Percentage(1);
+   //             tdRow.Text = (i+1).ToString();
+   //             tdRow.HorizontalAlign = HorizontalAlign.Center;
+   //             tr.Cells.Add(tdRow);
+
+
+   //             TableCell tdRow2 = new TableCell();
+   //             tdRow2.Width = Unit.Percentage(4);
+   //             tdRow2.Text = ds.Tables[0].Rows[i]["ExamCycle"].ToString();
+   //             tdRow2.HorizontalAlign = HorizontalAlign.Left;
+
+   //             tr.Cells.Add(tdRow2);
+
+                
+   //             TableCell tdRow3 = new TableCell();
+   //             tdRow3.Width = Unit.Percentage(5);
+   //             tdRow3.Text = ds.Tables[0].Rows[i]["RegnNo"].ToString();
+   //             tdRow3.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow3);
+
+              
+
+   //            TableCell tdRow16 = new TableCell();
+   //            tdRow16.Width = Unit.Percentage(5);
+   //            tdRow16.Text = Convert.ToDateTime(ds.Tables[0].Rows[i]["RegnNoDate"]).ToString("dd/MMM/yyyy");
+   //            tdRow16.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow16); 
+
+   //            TableCell tdRow4 = new TableCell();
+   //            tdRow4.Width = Unit.Percentage(25);
+   //            tdRow4.Text = ds.Tables[0].Rows[i]["Name"].ToString();
+   //            tdRow4.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow4);
+
+   //            TableCell tdRow5 = new TableCell();
+   //            tdRow5.Width = Unit.Percentage(15);
+   //            tdRow5.Text = ds.Tables[0].Rows[i]["ParentGuardianName"].ToString();
+   //            tdRow5.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow5);
+
+   //            TableCell tdRow6 = new TableCell();
+   //            tdRow6.Width = Unit.Percentage(5);
+   //            tdRow6.Text = Convert.ToDateTime(ds.Tables[0].Rows[i]["DateOfBirth"]).ToString("dd/MMM/yyyy");
+   //            tdRow6.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow6); 
+
+   //            TableCell tdRow7 = new TableCell();
+   //            tdRow7.Width = Unit.Percentage(5);
+   //            tdRow7.Text = ds.Tables[0].Rows[i]["Gender"].ToString();
+   //            tdRow7.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow7);
+
+   //            TableCell tdRow8 = new TableCell();
+   //            tdRow8.Width = Unit.Percentage(5);
+   //            tdRow8.Text = ds.Tables[0].Rows[i]["Caste"].ToString();
+   //            tdRow8.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow8);
+
+   //            TableCell tdRow9 = new TableCell();
+   //            tdRow9.Width = Unit.Percentage(5);
+   //            tdRow9.Text = ds.Tables[0].Rows[i]["isHandicapped"].ToString();
+   //            tdRow9.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow9);                  
+              
+   //            TableCell tdRow10 = new TableCell();
+   //            tdRow10.Width = Unit.Percentage(10);
+   //            tdRow10.Text = ds.Tables[0].Rows[i]["ExamAppeared"].ToString() ;
+   //            //tdRow10.HorizontalAlign = HorizontalAlign.Left;
+   //           // tr.Cells.Add(tdRow10);                    
+
+   //            TableCell tdRow11 = new TableCell();
+   //            tdRow11.Width = Unit.Percentage(10);
+   //            tdRow11.Text = ds.Tables[0].Rows[i]["ExamPassed"].ToString();
+   //            //tdRow11.HorizontalAlign = HorizontalAlign.Left;
+   //            //tr.Cells.Add(tdRow11);
+
+   //            Int64 regno = 0, candidateid = 0;
+   //            regno =Convert.ToInt64( ds.Tables[0].Rows[i]["RegnNo"].ToString());
+   //            candidateid = Convert.ToInt64(ds.Tables[0].Rows[i]["CandidateID"].ToString());              
+
+   //            using (DataTable dt = PreviousExamRecordView(regno, candidateid))
+   //            {
+   //                if (dt.Rows.Count > 0)
+   //                {                       
+   //                    int j;
+   //                    for (j = 0; j < dt.Rows.Count; j++)
+   //                    {                          
+   //                        PExamCycle = dt.Rows[j].Field<string>("PExamCycle");
+   //                        PreviousExamAppeared = dt.Rows[j].Field<string>("PExamAppeared");
+   //                        PreviousExamPassed = dt.Rows[j].Field<string>("PExamPassed");
+   //                        if (j==0)
+   //                        {
+   //                            tdRow10.Text = tdRow10.Text + "<br><br><b> <span style=\"color:Blue;\">PreviousExam </span> </b>" + "<br> <b>" + PExamCycle + "</b>" + " -- " + PreviousExamAppeared.ToString();
+   //                            tdRow11.Text = tdRow11.Text + "<br><br><b><span style=\"color:Blue;\">PreviousExam </span> </b>" + "<br> <b>" + PExamCycle + "</b>" + " -- " + PreviousExamPassed.ToString(); 
+   //                        }
+   //                        else
+   //                        {        
+   //                            tdRow10.Text = tdRow10.Text + "<br> <b>" + PExamCycle + "</b>"+" -- " + PreviousExamAppeared.ToString();
+   //                            tdRow11.Text = tdRow11.Text + "<br> <b>" + PExamCycle + "</b>" + " -- " + PreviousExamPassed.ToString();
+   //                        }                        
+   //                    }
+   //                }                  
+   //            }
+
+   //            tdRow10.HorizontalAlign = HorizontalAlign.Left;
+   //            tr.Cells.Add(tdRow10); // ExamAppeared add  row record
+
+   //            tdRow11.HorizontalAlign = HorizontalAlign.Left;
+   //            tr.Cells.Add(tdRow11); //ExamPassed add  row record
+                        
+
+   //            TableCell tdRow12 = new TableCell();
+   //            tdRow12.Width = Unit.Percentage(5);
+   //            tdRow12.Text = ds.Tables[0].Rows[i]["VerificationStatus"].ToString();
+   //            tdRow12.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow12);
+                             
+
+   //            TableCell tdRow13= new TableCell();
+   //            tdRow13.Width = Unit.Percentage(5);
+   //            tdRow13.Text = ds.Tables[0].Rows[i]["rejectionReason"].ToString();
+   //            tdRow13.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow13);
+
+              
+   //            TableCell tdRow14 = new TableCell();
+   //            tdRow14.Width = Unit.Percentage(5);
+   //            tdRow14.Text = ds.Tables[0].Rows[i]["ApplicationStatus"].ToString();
+   //            tdRow14.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow14);
+
+   //             tbl.Rows.Add(tr);
+             
+   //         }
+   //       // TableRow trGrand = new TableRow();
+           
+
+   //       // TableCell tCell1 = new TableCell();
+   //       // tCell1.Width = Unit.Percentage(1);
+         
+   //       // tCell1.HorizontalAlign = HorizontalAlign.Center;
+   //       // trGrand.Cells.Add(tCell1);
+
+
+   //       // TableCell tCell2 = new TableCell();
+   //       // tCell2.Width = Unit.Percentage(20);
+   //       // tCell2.Text = "Total---------------";
+   //       // tCell2.Font.Bold=true ;
+   //       // tCell2.HorizontalAlign = HorizontalAlign.Center;
+
+   //       // trGrand.Cells.Add(tCell2);
+
+
+
+   //       // TableCell tCell3 = new TableCell();
+   //       // tCell3.Width = Unit.Percentage(30);
+   //       // tCell3.Text = gtot.ToString().Trim ();
+   //       // tCell3.Font.Bold = true;
+   //       // tCell3.HorizontalAlign = HorizontalAlign.Center;
+           
+   //       //trGrand.Cells.Add(tCell3);
+
+   //       //tbl.Rows.Add(trGrand);
+   //       }
+   //     }
+   //     catch (Exception ex)
+   //     {
+   //         ShowAlert(ex.Message);
+   //     }
+                      
+   //}
+        
+   //protected void getData()
+   // {      
+   //     try
+   //     {
+   //         String PreviousExamAppeared = "", PreviousExamPassed = "", PExamCycle="";
+   //         ShowTableHeader();
+
+   //         if (ddlcourse.SelectedValue.ToString().Equals("0"))
+   //         {
+   //             ShowAlert("Select Course");
+   //             return;
+   //         }
+
+   //         if (ddlcoursecategory.SelectedValue.ToString().Equals("0"))
+   //         {
+   //             ShowAlert("Select Course Type");
+   //             return;
+   //         }
+
+   //         if (ddlExamCycle.SelectedValue.ToString().Equals("0"))
+   //         {
+   //             ShowAlert("Select Exam Cycle");
+   //             return;
+   //         }
+
+   //         if (ddlSessionExam.SelectedValue.ToString().Equals("0"))
+   //             return;
+
+          
+   //         Int64 gtot = 0;
+            
+   //         EConnect.Connections.SqlCon con = new EConnect.Connections.SqlCon();
+   //         //SqlCommand scCommand = new SqlCommand("getExamCandForPuraskar", new SqlConnection(con.ConnectionString));
+   //         //scCommand.CommandType = CommandType.StoredProcedure;
+   //         //scCommand.Parameters.Add("@pExamID", SqlDbType.Int).Value = Convert.ToInt32(ddlSessionExam.SelectedValue);
+   //         //scCommand.Parameters.Add("@pVerificationStatus", SqlDbType.Int).Value = Convert.ToInt32(ddlVerificationStatus.SelectedValue);
+   //         SqlCommand scCommand = new SqlCommand("getExamCandForPuraskarRecordView", new SqlConnection(con.ConnectionString));
+   //         scCommand.CommandType = CommandType.StoredProcedure;
+   //         scCommand.Parameters.Add("@View", SqlDbType.Int).Value = 1;
+   //         scCommand.Parameters.Add("@Regno", SqlDbType.Int).Value = 1;
+   //         scCommand.Parameters.Add("@CandidateID", SqlDbType.Int).Value = 1;
+   //         scCommand.CommandTimeout = 50000;
+   //         if (scCommand.Connection.State == ConnectionState.Closed)
+   //         {
+   //             scCommand.Connection.Open();
+   //         }
+
+   //         SqlDataAdapter da = new SqlDataAdapter(scCommand);
+   //         DataSet ds = new DataSet();
+
+   //         da.Fill(ds);
+
+   //         if (ds.Tables[0].Rows.Count > 0)
+   //         {
+   //             int i;
+   //             for (i = 0; i < ds.Tables[0].Rows.Count; i++)
+   //             {
+   //                 TableRow tr = new TableRow();
+   //                 if (i % 2 == 0)
+   //                     tr.CssClass = "gdalternate1";
+   //                 else
+   //                     tr.CssClass = "gdrow1";
+
+   //                 PreviousExamAppeared = "";
+   //                 PreviousExamPassed = "";
+   //                 PExamCycle = "";
+   //             TableCell tdRow = new TableCell();
+   //             tdRow.Width = Unit.Percentage(1);
+   //             tdRow.Text = (i+1).ToString();
+   //             tdRow.HorizontalAlign = HorizontalAlign.Center;
+   //             tr.Cells.Add(tdRow);
+
+
+   //             TableCell tdRow2 = new TableCell();
+   //             tdRow2.Width = Unit.Percentage(4);
+   //             tdRow2.Text = ds.Tables[0].Rows[i]["ExamCycle"].ToString();
+   //             tdRow2.HorizontalAlign = HorizontalAlign.Left;
+
+   //             tr.Cells.Add(tdRow2);
+
+                
+   //             TableCell tdRow3 = new TableCell();
+   //             tdRow3.Width = Unit.Percentage(5);
+   //             tdRow3.Text = ds.Tables[0].Rows[i]["RegnNo"].ToString();
+   //             tdRow3.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow3);
+
+              
+
+   //            TableCell tdRow16 = new TableCell();
+   //            tdRow16.Width = Unit.Percentage(5);
+   //            tdRow16.Text = Convert.ToDateTime(ds.Tables[0].Rows[i]["RegnNoDate"]).ToString("dd/MMM/yyyy");
+   //            tdRow16.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow16); 
+
+   //            TableCell tdRow4 = new TableCell();
+   //            tdRow4.Width = Unit.Percentage(25);
+   //            tdRow4.Text = ds.Tables[0].Rows[i]["Name"].ToString();
+   //            tdRow4.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow4);
+
+   //            TableCell tdRow5 = new TableCell();
+   //            tdRow5.Width = Unit.Percentage(15);
+   //            tdRow5.Text = ds.Tables[0].Rows[i]["ParentGuardianName"].ToString();
+   //            tdRow5.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow5);
+
+   //            TableCell tdRow6 = new TableCell();
+   //            tdRow6.Width = Unit.Percentage(5);
+   //            tdRow6.Text = Convert.ToDateTime(ds.Tables[0].Rows[i]["DateOfBirth"]).ToString("dd/MMM/yyyy");
+   //            tdRow6.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow6); 
+
+   //            TableCell tdRow7 = new TableCell();
+   //            tdRow7.Width = Unit.Percentage(5);
+   //            tdRow7.Text = ds.Tables[0].Rows[i]["Gender"].ToString();
+   //            tdRow7.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow7);
+
+   //            TableCell tdRow8 = new TableCell();
+   //            tdRow8.Width = Unit.Percentage(5);
+   //            tdRow8.Text = ds.Tables[0].Rows[i]["Caste"].ToString();
+   //            tdRow8.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow8);
+
+   //            TableCell tdRow9 = new TableCell();
+   //            tdRow9.Width = Unit.Percentage(5);
+   //            tdRow9.Text = ds.Tables[0].Rows[i]["isHandicapped"].ToString();
+   //            tdRow9.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow9);                  
+              
+   //            TableCell tdRow10 = new TableCell();
+   //            tdRow10.Width = Unit.Percentage(10);
+   //            tdRow10.Text = ds.Tables[0].Rows[i]["ExamAppeared"].ToString() ;
+   //            //tdRow10.HorizontalAlign = HorizontalAlign.Left;
+   //           // tr.Cells.Add(tdRow10);                    
+
+   //            TableCell tdRow11 = new TableCell();
+   //            tdRow11.Width = Unit.Percentage(10);
+   //            tdRow11.Text = ds.Tables[0].Rows[i]["ExamPassed"].ToString();
+   //            //tdRow11.HorizontalAlign = HorizontalAlign.Left;
+   //            //tr.Cells.Add(tdRow11);
+
+   //            //Int64 regno = 0, candidateid = 0;
+   //            //regno =Convert.ToInt64( ds.Tables[0].Rows[i]["RegnNo"].ToString());
+   //            //candidateid = Convert.ToInt64(ds.Tables[0].Rows[i]["CandidateID"].ToString());              
+
+   //            //using (DataTable dt = PreviousExamRecordView(regno, candidateid))
+   //            //{
+   //            //    if (dt.Rows.Count > 0)
+   //            //    {                       
+   //            //        int j;
+   //            //        for (j = 0; j < dt.Rows.Count; j++)
+   //            //        {                          
+   //            //            PExamCycle = dt.Rows[j].Field<string>("PExamCycle");
+   //            //            PreviousExamAppeared = dt.Rows[j].Field<string>("PExamAppeared");
+   //            //            PreviousExamPassed = dt.Rows[j].Field<string>("PExamPassed");
+   //            //            if (j==0)
+   //            //            {
+   //            //                tdRow10.Text = tdRow10.Text + "<br><br><b> <span style=\"color:Blue;\">PreviousExam </span> </b>" + "<br> <b>" + PExamCycle + "</b>" + " -- " + PreviousExamAppeared.ToString();
+   //            //                tdRow11.Text = tdRow11.Text + "<br><br><b><span style=\"color:Blue;\">PreviousExam </span> </b>" + "<br> <b>" + PExamCycle + "</b>" + " -- " + PreviousExamPassed.ToString(); 
+   //            //            }
+   //            //            else
+   //            //            {        
+   //            //                tdRow10.Text = tdRow10.Text + "<br> <b>" + PExamCycle + "</b>"+" -- " + PreviousExamAppeared.ToString();
+   //            //                tdRow11.Text = tdRow11.Text + "<br> <b>" + PExamCycle + "</b>" + " -- " + PreviousExamPassed.ToString();
+   //            //            }                        
+   //            //        }
+   //            //    }                  
+   //            //}
+
+   //            tdRow10.HorizontalAlign = HorizontalAlign.Left;
+   //            tr.Cells.Add(tdRow10); // ExamAppeared add  row record
+
+   //            tdRow11.HorizontalAlign = HorizontalAlign.Left;
+   //            tr.Cells.Add(tdRow11); //ExamPassed add  row record
+                        
+
+   //            TableCell tdRow12 = new TableCell();
+   //            tdRow12.Width = Unit.Percentage(5);
+   //            tdRow12.Text = ds.Tables[0].Rows[i]["VerificationStatus"].ToString();
+   //            tdRow12.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow12);
+                             
+
+   //            TableCell tdRow13= new TableCell();
+   //            tdRow13.Width = Unit.Percentage(5);
+   //            tdRow13.Text = ds.Tables[0].Rows[i]["rejectionReason"].ToString();
+   //            tdRow13.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow13);
+
+              
+   //            TableCell tdRow14 = new TableCell();
+   //            tdRow14.Width = Unit.Percentage(5);
+   //            tdRow14.Text = ds.Tables[0].Rows[i]["ApplicationStatus"].ToString();
+   //            tdRow14.HorizontalAlign = HorizontalAlign.Center;
+
+   //            tr.Cells.Add(tdRow14);
+
+   //             tbl.Rows.Add(tr);             
+   //         }         
+   //       }
+   //     }
+   //     catch (Exception ex)
+   //     {
+   //         ShowAlert(ex.Message);
+   //     }
+                      
+   //}
+   //protected void btnProcess_Click(object sender, EventArgs e)
+   //{
+
+   //    tbl.CssClass = "sample3";
+   //    tbl.CellPadding = 2;
+   //    tbl.CellSpacing = 1;
+   //    tbl.Width = Unit.Percentage(100);
+   //    //ShowData();       
+   //     //BindGridView();
+   //    lblheading.Visible = false;
+   //    gvMain.Visible = false;
+   //    lblError.Visible = false;
+   //}
+   //  protected void btnGenerate_Click(object sender, EventArgs e)
+   // {
+   
+   //     tbl.CssClass = "sample3";
+   //     tbl.CellPadding = 2;
+   //     tbl.CellSpacing = 1;
+   //     tbl.Width = Unit.Percentage(100);  
+   //     //ShowData();
+   //     //divReportData.Controls.Add(tbl);
+   //     //divReportData.Visible = true;
+   //     BindGridView();
+   // }
+     protected void OnSelectedIndexChanged(object sender, EventArgs e)
+     {      
+         GridViewRow row = gvMain.SelectedRow;
+         //Find label id from gridview cell data
+         Label lblRegno = row.FindControl("lblRegno") as Label;
+         Label lblcandidateid = row.FindControl("lblcandidateid") as Label;
+         Int64 candidateid = 0;
+         candidateid = Convert.ToInt64(lblcandidateid.Text);
+         Int64 RegistrationNo = Convert.ToInt64(lblRegno.Text);
+         Session["Regno"] = RegistrationNo.ToString();
+         Session["CandidateID"] = candidateid.ToString();
+         
+         string url = "../HO/Rpt/rptExamCandidateForPuraskar2.aspx";         
+         string name = "deep", address = "DL", state = "GG";
+
+         //ScriptManager.RegisterStartupScript(Page, Page.GetType(), "popup", "window.open('" + url + "','_blank')", true);
+         //ScriptManager.RegisterStartupScript(Page, Page.GetType(), "popup", "window.open('../PreviousExamDetailsForPuraskarCand.aspx?name=" + name + "&address=" + address + "&state=" + state + "' ,'_blank')", true);
+         ScriptManager.RegisterStartupScript(Page, Page.GetType(), "popup", "window.open('../Rpt/PreviousExamDetailsForPuraskarCand.aspx' ,'_blank')", true);
+     }  
+     protected void BindGridView()
+     {
+         try
+         {
+             using (DataTable dt = FillGridViewRecord())
+             {
+                 if (dt.Rows.Count > 0)
+                 {     
+                     var ApplicationData = (from p in dt.AsEnumerable()
+                                            select new
+                                            {
+                                                //ID = p.Field<Int64>("ID"),
+                                                //CandidateID = p.Field<Int64>("CandidateID"),
+                                                ExamCycle = p.Field<string>("ExamCycle"),
+                                                RegnNo = p.Field<Int64>("RegnNo"),
+                                                RegnDate = p.Field<DateTime>("RegnNoDate"),
+                                                Name = p.Field<string>("Name"),
+                                                ParentGuardianName = p.Field<string>("ParentGuardianName"),
+                                                DOB = p.Field<DateTime>("DateOfBirth"),
+                                                Gender = p.Field<string>("Gender"),
+                                                Caste = p.Field<string>("Caste"),
+                                                isHandicapped = p.Field<string>("isHandicapped"),
+                                                ExamAppeared = p.Field<string>("ExamAppeared"),
+                                                ExamPassed = p.Field<string>("ExamPassed"),
+                                                VerificationStatus = p.Field<string>("VerificationStatus"),
+                                                rejectionReason = p.Field<string>("rejectionReason"),
+                                                ApplicationStatus = p.Field<string>("ApplicationStatus"),
+                                                candidateid = p.Field<Int64>("CandidateID"),
+                                               // ExamId = p.Field<Int64>("ExamId"),                                                
+
+                                            });
+                    
+                     PagingBar1.Bind(ApplicationData, ref gvMain);
+                     uPnlGrid.Update();
+                     uPnlNavigation.Update();
+                     lblError.Visible = false;
+                     lblheading.Visible = true;
+                     gvMain.Visible = true;
+                     if (gvMain.Rows.Count <= 0)
+                     {
+                         lblError.Text = "No record found.";
+                         lblError.Visible = true;
+                         gvMain.Visible = false;
+                         lblheading.Visible = true;
+                     }
+                 }
+                 else
+                 {
+                     lblError.Text = "No record found.";
+                     lblError.Visible = true;
+                     gvMain.Visible = false;
+                     lblheading.Visible = true;
+                 }
+             }
+         }
+         catch (Exception ex)
+         {
+             throw ex;
+         }
+     }
+     protected void gvMain_Sorting(object sender, GridViewSortEventArgs e)
+     {
+         try
+         {
+             ViewState["SortField"] = e.SortExpression;
+             if (ViewState["SortOrder"].ToString() == "DESC")
+                 ViewState["SortOrder"] = "ASC";
+             else
+                 ViewState["SortOrder"] = "DESC";
+             BindGridView();
+         }
+         catch (Exception ex)
+         {
+             ShowAlert(ex.Message, true);
+         }
+     }
+     protected void gvMain_RowDataBound(object sender, GridViewRowEventArgs e)
+     {
+         try
+         {
+
+             if (e.Row.RowType == DataControlRowType.DataRow)
+             {
+                 //Encryption url of hypelink field
+                 HyperLink hl = (HyperLink)e.Row.Cells[1].Controls[0];
+                 string href = hl.NavigateUrl;
+                 if (!String.IsNullOrEmpty(Request.QueryString["ID"]))
+                 {
+                     href += "&ID=" + Request.QueryString["ID"].ToString();
+                 }              
+                 e.Row.Cells[0].Text = ((e.Row.RowIndex + 1) + (PagingBar1.CurrentPageSize * PagingBar1.CurrentPageIndex)).ToString();
+
+             }
+         }
+         catch (Exception ex)
+         {
+             throw ex;
+         }
+     }
+
+     protected void PageIndexChanged(Int32 NewPageIndex)
+     {
+         try
+         {
+             gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+             BindGridView();
+         }
+         catch (Exception ex)
+         {
+             ShowAlert(ex.Message, true);
+         }
+     } 
+    protected void ibExport_Click(object sender, ImageClickEventArgs e)
+    {
+        if (ddlcourse.SelectedValue.ToString().Equals("0"))
+            return;
+
+        if (ddlcoursecategory.SelectedValue.ToString().Equals("0"))
+            return;
+
+        if (ddlExamCycle.SelectedValue.ToString().Equals("0"))
+            return;
+        if (ddlSessionExam.SelectedValue.ToString().Equals("0"))
+            return;              
+
+        try
+        {
+            System.IO.StringWriter StringWrite = new System.IO.StringWriter();
+            Html32TextWriter htmlWrite;
+           
+                divReportData.Visible = true;
+                getData();
+                divReportData.Controls.Add(tbl);
+                Response.Clear();
+            
+            Response.AddHeader("content-disposition", "attachment;filename=StudentRegdReport.xls");
+            Response.Charset = "";
+            Response.ContentType = "application/vnd.xls";
+            htmlWrite = new Html32TextWriter(StringWrite);
+            htmlWrite.AddAttribute("border", "2");
+            divReportData.RenderControl(htmlWrite);
+            Response.Write(StringWrite.ToString());
+            Response.End();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+
+    }
+    protected void imgPDF_Click(object sender, ImageClickEventArgs e)
+    {
+        if (ddlcourse .SelectedValue.ToString ().Equals ("0"))
+            return;
+
+        if (ddlcoursecategory.SelectedValue.ToString().Equals("0"))
+            return;
+
+        if (ddlExamCycle.SelectedValue.ToString().Equals("0"))
+            return;
+        if (ddlSessionExam.SelectedValue.ToString().Equals("0"))
+            return;
+     
+          try
+        {        
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter hw = new HtmlTextWriter(sw);
+            hw.AddAttribute("border", "1");
+              hw.RenderBeginTag(HtmlTextWriterTag.Font );
+              hw.AddStyleAttribute(HtmlTextWriterStyle.FontSize , "9");
+
+            divReportData.Visible = true;
+            tbl.BorderStyle = BorderStyle .Solid ;
+            tbl.CssClass = "sample3";
+            tbl.CellPadding = 2;
+            tbl.CellSpacing = 1;
+            tbl.Width = Unit.Percentage(200);
+            
+                getData();
+                divReportData.Controls.Add(tbl);
+            
+            divReportData.RenderControl(hw);
+            hw.RenderEndTag();
+            Response.Clear();
+            StringReader sr = new StringReader(sw.ToString());
+           // Document pdfDoc = new Document(PageSize.A4, 5f, 5f, 5f, 0f);
+            Document pdfDoc = new Document(PageSize.A4.Rotate(), 5f, 5f, 5f, 0f);
+              
+            HTMLWorker htmlparser = new HTMLWorker(pdfDoc);
+            PdfWriter.GetInstance(pdfDoc, Response.OutputStream);
+            pdfDoc.Open();
+            htmlparser.Parse(sr);
+            pdfDoc.Close();
+            Response.ContentType = "application/pdf";
+            Response.AddHeader("content-disposition", "attachment;filename=StudentsRegdReport.pdf");
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            
+            Response.Write(pdfDoc);
+            Response.End();           
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+    protected void FillExamName()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                System.Web.UI.WebControls.ListItem lst = new System.Web.UI.WebControls.ListItem("--Select One--", "0");
+                Int32 ExamYear = Convert.ToInt32(ddlSessionExam .SelectedValue);
+                Int32 CourseID = Convert.ToInt32(ddlcourse.SelectedValue);
+                Int32 ExamCycleID = Convert.ToInt32(ddlExamCycle.SelectedValue);
+                var ExamName = (from p in context.CourseExamApplications
+                                join c in context.Exams on
+                                p.ExamID equals c.ID
+                                where p.Exam.ExamYear == ExamYear && p.CourseID == CourseID && c.DateOfPublishingOfResult != null && c.ExaminationCycleID == ExamCycleID
+                                orderby (c.Name) ascending
+                                select new { ValueField = p.Exam.ID, TextField = p.Exam.Name }).Distinct().ToList();
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlSessionExam, ExamName, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void FillExamYear()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                System.Web.UI.WebControls.ListItem lst = new System.Web.UI.WebControls.ListItem("--Select One--", "0");
+                Int32 ExamCycleID = Convert.ToInt32(ddlExamCycle.SelectedValue);
+                Int32 CourseID = Convert.ToInt32(ddlcourse.SelectedValue);
+                Int32 CourseCategoryID = Convert.ToInt32(ddlcoursecategory.SelectedValue);
+                Int32 currentyear = Convert.ToInt32(DateTime.Now.Year);
+                var examYear = (from p in context.Exams
+                                join q in context.CourseExamApplications
+                                on p.ID equals q.ExamID
+                                where (p.CourseID == CourseID && p.CourseCategoryID == CourseCategoryID && p.ExaminationCycleID == ExamCycleID && p.ExamYear >= currentyear && p.DateOfPublishingOfResult == null)
+                                orderby (p.ExamYear) descending
+                                select new { ValueField = p.ExamYear, TextField = p.ExamYear }).Distinct();
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlSessionExam, examYear, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void FillExamCycle()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                System.Web.UI.WebControls.ListItem lst = new System.Web.UI.WebControls.ListItem("--Select One--", "0");
+                int CourseID = Convert.ToInt32(ddlcourse.SelectedValue);
+                var ExamCycleList = from p in context.ExaminationCycles
+                                    where p.CourseID == CourseID
+                                    select new { ValueField = p.ID, TextField = p.Name };
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlExamCycle, ExamCycleList, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void FillCategories()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                Int32 CourseType = Convert.ToInt32(enmCourseType.CertificationCourse );
+                System.Web.UI.WebControls.ListItem lst = new System.Web.UI.WebControls.ListItem("--Select One--", "0");
+
+                var Category = (from s in context.CourseCategories
+                                join c in context.Courses on s.ID equals c.CourseCategoryID
+                                where c.CourseTypeID == CourseType && s.ID==1
+                                orderby (s.Name)
+                                select new { ValueField = s.ID, TextField = s.Name }).Distinct();
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlcoursecategory, Category, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+ 
+    protected void FillCourses()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                Int32 CourseType = Convert.ToInt32(enmCourseType.CertificationExam);
+                System.Web.UI.WebControls.ListItem lst = new System.Web.UI.WebControls.ListItem("--Select One--", "0");
+                int id = Convert.ToInt32(ddlcoursecategory.SelectedValue);
+                var CourseList = from p in context.Courses
+                                 where p.CourseCategoryID == id                                 
+                                 select new { ValueField = p.ID, TextField = p.Name };
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlcourse, CourseList, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
+    protected void FillSessionExam()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                System.Web.UI.WebControls.ListItem lst = new System.Web.UI.WebControls.ListItem("--Select One--", "0");
+                Int32 ExamCycleID = Convert.ToInt32(ddlExamCycle.SelectedValue);
+                Int32 CourseID = Convert.ToInt32(ddlcourse.SelectedValue);
+                Int32 CourseCategoryID = Convert.ToInt32(ddlcoursecategory.SelectedValue);
+                Int32 currentyear = Convert.ToInt32(DateTime.Now.Year);
+                var examYear = (from p in context.Exams 
+                               where (p.CourseID == CourseID && p.CourseCategoryID == CourseCategoryID && p.ExaminationCycleID == ExamCycleID )
+                                orderby (p.ExamYear) descending
+                                select new { ValueField = p.ID , TextField = p.Name  });  
+
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlSessionExam , examYear, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }   
+ 
+    protected void ddlcoursecategory_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlcourse.Items.Clear();
+        ddlExamCycle.Items.Clear();
+        ddlSessionExam.Items.Clear();       
+        ddlExamCycle.Items.Insert(0, "--Select One--");       
+        FillCourses();
+        divReportData.Visible = false;       
+    }
+    protected void ddlcourse_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlExamCycle.Items.Clear();
+        ddlSessionExam.Items.Clear();      
+        FillExamCycle();
+        divReportData.Visible = false;
+    }
+        
+    protected void ddlExamCycle_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ddlSessionExam.Items.Clear();
+        ddlSessionExam.Items.Insert(0, "--Select One--");  
+        FillSessionExam();    
+        divReportData.Visible = false;
+    }
+    public override void VerifyRenderingInServerForm(Control control)
+    {
+        /* Verifies that the control is rendered */
+    }
+
+    protected void ddlSessionExam_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        divReportData.Visible = false;
+    }
+}

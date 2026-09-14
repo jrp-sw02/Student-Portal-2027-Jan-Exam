@@ -1,0 +1,18 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Backup files
+*.bak

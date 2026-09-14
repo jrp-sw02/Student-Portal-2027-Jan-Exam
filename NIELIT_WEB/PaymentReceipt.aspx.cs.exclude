@@ -1,0 +1,182 @@
+﻿using System;
+using System.Linq;
+using System.Web.UI;
+using EConnect;
+using EConnect.DAL;
+using EConnect.NIELIT;
+
+public partial class PaymentReceipt : BasePage
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        Response.CacheControl = "no-cache";
+        Response.AddHeader("Progra", "no-cache");
+        Response.Expires = -1500;
+        if (Request.UrlReferrer == null)
+        {
+            Response.Write(GeInvalidRequestMessage("Goto Home Page", Server.MapPath("Index.aspx")));
+            Response.End();
+            return;
+        }
+        if (!Page.IsPostBack)
+        {
+            divCSC.Visible = false;
+            DivDD.Visible = false;
+            DivOnline.Visible = false;
+            TrdddetailE.Visible = false;
+            TrdddetailH.Visible = false;
+            TrneftE.Visible = false;
+            TrneftH.Visible = false;
+        }
+        showdata();
+    }
+
+    protected void showdata()
+    {
+        if ((!String.IsNullOrEmpty(Request.QueryString["DemandNoteid"])) && (!String.IsNullOrEmpty(Request.QueryString["Src"])))
+        {
+
+            Int32 Demandid = Convert.ToInt32(Request.QueryString["DemandNoteid"]);
+            using (EConnectContext context = new EConnectContext())
+            {
+                DemandNote demandnote = context.DemandNotes.Find(Demandid);
+                if (Request.QueryString["Src"] == "DD") // DD Transaction
+                {
+                    Lblddmessage.Visible = true;
+                    TrdddetailE.Visible = true;
+                    TrdddetailH.Visible = true;
+                    TrneftE.Visible = false;
+                    TrneftH.Visible = false;
+                   
+                    if (demandnote.enmApplicationType == enmApplicationType.CertificateExamApplication)
+                    {
+                        var dddetail = (from dd in context.DemandDraftTransactions
+                                       where dd.DemandNoteID == Demandid
+                                       select dd).FirstOrDefault();
+                        DivTransactionE.InnerHtml = "<font color='#000099'>Your Transaction No. is:" + dddetail.ID + "<br>" +
+                                             "Your Transaction Date is:" + dddetail.Date.ToString("dd-MMM-yyyy") + "</br>";
+
+                        DivTransactionH.InnerHtml = "<font color='#000099'> आपकी लेन - देन संख्या: " + dddetail.ID + " है| " +
+                                            "<br/>आपकी लेन - देन तिथि :" + dddetail.Date.ToString("dd-MMM-yyyy") + " है |</font>";
+
+                        if (!context.CertificateExamApplications.Where(t => t.DemandNoteID.Value == demandnote.ID).FirstOrDefault().Exam.IsBatchProcessable)
+                        {
+                            Lblddmessage.Text = "You have successfully submitted the demand draft information.";
+                            LblddmessageH.Text = "आपने सफलतापूर्वक डिमांड ड्राफ्ट जानकारी प्रस्तुत की है.";
+                        }
+                    }
+                    else if (demandnote.enmApplicationType == enmApplicationType.CourseExamApplication)
+                    {
+                        var dddetail = (from dd in context.DemandDraftTransactions
+                                        where dd.DemandNoteID == Demandid
+                                        select dd).FirstOrDefault();
+                        DivTransactionE.InnerHtml = "<font color='#000099'>Your Transaction No. is:" + dddetail.ID + "<br>" +
+                                             "Your Transaction Date is:" + dddetail.Date + "</br>";
+
+                        DivTransactionH.InnerHtml = "<font color='#000099'> आपकी लेन - देन संख्या " + dddetail.ID + " है| " +
+                                            "<br/>आपकी लेन - देन तिथि :" + dddetail.Date.ToString("dd-MMM-yyyy") + " है |</font>";
+                                              
+                    }
+                    else if (demandnote.enmApplicationType == enmApplicationType.CourseRegistrationApplication)
+                    {
+                        var dddetail = (from dd in context.DemandDraftTransactions
+                                        where dd.DemandNoteID == Demandid
+                                        select dd).FirstOrDefault();
+                        DivTransactionE.InnerHtml = "<font color='#000099'>Your Transaction No. is:" + dddetail.ID + "<br>" +
+                                             "Your Transaction Date is:" + dddetail.Date + "</br>";
+
+                        DivTransactionH.InnerHtml = "<font color='#000099'> आपकी लेन - देन संख्या " + dddetail.ID + " है| " +
+                                            "<br/>आपकी लेन - देन तिथि :" + dddetail.Date.ToString("dd-MMM-yyyy") + " है |</font>";
+                                              
+                    }
+                }
+                else if (Request.QueryString["Src"] == "NEFT") // NEFT Transaction
+                {
+                    TrdddetailE.Visible = false;
+                    TrdddetailH.Visible = false;
+                    TrneftE.Visible = true;
+                    TrneftH.Visible = true;
+                    if (demandnote.enmApplicationType == enmApplicationType.CertificateExamApplication)
+                    {
+                        var neftdetail = (from dd in context.NEFTTransactions
+                                       where dd.DemandNoteID == Demandid
+                                       select dd).FirstOrDefault();
+                        DivNeftTransactionE.InnerHtml = "<font color='#000099'>Your Transaction No. is:" + neftdetail.ID + "<br>" +
+                                             "Your Transaction Date is:" + neftdetail.Date.ToString("dd-MMM-yyyy") + "</br>";
+
+                        DivNeftTransactionH.InnerHtml = "<font color='#000099'> आपकी लेन - देन संख्या: " + neftdetail.ID + " है| " +
+                                            "<br/>आपकी लेन - देन तिथि :" + neftdetail.Date.ToString("dd-MMM-yyyy") + " है |</font>";
+
+
+                        if (!context.CertificateExamApplications.Where(t => t.DemandNoteID.Value == demandnote.ID).FirstOrDefault().Exam.IsBatchProcessable)
+                        {
+                            lblmessage.Text = "You have successfully submitted the NEFT/RTGS electronic transfer information details";
+                            lblmessageH.Text = "आपने सफलतापूर्वक एनईएफटी / आरटीजीएस इलेक्ट्रॉनिक ट्रांसफर जानकारी प्रस्तुत की है.";
+                        }
+
+                    }
+                    else if (demandnote.enmApplicationType == enmApplicationType.CourseExamApplication)
+                    {
+                        var neftdetail = (from dd in context.NEFTTransactions
+                                        where dd.DemandNoteID == Demandid
+                                        select dd).FirstOrDefault();
+                        DivNeftTransactionE.InnerHtml = "<font color='#000099'>Your Transaction No. is:" + neftdetail.ID + "<br>" +
+                                             "Your Transaction Date is:" + neftdetail.Date + "</br>";
+
+                        DivNeftTransactionH.InnerHtml = "<font color='#000099'> आपकी लेन - देन संख्या " + neftdetail.ID + " है| " +
+                                            "<br/>आपकी लेन - देन तिथि :" + neftdetail.Date.ToString("dd-MMM-yyyy") + " है |</font>";
+                                              
+                    }
+                    else if (demandnote.enmApplicationType == enmApplicationType.CourseRegistrationApplication)
+                    {
+                        var neftdetail = (from dd in context.NEFTTransactions
+                                        where dd.DemandNoteID == Demandid
+                                        select dd).FirstOrDefault();
+                        DivNeftTransactionE.InnerHtml = "<font color='#000099'>Your Transaction No. is:" + neftdetail.ID + "<br>" +
+                                             "Your Transaction Date is:" + neftdetail.Date + "</br>";
+
+                        DivNeftTransactionH.InnerHtml = "<font color='#000099'> आपकी लेन - देन संख्या " + neftdetail.ID + " है| " +
+                                            "<br/>आपकी लेन - देन तिथि :" + neftdetail.Date.ToString("dd-MMM-yyyy") + " है |</font>";
+                                              
+                    }
+                }
+                else
+                {
+                    if (demandnote.enmApplicationType == enmApplicationType.CertificateExamApplication)
+                    {
+
+                    }
+                    else if (demandnote.enmApplicationType == enmApplicationType.CourseExamApplication)
+                    {
+
+                    }
+                    else if (demandnote.enmApplicationType == enmApplicationType.CourseRegistrationApplication)
+                    {
+
+                    }
+                }
+            };
+        }
+    }
+    protected void Lnkhome_Click(object sender, EventArgs e)
+    {
+
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                Int32 Demandid = Convert.ToInt32(Request.QueryString["DemandNoteid"]);
+                DemandNote demandnote = context.DemandNotes.Find(Demandid);
+                if (demandnote.enmDemandNoteType == enmDemandNoteType.Single && demandnote.ApplicationTypeID != 4)// 4 is for module Certificate
+                    Response.Redirect("Index.aspx");
+                else
+                    Response.Redirect("FrmDashBoard.aspx");
+            };
+        }
+        catch (Exception ex)
+        {
+            
+            throw ex;
+        }
+    }
+}

@@ -1,0 +1,120 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" MasterPageFile="~/MasterPages/MyInfo.master"
+    CodeFile="CorrectionForUPMSP.aspx.cs" Inherits="CCStatus" %>
+
+<%@ Register Src="~/UserControl/SideLink.ascx" TagName="SideLink" TagPrefix="uc2" %>
+<%@ Register Src="~/UserControl/SideLink.ascx" TagName="SideLink" TagPrefix="uc3" %>
+<%@ Register Src="../UserControl/BreadCrumb.ascx" TagName="BreadCrumb" TagPrefix="uc1" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <style type="text/css">
+        .sidetable a {
+            color: #000000;
+            text-decoration: none;
+        }
+
+            .sidetable a:hover {
+                color: #3366CC;
+                text-decoration: underline;
+            }
+    </style>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="chpHeading" runat="Server">
+    <asp:Label ID="lblheading" runat="server" Text=""></asp:Label>
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="cphAddNew" runat="Server">
+</asp:Content>
+<asp:Content ID="Content4" ContentPlaceHolderID="cphBreadScrum" runat="Server">
+    <uc1:BreadCrumb ID="BreadCrumb1" runat="server" />
+</asp:Content>
+<asp:Content ID="Content5" ContentPlaceHolderID="cphContents" runat="Server">
+    <script src="../Script/GlobalFunction.js" type="text/javascript"></script>
+    <script language="javascript" type="text/javascript">
+        function ValidateFormFields() {
+
+            if (!isBlank("<%=Txtregno.ClientID %>", "Registration No."))
+                return false;
+            if (!isNumber("<%=Txtregno.ClientID %>", "Not Valid Registration No."))
+                return false;
+            if (!isBlank("<%=TxtDOB.ClientID %>", "Date of Birth"))
+                return false;
+            if (!isDate("<%=TxtDOB.ClientID%>", "Invalid Date of Birth"))
+                return false;
+            if (!isBlank("<%=txtcode.ClientID %>", "Captcha Code No."))
+                return false;
+        }
+    </script>
+    <div id="divfilter" runat="server">
+        <table id="Table3" align="center" class="sample3" width="100%" runat="server" cellpadding="3" cellspacing="1">
+            <tr class="gdrow1">
+                <td class="odd" width="40%">
+                    <asp:Label ID="Lblsubheading" runat="server" Text=""></asp:Label>
+                </td>
+                <td class="odd" width="60%" valign="bottom">
+                    <asp:Label ID="Lblcname" runat="server" Text=""></asp:Label>
+                </td>
+            </tr>
+            <tr class="gdalternate1">
+                <td class="even" width="40%">Enter Registration No.</td>
+                <td>
+                    <asp:TextBox ID="Txtregno" runat="server" Width="139px" MaxLength="10" onkeypress="checkNumber(this,10,0,event);"></asp:TextBox>
+                    <span style="text-align: left; vertical-align: top; font-size: 8pt;">(Registration No.
+                        printed on your application form)</span>
+                </td>
+            </tr>
+            <tr class="trgdrow1calendar">
+                <td class="odd" width="40%">Enter DOB(dd-mon-yyyy)</td>
+                <td class="odd">
+                    <asp:TextBox ID="TxtDOB" runat="server" Width="139px"></asp:TextBox>
+                    <img id="imgDob" src="../images/calendaricon.jpg" style="width: 20px; height: 22px; vertical-align: top;" />
+                    <span style="text-align: left; vertical-align: top; font-size: 8pt;">(Date of Birth
+                        of the candidate)</span>
+                    <asp:CalendarExtender ID="ceDOB" TargetControlID="txtDOB" PopupPosition="BottomLeft"
+                        Format="dd-MMM-yyyy" PopupButtonID="imgDob" runat="server">
+                    </asp:CalendarExtender>
+                </td>
+            </tr>
+            <tr class="gdalternate1">
+                <td valign="top" width="40%">Captcha Code
+                </td>
+                <td>
+                    <asp:TextBox ID="txtcode" runat="server" Width="139px" MaxLength="6" onkeypress="checkNumber(this,6,0,event)"></asp:TextBox>
+                    <span style="text-align: left; vertical-align: top; font-size: 8pt;">(Enter captcha
+                        code shown in image below)</span>
+                </td>
+            </tr>
+            <tr class="gdrow1">
+                <td valign="top" width="40%"></td>
+                <td align="left" valign="top" style="padding: 0">
+                    <asp:UpdatePanel ID="UpdatePanel5" runat="server" UpdateMode="Conditional">
+                        <ContentTemplate>
+                            <table cellpadding="0" cellspacing="0" style="margin: 0">
+                                <tr>
+                                    <td width="42%" align="left">
+                                        <img id="imgcap" runat="server" alt="Capture Code" width="150" height="40" src="" />
+                                        <asp:ImageButton ID="ImgBtnRefresh" runat="server" CausesValidation="false" ImageUrl="~/images/refresh.gif"
+                                            Width="30px" Style="vertical-align: baseline;" />
+                                    </td>
+                                    <td width="58%">
+                                        <span style="text-align: left; vertical-align: top; font-size: 8pt;">(Click here to
+                                            obtain new captcha code if are not able to see the captcha code in image.)</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            <asp:HiddenField ID="HfCaptcha" runat="server" />
+                        </ContentTemplate>
+                    </asp:UpdatePanel>
+                </td>
+            </tr>
+        </table>
+        <div style="text-align: right; margin-top: 10px">
+            <asp:Button ID="BtnView" runat="server" Text="View" class="even" OnClientClick="return ValidateFormFields();" />
+            <asp:Button ID="BtnReset" runat="server" Text="Reset" class="even"
+                OnClick="BtnReset_Click" />
+        </div>
+    </div>
+</asp:Content>
+<asp:Content ID="Content6" ContentPlaceHolderID="cphNavigation" runat="Server">
+</asp:Content>
+<asp:Content ID="Content7" ContentPlaceHolderID="cthRightPannel" runat="Server">
+    <uc2:SideLink ID="Sidelink" runat="server" />
+    <uc3:SideLink ID="Sidelink1" runat="server" />
+</asp:Content>

@@ -1,0 +1,198 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPages/main.master" AutoEventWireup="true"
+    CodeFile="insttAccrStatus.aspx.cs" Inherits="insttAccrStatus" Debug="false" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="asp" %>
+<%@ Register Src="../../UserControl/SearchBar.ascx" TagName="SearchBar" TagPrefix="uc1" %>
+<%@ Register Src="../../UserControl/ToggleView.ascx" TagName="ToggleView" TagPrefix="uc2" %>
+<%@ Register Src="../../UserControl/PagingBar.ascx" TagName="PagingBar" TagPrefix="uc3" %>
+<%@ Register Src="../../UserControl/BreadCrumb.ascx" TagName="BreadCrumb" TagPrefix="uc4" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <style type="text/css">
+        .auto-style1 {
+            width: 264px;
+        }
+    </style>
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="chpHeading" runat="Server">
+    <asp:Label ID="lblHeading" runat="server" Text="Accreditation Status"></asp:Label>
+</asp:Content>
+<asp:Content ID="Content4" ContentPlaceHolderID="cphAddNew" runat="Server">
+</asp:Content>
+<asp:Content ID="Content5" ContentPlaceHolderID="cphBreadScrum" runat="Server">
+
+    <%--<ul class="crumbs">
+        <li class="first"><a href="adminaccrediatedcenter.aspx" style="z-index: 9;"><span></span>
+            Accredited Centers</a></li>
+        <li><a href="adminaccrediatedcenter.aspx?key=R101&name=Aishwarya College&contact=9001107701"
+            style="z-index: 8;">Aishwarya College</a></li>
+        <li><a href="accrediationdetails.aspx" style="z-index: 7;">Accrediation Details</a></li>
+        <li id="l1" runat="server" visible="false"><a href="#" style="z-index: 6;"><span
+            id="aclink" runat="server"></span></a></li>
+    </ul>--%>
+    <%--<a href="adminaccrediatedcenter.aspx">Accredited Centers</a>:<a href="adminaccrediatedcenter.aspx?key=R101&name=Aishwarya College&contact=9001107701">Aishwarya College</a>>><a href="accrediationdetails.aspx">Accrediation Details</a>:<a href="#"><span id="aclink" runat="server"></span></a>--%>
+</asp:Content>
+<asp:Content ID="Content6" ContentPlaceHolderID="cphContents" runat="Server">
+    <script language="javascript" type="text/javascript">
+
+
+        function ValidateFormFields() {
+
+
+            if (!isBlank("<%=txtAccrNo.ClientID %>", "Accreditation Number"))
+                return false;
+
+
+
+        }
+
+
+
+    </script>
+
+    <div id="divGrid" runat="server">
+        <asp:UpdatePanel EnableViewState="true" ID="uPnlGrid" UpdateMode="Conditional" runat="server">
+            <ContentTemplate>
+                <table>
+                    <tr>
+                        <td align="left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Label ID="Label5" Width="100%" runat="server" Text="Course Category"></asp:Label>
+                        </td>
+                        <td class="auto-style1">
+                            <asp:DropDownList ID="ddlcategry" Width="100%" runat="server"
+                                Enabled="false">
+                                <asp:ListItem Value="0" Text="--Select One--"></asp:ListItem>
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Label ID="Label8" Width="100%" runat="server" Text="Accreditation No."></asp:Label>
+                        </td>
+                        <td class="auto-style1">
+                            <asp:TextBox ID="txtAccrNo" runat="server" ToolTip="Accreditation Number" MaxLength="12" BorderStyle="Solid"></asp:TextBox>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Button ID="btnShow" runat="server" Text="Check Status" OnClick="btnShow_Click" />
+                        </td>
+                        <td class="auto-style1">
+                            <asp:Button ID="btnCancel" runat="server" Text="Cancel" OnClick="btnCancel_Click" /></div></td>
+
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Label ID="lblName" runat="server" Visible="False" Font-Bold="True">Name</asp:Label></td>
+                        <td class="auto-style1">
+                            <asp:TextBox ID="txtName" runat="server" Visible="false" Enabled="False" Height="16px" TextMode="MultiLine" Width="277px"></asp:TextBox>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <asp:Label ID="lblAddress" runat="server" Visible="False" Font-Bold="True">Address</asp:Label></td>
+                        <td class="auto-style1">
+                            <asp:TextBox ID="txtAddress" runat="server" Visible="false" Enabled="False" Height="32px" TextMode="MultiLine" Width="273px"></asp:TextBox></td>
+                    </tr>
+                </table>
+                <br />
+
+                <asp:GridView ID="gvMain" runat="server" DataKeyNames="ID" OnSorting="gvMain_Sorting"
+                    OnRowDataBound="gvMain_RowDataBound" AutoGenerateColumns="False" Width="100%" Visible="False" EmptyDataText="No record found" Caption="&lt;b&gt;&lt;center&gt;Accreditation Status&lt;/centre&gt;&lt;/b&gt;" OnSelectedIndexChanged="gvMain_SelectedIndexChanged" >
+                    <Columns>
+                        <asp:TemplateField HeaderText="#">
+                            <EditItemTemplate>
+                                <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+                            </EditItemTemplate>
+                            <ItemTemplate>
+                                <asp:Label ID="Label1" runat="server" Text="<%# Container.DataItemIndex + 1 %>"></asp:Label>
+                            </ItemTemplate>
+                            <HeaderStyle Width="5%" />
+                            <ItemStyle HorizontalAlign="Right" />
+                        </asp:TemplateField>
+
+                        <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                            DataTextField="Name" HeaderText="Course Name" SortExpression="Name"
+                            Target="_self">
+                            <HeaderStyle Width="20%" />
+                        </asp:HyperLinkField>
+                        <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                            DataTextField="EffectiveFromDate" DataTextFormatString="{0:dd-MMM-yyyy}" HeaderText="Effective From Date" SortExpression="EffectiveFromDate "
+                            Target="_self">
+                            <HeaderStyle Width="20%" />
+                            <ItemStyle HorizontalAlign="Right" />
+                        </asp:HyperLinkField>
+                        <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                            DataTextField="EffectiveToDate" DataTextFormatString="{0:dd-MMM-yyyy}" HeaderText="Effective To Date" SortExpression="EffectiveToDate"
+                            Target="_self">
+                            <HeaderStyle Width="20%" />
+                            <ItemStyle HorizontalAlign="Right" />
+                        </asp:HyperLinkField>
+                        <%-- <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                                    DataTextField="Name" HeaderText="Course" SortExpression="Name" Target="_self"><HeaderStyle Width="20%" /><ItemStyle HorizontalAlign="Left" /></asp:HyperLinkField>--%>
+                        <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                            DataTextField="SNAME" HeaderText="Status" SortExpression="SNAME" Target="_self">
+                            <HeaderStyle Width="40%" />
+                            <ItemStyle HorizontalAlign="Left" />
+                        </asp:HyperLinkField>
+                        <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                            DataTextField="WithdrawlDate" DataTextFormatString="{0:dd-MMM-yyyy}" HeaderText="WithdrawlDate" SortExpression="WithdrawlDate"
+                            Target="_self">
+                            <HeaderStyle Width="20%" />
+                            <ItemStyle HorizontalAlign="Right" />
+                        </asp:HyperLinkField>
+                        <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                            DataTextField="Temp_Blocked" HeaderText="Blocked" SortExpression="Temp_Blocked" Target="_self">
+                            <HeaderStyle Width="40%" />
+                            <ItemStyle HorizontalAlign="Left" />
+                        </asp:HyperLinkField>
+                        <%--  <asp:HyperLinkField HeaderStyle-Width="40%" DataNavigateUrlFields="ID" DataNavigateUrlFormatString="?Key={0}"
+                                    DataTextField="Address" HeaderText="Address" SortExpression="Address" Target="_self" />--%>
+                    </Columns>
+                    <PagerSettings Visible="False" />
+                </asp:GridView>
+                <asp:HiddenField ID="hfActionID" runat="server" Value="" />
+                <asp:HiddenField ID="hfAccreID" runat="server" />
+                <asp:HiddenField ID="hfAccName" runat="server" />
+            </ContentTemplate>
+        </asp:UpdatePanel>
+    </div>
+    <div id="divNavigation" runat="server">
+        <asp:UpdatePanel RenderMode="Inline" ID="uPnlNavigation" UpdateMode="Conditional"
+            runat="server">
+        </asp:UpdatePanel>
+    </div>
+    <div id="div1" runat="server">
+        <asp:UpdatePanel RenderMode="Inline" ID="UpdatePanel1" UpdateMode="Conditional"
+            runat="server">
+            <ContentTemplate>
+                <uc3:PagingBar ID="PagingBar1" runat="server" OnPageIndexChanged="PageIndexChanged" Visible="False" />
+            </ContentTemplate>
+        </asp:UpdatePanel>
+    </div>
+
+</asp:Content>
+<asp:Content ID="Content7" ContentPlaceHolderID="cphNavigation" runat="Server">
+</asp:Content>
+<asp:Content ID="Content8" ContentPlaceHolderID="cthRightPannel" runat="Server">
+    <table runat="server" visible="false" class="nav" cellspacing="0" cellpadding="0"
+        id="tblNavLinks" width="97%" style="width: 97%;">
+        <%-- <tr>
+            <td style="border: 1px solid #2c5070; background-color: #FFFFFF;" width="100%">
+                <a href="admpaymentdetails.aspx">Payment Detail</a>
+            </td>
+        </tr>--%>
+    </table>
+</asp:Content>

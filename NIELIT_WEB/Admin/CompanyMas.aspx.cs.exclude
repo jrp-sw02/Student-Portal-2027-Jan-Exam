@@ -1,0 +1,733 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using EConnect;
+using EConnect.URM;
+using EConnect.DAL;
+using EConnect.NIELIT;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Transactions;
+
+public partial class Admin_CompanyMas : BasePage
+{
+    String strMessage = string.Empty;
+    //EConnectContext context = new EConnectContext();
+    Int32 currentRoleId = 0;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //Response.Write(Request.QueryString.ToString());
+        Response.CacheControl = "no-cache";
+        Response.AddHeader("Progra", "no-cache");
+        Response.Expires = -1500;
+        try
+        {
+            if (IsSessionAlive() == false)
+                Response.Redirect("../Index.aspx");
+            currentRoleId = Convert.ToInt32(Session["RoleID"]);
+            if (!UserManager.HasRight(currentRoleId, enmRight.View))
+            {
+                Response.Write("Sorry! You don't have rights  to view this page");
+                Response.End();
+            }
+            if (!Page.IsPostBack)
+            {
+                FillCourses();
+                if (!String.IsNullOrEmpty(Request.QueryString["Key"]))
+                {
+                    ShowEditMode();
+                }
+                else
+                {
+                    ViewState["SortField"] = "";
+                    ViewState["SortOrder"] = "";
+                    FillFilterOccupation();
+                    BindGridView();
+                    BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("Company Master", "Admin/CompanyMas.aspx", ""));
+                }
+                if (!string.IsNullOrWhiteSpace(Request.QueryString["msg"]))
+                    ShowAlert(Request.QueryString["msg"].ToString());
+            }
+            BreadCrumb1.Render();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void FillFilterOccupation()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+
+                ListItem lst = new ListItem("--Select One--", "0");
+                var OccupationList = from p in context.Occupations
+                                     orderby p.ID
+                                     select new { ValueField = p.ID, TextField = p.Name };
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlOccupation, OccupationList, lst);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    protected void bindState()
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                var PState = (from s in context.Locations
+                              orderby (s.Name)
+                              where s.LocationTypeID == 2
+                              && s.ParentLocationID == 1
+                              select new { ValueField = s.ID, TextField = s.Name }).ToList();
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlCmpState, PState, lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+    }
+
+    protected void bindDistrict(long stateID, ref DropDownList ddl)
+    {
+        try
+        {
+            int locationTypeID = Convert.ToInt32(enmLocationType.District);
+            using (EConnectContext context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                var district = from s in context.Locations
+                               orderby (s.Name)
+                               where s.LocationTypeID == locationTypeID
+                               && s.ParentLocationID == stateID
+                               select new { ValueField = s.ID, TextField = s.Name };
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddl, district.ToList(), lst);
+
+                if (ddl.Items.Count == 0)
+                    ddl.Items.Add(lst);
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    protected void FillCourses()
+    {
+        bindState();
+    }
+
+    protected void ddlCmpState_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            int id1 = Convert.ToInt32(ddlCmpState.SelectedValue);
+            ddlCmpDistrict.Items.Clear();
+            bindDistrict(id1, ref ddlCmpDistrict);
+        }
+        catch (Exception ex)
+        {
+            //lblerror.Text = ex.Message.ToString() + ex.Source.ToString();
+        }
+    }
+
+    protected void ShowEditMode()
+    {
+        try
+        {
+            btnMode.ViewMode = ToggleView.Mode.List;
+            mltvTab.ActiveViewIndex = 1;
+            pnlFilter.Visible = false;
+            ucSearchBar.Visible = false;
+            btnSave.Text = "Update";
+            lblHeading.Text = "Company Master";
+            //tblNavLinks.Visible = true;
+            using (NIELITMISContext context = new NIELITMISContext())
+            {
+                Int64 CompanyID = Convert.ToInt32(Request.QueryString["Key"]);
+                var objOccupation = (from s in context.companyMasters
+                                     where s.ID == CompanyID
+                                     select s).FirstOrDefault();
+                txtCompanyName.Text = objOccupation.company_Name.ToString();
+                txtPersonName.Text = objOccupation.contactPersonName.ToString();
+                txtMob.Text = objOccupation.contactPersonMobile.ToString();
+                txtEmailID.Text = objOccupation.PersonEmail.ToString();
+                txtCmpAdd1.Text = objOccupation.comapny_Address.ToString();
+
+                txtCmpAdd2.Text = string.IsNullOrEmpty(objOccupation.comapny_Address2) == false && !string.IsNullOrWhiteSpace(objOccupation.comapny_Address2) ? GetInitCap(objOccupation.comapny_Address2) : "";
+                txtCmpAdd3.Text = string.IsNullOrEmpty(objOccupation.comapny_Address3) == false && !string.IsNullOrWhiteSpace(objOccupation.comapny_Address3) ? GetInitCap(objOccupation.comapny_Address3) : "";
+
+                //txtCmpAdd2.Text = objOccupation.comapny_Address2.ToString();
+                //txtCmpAdd3.Text = objOccupation.comapny_Address3.ToString();
+
+                ddlCmpState.SelectedValue = objOccupation.compnyState_ID.ToString();
+                int id2 = Convert.ToInt32(ddlCmpState.SelectedValue);
+                ddlCmpState_SelectedIndexChanged(ddlCmpState, EventArgs.Empty);
+                ddlCmpDistrict.SelectedValue = objOccupation.compnyDistrict_ID.ToString();
+
+                txtCmyCityName.Text = objOccupation.CompnyCityName.ToString();
+
+                txtCmpPinCode.Text = objOccupation.CompnyPinCode.ToString();
+                txtMob.Text = objOccupation.contactPersonMobile.ToString();
+
+                BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem(objOccupation.company_Name, "#", ""));
+                //BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("ExamVenue", "#", ""));
+                //Get last modified date of current record and save it in ViewState object.
+                ViewState["LastModifiedOn"] = DateTime.Now; // objMenuObject.ModifiedOn.HasValue ? objMenuObject.ModifiedOn.Value : objMenuObject.CreatedOn;
+                //Create an object of record to be modified and assign properties to relevant fields.
+                if (!UserManager.HasRight(currentRoleId, enmRight.Edit))
+                {
+                    btnSave.Visible = false;
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            // context.Dispose();
+        }
+    }
+
+    protected void BindGridView()
+    {
+        string constr = ConfigurationManager.ConnectionStrings["NIELITMISContext"].ConnectionString;
+        SqlConnection con = new SqlConnection(constr);
+        try
+        {
+            //Int64 instituteId = Convert.ToInt64(hfAccreID.Value);
+            //lblError.Visible = false;
+            using (NIELITMISContext context = new NIELITMISContext())
+            {
+                string searchString = ucSearchBar.SearchText.Trim().ToUpper();
+                string sortOrder = ViewState["SortOrder"].ToString();
+                string sortField = ViewState["SortField"].ToString();
+                Int32 OccupationID = 0;
+                if (ddlOccupation.SelectedValue != "0")
+                    OccupationID = Convert.ToInt32(ddlOccupation.SelectedValue);
+                var objOccupation = from s in context.companyMasters
+                                    orderby s.company_Name
+                                    select new
+                                    {
+                                        ID = s.ID,
+                                        Name = s.company_Name,
+                                        PersonName = s.contactPersonName,
+                                        PersonMobile = s.contactPersonMobile,
+                                        Location = s.CompnyCityName
+
+                                    };
+                DataTable DT = new DataTable();
+
+                con.Open();
+
+                using (SqlCommand Cmm = new SqlCommand("CompayMasGrid", con))
+                {
+                    Cmm.CommandType = CommandType.StoredProcedure;
+                    SqlDataAdapter Sda = new SqlDataAdapter(Cmm);
+
+
+                    Sda.Fill(DT);
+                }
+
+                if (!String.IsNullOrEmpty(searchString))
+                {
+                    string expression = "[PersonName] like '%" + searchString + "%'";
+                    string expression1 = "[Name] like '%" + searchString + "%'";
+                    if (DT.Select(expression).Count() > 0)
+                    {
+                        DT = DT.Select(expression).CopyToDataTable();
+
+                    }
+                    else if (DT.Select(expression1).Count() > 0)
+                    {
+                        DT = DT.Select(expression1).CopyToDataTable();
+                    }
+                    else
+                    {
+                        ShowAlert("No record found", true);
+
+                    }
+
+                }
+
+                if (ddlOccupation.SelectedValue.ToString() != "0")
+                {
+                    string expression = "[ID]=" + Convert.ToInt32(ddlOccupation.SelectedValue);
+                    if (DT.Select(expression).Count() > 0)
+                        DT = DT.Select(expression).CopyToDataTable();
+                    else
+                    {
+                        ShowAlert("No record found", true);
+
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(searchString))
+                {
+                    objOccupation = objOccupation.Where(s => s.Name.ToUpper().Contains(searchString)
+                                                        || s.PersonName.ToUpper().Contains(searchString));
+                }
+                if (OccupationID != 0)
+                {
+                    objOccupation = objOccupation.Where(s => s.ID == OccupationID);
+                }
+                if (!string.IsNullOrEmpty(sortOrder))
+                {
+                    switch (sortField)
+                    {
+                        case "ID":
+                            if (sortOrder == "DESC")
+                                objOccupation = objOccupation.OrderByDescending(s => s.ID);
+                            else
+                                objOccupation = objOccupation.OrderBy(s => s.ID);
+                            break;
+                        case "Name":
+                            if (sortOrder == "DESC")
+                                objOccupation = objOccupation.OrderByDescending(s => s.Name);
+                            else
+                                objOccupation = objOccupation.OrderBy(s => s.Name);
+                            break;
+                        case "PersonName":
+                            if (sortOrder == "DESC")
+                                objOccupation = objOccupation.OrderByDescending(s => s.PersonName);
+                            else
+                                objOccupation = objOccupation.OrderBy(s => s.PersonName);
+                            break;
+
+                        default:
+                            objOccupation = objOccupation.OrderBy(s => s.ID);
+                            break;
+                    }
+                }
+                //PagingBar1.Bind(objOccupation, ref gvMain);
+                PagingBar1.Bind(DT, ref gvMain);
+                uPnlGrid.Update();
+                uPnlNavigation.Update();
+
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            con.Close();
+        }
+    }
+
+    protected void PageIndexChanged(Int32 NewPageIndex)
+    {
+        try
+        {
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+            BindGridView();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void ToggleViewMode_Changed(object sender, EventArgs e)
+    {
+        try
+        {
+            if (btnMode.ViewMode == ToggleView.Mode.New)
+            {
+                if (!UserManager.HasRight(currentRoleId, enmRight.New))
+                {
+                    BreadCrumb1.Render();
+                    ShowAlert("Sorry! You don't have rights to add new record.", true);
+                    return;
+                }
+                btnMode.ViewMode = ToggleView.Mode.List;
+                mltvTab.ActiveViewIndex = 1;
+                pnlFilter.Visible = false;
+                ucSearchBar.Visible = false;
+                //Change the heading text as required
+                lblHeading.Text = "Company Master";
+                //Updating Breadcrumb
+                //BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("New Exam Centre", "#", ""));
+                BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("New Company Master", "#", ""));
+            }
+            else
+            {
+                Response.Redirect("CompanyMas.aspx", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+
+    protected void SearchBar_ApplySearch(object sender, EventArgs e)
+    {
+        try
+        {
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void SearchBar_Reset(object sender, EventArgs e)
+    {
+        try
+        {
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void SaveRecord(object sender, EventArgs e)
+    {
+        try
+        {
+            BreadCrumb1.Render();
+            using (TransactionScope scope = new TransactionScope())
+            {
+                using (NIELITMISContext context = new NIELITMISContext())
+                {
+                    companyMaster objCompany;
+                    companyMasterHistory objCompanyHistory;
+
+                    if (String.IsNullOrEmpty(Request.QueryString["Key"]))
+                    {
+
+                        objCompany = new companyMaster();
+
+                        objCompany.company_Name = txtCompanyName.Text;
+                        objCompany.contactPersonName = txtPersonName.Text;
+                        objCompany.contactPersonMobile = Convert.ToInt64(txtMob.Text);
+                        objCompany.PersonEmail = txtEmailID.Text;
+                        objCompany.comapny_Address = txtCmpAdd1.Text;
+                        objCompany.comapny_Address2 = txtCmpAdd2.Text;
+                        objCompany.comapny_Address3 = txtCmpAdd3.Text;
+                        objCompany.CompnyCityName = txtCmyCityName.Text;
+                        objCompany.CompnyCountry_ID = 1;
+                        objCompany.compnyState_ID = Convert.ToInt32(ddlCmpState.SelectedValue);
+                        objCompany.compnyDistrict_ID = Convert.ToInt32(ddlCmpDistrict.SelectedValue);
+                        objCompany.CompnyPinCode = Convert.ToInt32(txtCmpPinCode.Text);
+
+						objCompany.enter_By = Convert.ToInt32(Session["UserID"]);
+                        objCompany.enter_Date = DateTime.Now;
+                        //objOccupation.CourseID = Convert.ToInt32(ddlcourse.SelectedValue);
+                        context.companyMasters.Add(objCompany);
+                        context.SaveChanges();
+                        strMessage = "New record saved";
+
+                    }
+                    else
+                    {
+                        Int32 keyID = Convert.ToInt32(Request.QueryString["Key"]);
+
+                        objCompany = context.companyMasters.Find(Convert.ToInt32(Request.QueryString["key"]));
+                        
+                        
+
+                        //Insert Company History
+                        objCompanyHistory = new companyMasterHistory();
+                        objCompanyHistory.CompanyID = Convert.ToInt64(keyID);
+                        objCompanyHistory.company_Name = objCompany.company_Name;
+                        objCompanyHistory.contactPersonName = objCompany.contactPersonName ;
+                        objCompanyHistory.PersonEmail = objCompany.PersonEmail;
+                        objCompanyHistory.contactPersonMobile = Convert.ToInt64(objCompany.contactPersonMobile);
+                        objCompanyHistory.comapny_Address = objCompany.comapny_Address;
+                        objCompanyHistory.comapny_Address2 = objCompany.comapny_Address2;
+                        objCompanyHistory.comapny_Address3 = objCompany.comapny_Address3;
+                        objCompanyHistory.CompnyCityName = objCompany.CompnyCityName;
+                        objCompanyHistory.CompnyCountry_ID = 1;
+                        objCompanyHistory.compnyState_ID = Convert.ToInt32(objCompany.compnyState_ID);
+                        objCompanyHistory.compnyDistrict_ID = Convert.ToInt32(objCompany.compnyDistrict_ID);
+                        objCompanyHistory.CompnyPinCode = Convert.ToInt32(objCompany.CompnyPinCode);
+                        
+                        //objCompanyHistory.CompanyID = Convert.ToInt64(keyID);
+                        //objCompanyHistory.company_Name = txtCompanyName.Text;
+                        //objCompanyHistory.contactPersonName = txtPersonName.Text;
+                        //objCompanyHistory.PersonEmail = txtEmailID.Text;
+                        //objCompanyHistory.contactPersonMobile = Convert.ToInt64(txtMob.Text);
+                        //objCompanyHistory.comapny_Address = txtCmpAdd1.Text;
+                        //objCompanyHistory.comapny_Address2 = txtCmpAdd2.Text;
+                        //objCompanyHistory.comapny_Address3 = txtCmpAdd3.Text;
+                        //objCompanyHistory.CompnyCityName = txtCmyCityName.Text;
+                        //objCompanyHistory.CompnyCountry_ID = 1;
+                        //objCompanyHistory.compnyState_ID = Convert.ToInt32(ddlCmpState.SelectedValue);
+                        //objCompanyHistory.compnyDistrict_ID = Convert.ToInt32(ddlCmpDistrict.SelectedValue);
+                        //objCompanyHistory.CompnyPinCode = Convert.ToInt32(txtCmpPinCode.Text);
+                        //objCompanyHistory.CompnyPinCode = Convert.ToInt32(txtCmpPinCode.Text);
+                        objCompanyHistory.enter_By = Convert.ToInt32(Session["UserID"]);
+                        objCompanyHistory.enter_Date = DateTime.Now;
+                        context.companyMasterHistorys.Add(objCompanyHistory);
+                        context.SaveChanges();
+                        //EndOfCompanyHistory
+
+                        objCompany.company_Name = txtCompanyName.Text;
+                        objCompany.contactPersonName = txtPersonName.Text;
+                        objCompany.PersonEmail = txtEmailID.Text;
+                        objCompany.contactPersonMobile = Convert.ToInt64(txtMob.Text);
+                        objCompany.comapny_Address = txtCmpAdd1.Text;
+                        objCompany.comapny_Address2 = txtCmpAdd2.Text;
+                        objCompany.comapny_Address3 = txtCmpAdd3.Text;
+                        objCompany.CompnyCityName = txtCmyCityName.Text;
+                        objCompany.CompnyCountry_ID = 1;
+                        objCompany.compnyState_ID = Convert.ToInt32(ddlCmpState.SelectedValue);
+                        objCompany.compnyDistrict_ID = Convert.ToInt32(ddlCmpDistrict.SelectedValue);
+                        objCompany.CompnyPinCode = Convert.ToInt32(txtCmpPinCode.Text);
+                        objCompany.CompnyPinCode = Convert.ToInt32(txtCmpPinCode.Text);
+
+                        context.SaveChanges();
+                        strMessage = "Record updated";
+
+                    }
+                   // Response.Redirect("CompanyMas.aspx?msg=" + strMessage);
+                };
+                scope.Complete();
+            };
+            Response.Redirect("CompanyMas.aspx?msg=" + strMessage);
+           
+        }
+        catch (Exception ex)
+        {
+            
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void AllyFilter(object sender, EventArgs e)
+    {
+        try
+        {
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void ResetFilterPanel(object sender, EventArgs e)
+    {
+        try
+        {
+            ddlOccupation.SelectedValue = "0";
+            PagingBar1.CurrentPageIndex = 0;
+            gvMain.PageIndex = PagingBar1.CurrentPageIndex;
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void gvMain_Sorting(object sender, GridViewSortEventArgs e)
+    {
+        try
+        {
+            ViewState["SortField"] = e.SortExpression;
+            if (ViewState["SortOrder"].ToString() == "DESC")
+                ViewState["SortOrder"] = "ASC";
+            else
+                ViewState["SortOrder"] = "DESC";
+            BindGridView();
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+
+    protected void PerformPopupAction(object sender, EventArgs e)
+    {
+        try
+        {
+            using (EConnectContext context = new EConnectContext())
+            {
+                if (!UserManager.HasRight(currentRoleId, enmRight.Delete))
+                {
+                    BreadCrumb1.Render();
+                    ShowAlert("Sorry! You don't have rights to delete the records.", true);
+                    return;
+                }
+                Occupation occupation = context.Occupations.Find(Convert.ToInt32(hfActionID.Value));
+                context.Occupations.Remove(occupation);
+                context.SaveChanges();
+                BindGridView();
+                ShowAlert("Record deleted successfully.", true);
+                hfActionID.Value = "";
+            };
+            uPnlGrid.Update();
+        }
+        catch (Exception ex)
+        {
+            BindGridView();
+            uPnlGrid.Update();
+            ShowAlert("Record can not be deleted!", true);
+        }
+    }
+
+    protected void gvMain_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        try
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                //Encryption url of hypelink field
+                HyperLink hl = (HyperLink)e.Row.Cells[1].Controls[0];
+                hl.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(hl.NavigateUrl);
+                HyperLink h2 = (HyperLink)e.Row.Cells[2].Controls[0];
+                h2.NavigateUrl = EConnect.Utils.Security.QuertStringModule.Encrypt(h2.NavigateUrl);
+                e.Row.Cells[0].Text = ((e.Row.RowIndex + 1) + (PagingBar1.CurrentPageSize * PagingBar1.CurrentPageIndex)).ToString();
+
+                Image imgAction = (Image)e.Row.FindControl("imgAction");
+                imgAction.ID = "imgAction_" + gvMain.DataKeys[e.Row.RowIndex].Values[0].ToString();
+
+                CheckBox chk = (CheckBox)e.Row.FindControl("chk");
+                imgAction.ID = "chk_" + gvMain.DataKeys[e.Row.RowIndex].Values[0].ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    [System.Web.Services.WebMethod(EnableSession = true)]
+    public static String[] GetSearchText(String prefixText, Int32 count)
+    {
+        NIELITMISContext context = new NIELITMISContext();
+        try
+        {
+            if (count <= 0)
+                count = 10;
+
+            List<String> items = new List<String>();
+            string searchString = prefixText.Trim().ToUpper();
+            var OccupationList = from s in context.companyMasters
+                                 select new { Name = s.company_Name };
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                OccupationList = OccupationList.Where(s => s.Name.ToUpper().Contains(searchString));
+            }
+            OccupationList = OccupationList.OrderBy(s => s.Name);
+
+            var OccupationList1 = from s in context.companyMasters
+                                  select new { Name = s.contactPersonName };
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                OccupationList1 = OccupationList1.Where(s => s.Name.ToUpper().Contains(searchString));
+            }
+
+            OccupationList1 = OccupationList1.OrderBy(s => s.Name);
+
+            OccupationList = OccupationList.Union(OccupationList1).Take(count);
+            foreach (var c in OccupationList)
+            {
+                items.Add(c.Name);
+            }
+            return items.ToArray();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally { context.Dispose(); }
+    }
+
+    protected void btnCancel_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            Response.Redirect("CompanyMas.aspx", true);
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+    }
+
+    [System.Web.Script.Services.ScriptMethod()]
+    [System.Web.Services.WebMethod]
+    public static List<string> CompanyNameSearch(string prefixText)
+    {
+        string constr = ConfigurationManager.ConnectionStrings["NIELITMISContext"].ConnectionString;
+        SqlConnection con = new SqlConnection(constr);
+        NIELITMISContext context = new NIELITMISContext();
+        try
+        {
+            DataTable dt = new DataTable();
+            SqlParameter param;
+           
+            con.Open();
+
+            using (SqlCommand Cmm = new SqlCommand("sp_CompanyNameSearch", con))
+            {
+                Cmm.CommandType = CommandType.StoredProcedure;
+                param = new SqlParameter("@prefix", prefixText);
+                Cmm.Parameters.Add(param);
+                SqlDataAdapter Sda = new SqlDataAdapter(Cmm);
+
+
+                Sda.Fill(dt);
+            }
+
+            List<string> Output = new List<string>();
+            for (int i = 0; i < dt.Rows.Count; i++)
+                Output.Add(dt.Rows[i][0].ToString());
+            return Output;  
+
+            //int count = 0;
+            //if (count <= 0)
+            //    count = 10;
+
+            //List<String> items = new List<String>();
+            //string searchString = prefixText.Trim().ToUpper();
+            //var OccupationList = from s in context.companyMasters
+            //                     select new { Name = s.company_Name + s.CompnyCityName + s.compnyState_ID };
+            //if (!String.IsNullOrEmpty(searchString))
+            //{
+            //    OccupationList = OccupationList.Where(s => s.Name.ToUpper().Contains(searchString));
+            //}
+            //OccupationList = OccupationList.OrderBy(s => s.Name);
+            
+            //foreach (var c in OccupationList)
+            //{
+            //    items.Add(c.Name);
+            //}
+            //return items;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally {
+            con.Close();
+            context.Dispose(); }
+    }
+
+}

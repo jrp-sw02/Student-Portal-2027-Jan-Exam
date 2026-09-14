@@ -1,0 +1,35 @@
+﻿<asp:Menu IncludeStyleBlock="false" runat="server" Orientation="Horizontal" >
+</asp:Menu>
+ 
+ <asp:GridView runat="server" AllowPaging="True" AllowSorting="true" AutoGenerateColumns="False" PagerSettings-Visible="false"  CellPadding="2" CellSpacing="1" GridLines="None"  CssClass="gdbody" Width="100%"  >
+        <HeaderStyle  Wrap="True" CssClass="gdheader" />
+        <RowStyle CssClass="gdrow" Wrap="True"/>
+        <SelectedRowStyle Wrap="True"  CssClass="gdselected"/>
+        <AlternatingRowStyle Wrap="True"  CssClass="gdalternate" />
+ </asp:GridView>
+
+ <asp:TextBox runat="server" CssClass="txtNormal" ></asp:TextBox>
+ <asp:TextBox runat="server" Width="756px"  CssClass="txtInput" skinid ="txt756" ></asp:TextBox>
+ <asp:TextBox runat="server" Width="700px"  CssClass="txtInput" skinid ="txt700" ></asp:TextBox>
+ <asp:TextBox runat="server" Width="502px"  CssClass="txtInput" skinid ="txt502" ></asp:TextBox>
+ <asp:TextBox runat="server" Width="248px"  CssClass="txtInput" skinid ="txt248" ></asp:TextBox>
+ <asp:TextBox runat="server" Width="210px"  CssClass="txtInput"  onpaste="return false;" onfocusout="if(trim(this.value,' ').length!=11){this.value=''};" skinid ="txt210" ></asp:TextBox>
+ <asp:TextBox runat="server" CssClass="txtNormal" onpaste="return false;" onfocusout="if(trim(this.value,' ').length!=11){this.value=''};" skinid ="txtDate" ></asp:TextBox>
+
+ <asp:CalendarExtender cssClass="calendar" Format="dd-MMM-yyyy"  runat="server">
+</asp:CalendarExtender>
+
+<asp:DropDownList CssClass="ddlNormal" runat="server" ></asp:DropDownList>
+<asp:DropDownList Width="250px" CssClass="ddlInput" skinid="ddl250" runat="server" Height="22px"></asp:DropDownList>
+<asp:DropDownList Width="504px" CssClass="ddlInput" skinid="ddl504" runat="server" Height="22px"></asp:DropDownList>
+
+<asp:LinkButton runat="server" Width="100%" SkinId ="lnkbtnAction" CssClass="lnkBut" ></asp:LinkButton>
+
+<asp:CheckBox ToolTip="Select" runat="server" SkinId = "CheckAllInGridView" onClick="CheckAll(this,'chk')"  />
+
+<asp:Label runat="server" CssClass="lblNormal"></asp:Label>
+<asp:Label runat="server" skinid="CaptionLabel" CssClass="lblCaption" width="99%"></asp:Label>
+
+<asp:Button CssClass="btnNormal"  runat="server" />
+
+<asp:Button CssClass="btn_navigator"  runat="server" skinid="btnNavigator" />

@@ -1,0 +1,160 @@
+
+
+.menu {
+    /*background: url(Images/menu_background.jpg) repeat-x;*/
+    background: #244155;
+}
+
+.level1 {
+    /*background: url(Images/menu_background.jpg) repeat-x;*/
+    font: normal 13px arial;
+    color: #ffffff;
+    padding-left: 0;
+    margin: 0;
+}
+
+.menu .level1 li {
+    list-style: none;
+    display: block;
+}
+
+    .menu .level1 li a {
+        /*background: url(Images/seprator.jpg) no-repeat;*/
+        padding: 0 20px 0 17px;
+        text-decoration: none;
+        float: left;
+        color: #ffffff;
+        line-height: 32px;
+        /*added by amit*/
+        background: linear-gradient(to bottom, #172a3a, #345c75);
+        /*min-width: 80px;*/
+        width: auto;
+        border-right: 2px solid gray;
+        /*added by amit*/
+    }
+
+        .menu .level1 li a:hover {
+            color: #FFFFFF;
+/*            font-size: 12.4px;
+            font-weight: bold;
+            line-height: 32px;*/
+        }
+
+.level2 {
+    /*background:#ffffff3c638e*/;
+    font: normal 13px arial;
+    width: auto;
+    color: #ffffff;
+    padding-left: 0;
+    padding-top: 0px;
+    margin-left: 1px;
+    height: 30px;
+}
+
+/* Code changed by Amit , 01-04-2025*/
+.menu .level2 li {
+    background: #2c5070;
+    width: auto;
+    list-style: none;
+    display: block;
+    text-align: left;
+    z-index: 999;
+}
+
+    .menu .level2 li a {
+        background: #2c5070;
+        width: 200px;
+        padding: 0 0 0 17px;
+        text-decoration: none;
+        font: normal 13px arial;
+        color: #ffffff;
+        line-height: 30px;
+        border-bottom: 1px dashed #62819f;
+        
+    }
+        /*081929*/
+
+        .menu .level2 li a:hover {
+            width: 200px;
+            color: #FFFFFF;
+            font-size: 12.4px;
+            font-weight: bold;
+            line-height: 30px;
+        
+        }
+
+.level3 {
+    /*background:#ffffff3c638e*/
+    font: normal 13px arial;
+    width: auto;
+    color: #ffffff;
+    padding-left: 0;
+    padding-top: 0px;
+    margin-left: 1px;
+    height: 30px;
+}
+
+.menu .level3 li {
+    background: #2c5070;
+    width: auto;
+    list-style: none;
+    display: block;
+    text-align: left;
+}
+
+    .menu .level3 li a {
+        background: #2c5070;
+        width: 200px;
+        padding: 0 0 0 17px;
+        text-decoration: none;
+        float: left;
+        font: normal 13px arial;
+        color: #ffffff;
+        line-height: 30px;
+        border-bottom: 1px dashed #62819f;
+    }
+
+        .menu .level3 li a:hover {
+            font: normal 13px arial;
+            width: 200px;
+            color: #5a7e99;
+            line-height: 30px;
+        }
+
+.level4 {
+    /*background:#ffffff3c638e*/
+    font: normal 13px arial;
+    width: auto;
+    color: #ffffff;
+    padding-left: 0;
+    padding-top: 2px;
+    margin-left: 1px;
+    height: 30px;
+}
+
+.menu .level4 li {
+    background: #2c5070;
+    width: auto;
+    list-style: none;
+    display: block;
+    text-align: left;
+}
+
+    .menu .level4 li a {
+        background: #2c5070;
+        width: 200px;
+        padding: 0 0 0 17px;
+        text-decoration: none;
+        float: left;
+        font: normal 13px arial;
+        color: #ffffff;
+        line-height: 30px;
+        border-bottom: 1px dashed #62819f;
+    }
+
+        .menu .level4 li a:hover {
+            font: normal 13px arial;
+            width: 200px;
+            color: #5a7e99;
+            line-height: 30px;
+        }

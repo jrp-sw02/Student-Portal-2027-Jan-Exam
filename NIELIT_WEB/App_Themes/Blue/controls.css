@@ -1,0 +1,32 @@
+﻿ .txtNormal{border:1px solid #4682B4; font-size:10pt; padding:2px 5px 2px 5px;}
+ .txtNormal:focus{border:1px solid #4682B4; background-color:#f5f5f5; font-size:10pt; padding:2px 5px 2px 5px;}
+ 
+ .txtInput{border:1px solid #ffffff; font-size:10pt; font-family:Arial; padding:3px 0 0px 0; height:20px;}
+ .txtInput:focus{border:1px solid #4682B4; background-color:#ffffff; font-size:10pt; padding:3px 0 0px 0; height:20px;}
+ 
+ .ddlNormal{border:1px solid #4682B4; font-size:10pt; padding:1px 0px 1px 0px;}
+ 
+ .ddlInput{border:none; font-size:10pt;  /*padding:2px 1px 2px 1px;*/ height:20px;}
+ .ddlInput:focus{border:1px solid #4682B4; font-size:10pt; /*padding:1px 0px 1px 0px;*/ height:20px;}
+ 
+ .lblNormal{margin:2px 0 1px 0; text-align:left;}
+ .lblCaption{font-size:13px; font-family:Arial; margin:2px 0 1px 0; float:left; text-align:left;}
+ 
+ .calendar  
+ {
+    border:1px solid #646464;
+    background-color:#FFFFFF;
+    color:#000000;
+    padding-right:0px;
+    margin-right:0px;
+ }
+ 
+ .btnNormal{background:url(Images/btn_normal.jpg); font:bold 12px arial; color:#01060b; text-align:center; height:25px;}
+ .btnNormal:hover{background:url(Images/btn_normal.jpg); font:bold 12px arial; color:#5f8ab6; text-align:center; cursor:pointer; height:25px;}
+ 
+ .lnkBut{padding: 5px 3px 5px 0px; text-decoration: none;font-size: 11px;color: #000000;}
+
+ .lnkBut:hover{	background: #4f81ac; padding: 5px 3px 5px 0px; text-decoration: none;font-size: 11px;color: #ffffff;}
+ 
+ .btn_navigator{background:url(Images/btn_normal.jpg); font:bold 12px arial; color:#01060b; text-align:center; width:54px; height:22px;}
+ .btn_navigator:hover{background:url(Images/btn_normal.jpg); font:bold 12px arial; color:#5f8ab6; text-align:center;  cursor:pointer; height:22px;}

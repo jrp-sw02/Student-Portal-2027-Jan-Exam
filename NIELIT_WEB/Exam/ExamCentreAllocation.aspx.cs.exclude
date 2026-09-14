@@ -1,0 +1,648 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Objects;
+using System.Data.OleDb;
+using System.Linq;
+using System.Text;
+using System.Web.UI.WebControls;
+using EConnect.DAL;
+using EConnect.NIELIT;
+using EConnect.URM;
+
+
+public partial class Exam_ExamCentreAllocation : BasePage
+{
+    UserType loginUserType;
+    Int64 entityID = 0;
+    Int32 currentRoleId = 0;
+    Int32 loginUserNo = 0;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        lblError.Text = "";
+        try
+        {
+            if (IsSessionAlive() == false)
+                Response.Redirect("../Index.aspx");
+            currentRoleId = Convert.ToInt32(Session["RoleID"]);
+            loginUserNo = Convert.ToInt32(Session["UserID"]);
+            if (!UserManager.HasRight(currentRoleId, enmRight.View))
+            {
+                Response.Write("Sorry! You don't have rights  to view this page");
+                Response.End();
+            }
+            loginUserType = (UserType)Session["UserType"];
+            entityID = Convert.ToInt64(Session["EntityID"]);
+
+            if (!IsPostBack)
+            {
+                BindCourseCategory();
+                BindRegionalCentre();
+                BreadCrumb1.AddNewBreadCrumbItem(new BreadCrumbItem("Admit Card Allocation", "#", ""));
+            }
+            BreadCrumb1.Render();
+        }
+        catch (Exception ex)
+        {
+            lblError.Text = ex.Message;
+        }
+
+    }
+
+    private void BindRegionalCentre()
+    {
+        using (var context = new EConnectContext())
+        {
+            ListItem lst = new ListItem("--Select One--", "0");
+            var Rclist = context.RegionalCenters.Select(c => new { ValueField = c.ID, TextField = c.Name });
+
+            EConnect.Utils.Common.ControlUtility.BindListObject(ddlRegionalCentre, Rclist, lst);
+        }
+    }
+    private void BindCourseCategory()
+    {
+        try
+        {
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                var courses = from s in context.CourseCategories
+                              select new { ValueField = s.ID, TextField = s.Name };
+
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlCourseCategry, courses.Distinct(), lst);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message);
+        }
+
+    }
+    protected void SentBulkSMS(List<StudentList> candidateList, Int32 UserID)
+    {
+        StringBuilder mobilemsg = new StringBuilder();
+        for (int i = 0; i < candidateList.Count(); i++)
+        {
+            mobilemsg.Append("Dear " + GetInitCap(candidateList[i].Salutation + " " + candidateList[i].AppName) + "," + " Admit Card for the " + candidateList[i].CourseName + " :- " + candidateList[i].ExamName + " Exam has been uploaded by NIELIT. Please check your E-mail regarding this.");
+            try
+            {
+                //sending SMS 
+                if (candidateList[i].MobileNo != 0)
+                {
+                    EConnect.NIELIT.SMS sms = new SMS(mobilemsg.ToString(), candidateList[i].MobileNo.ToString(), SmsServiceType.BulkSMS, false);
+                    int sentMessageCount;
+                    sms.sendSingleSMS(out sentMessageCount);
+
+                    //EConnect.NIELIT.SMS message = new SMS(mobilemsg, candidateList[i].MobileNo.ToString(), SmsServiceType.SignleSMS);
+                    //int sentMessageCount;
+                    //message.Send(out sentMessageCount);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            mobilemsg.Clear();
+        }
+    }
+    protected void SentBulkEmail(List<StudentList> candidateList, Int32 UserID)
+    {
+        StringBuilder emailmsg = new StringBuilder();
+        for (int i = 0; i < candidateList.Count(); i++)
+        {
+            emailmsg.Append("Dear " + GetInitCap(candidateList[i].Salutation + " " + candidateList[i].AppName) + ",<br/><br/>" + " Admit Card for the <b>" + candidateList[i].CourseName + " :- " + candidateList[i].ExamName + " </b> Exam has been uploaded by NIELIT. You can download your admit card from <b> NIELIT Website (http://student.nielit.gov.in) </b> with your Application-Number (<b>" + candidateList[i].Appno + "</b>)");
+            try
+            {
+                //sending SMS 
+                if (candidateList[i].Email.Trim().Length > 0)
+                {
+                    //EConnect.NIELIT.Email mail = new Email("Admit Card Notification:NIELIT", emailmsg, candidateList[i].Email, false);
+                    //mail.SendInThread(UserID);
+
+                    EConnect.NIELIT.Email mail1 = new Email("Admit Card Notification:NIELIT", emailmsg.ToString(), candidateList[i].Email);
+                    mail1.Send();
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            emailmsg.Clear();
+        }
+    }
+    protected void ddlCourseCategry_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+
+            int courseCatId = Convert.ToInt32(ddlCourseCategry.SelectedValue);
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                var courses = from s in context.Courses
+                              where s.CourseCategoryID == courseCatId
+                              select new { ValueField = s.ID, TextField = s.Name };
+
+                courses = courses.Distinct();
+                EConnect.Utils.Common.ControlUtility.BindListObject(ddlCourseName, courses, lst);
+            }
+            ddlCourseName.SelectedValue = "0";
+            ddlCourseName_SelectedIndexChanged(ddlCourseName, EventArgs.Empty);
+
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ddlCourseName_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            Int32 cid = Convert.ToInt32(ddlCourseName.SelectedValue);
+            ListItem lst = new ListItem("--Select One--", "0");
+            using (EConnectContext context = new EConnectContext())
+            {
+                Course cr = context.Courses.Find(cid);
+                if (cr != null)
+                {
+                    var courses = from s in context.ExaminationCycles
+                                  join a in context.ApplicationTypes on s.Course.CourseTypeID equals a.CourseTypeID
+                                  where s.CourseID == cid
+                                  select new { ValueField = s.ID, TextField = s.Name };
+                    EConnect.Utils.Common.ControlUtility.BindListObject(ddlExamCycle, courses.Distinct(), lst);
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ddlExamCycle_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            int courseId = Convert.ToInt32(ddlCourseName.SelectedValue);
+            int ExamCycleId = Convert.ToInt32(ddlExamCycle.SelectedValue);
+
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                if (courseId > 0 && ExamCycleId > 0)
+                {
+                    Course currentcourse = context.Courses.Find(courseId);
+
+                    var courses = (from s in context.Exams
+                                   where s.CourseID == courseId && s.ExaminationCycleID == ExamCycleId && s.DateOfPublishingOfTimeTable <= System.Data.Entity.DbFunctions.TruncateTime(DateTime.Now)
+                                   select new { ValueField = s.ExamYear, TextField = s.ExamYear }).Distinct();
+                    courses = courses.OrderByDescending(s => s.ValueField);
+                    courses = courses.OrderByDescending(s => s.ValueField);
+                    EConnect.Utils.Common.ControlUtility.BindListObject(ddlExamYear, courses, lst);
+                    ddlExamYear_SelectedIndexChanged(ddlExamYear, EventArgs.Empty);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void ddlExamYear_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            int courseId = Convert.ToInt32(ddlCourseName.SelectedValue);
+            int ExamCycleId = Convert.ToInt32(ddlExamCycle.SelectedValue);
+            int examYear = Convert.ToInt32(ddlExamYear.SelectedValue);
+            using (var context = new EConnectContext())
+            {
+                ListItem lst = new ListItem("--Select One--", "0");
+                if (courseId > 0 && examYear > 0 && ExamCycleId > 0)
+                {
+
+                    var courses = (from s in context.Exams
+                                   where s.CourseID == courseId && s.ExaminationCycleID == ExamCycleId && s.ExamYear == examYear
+                                   && s.DateOfPublishingOfTimeTable <= System.Data.Entity.DbFunctions.TruncateTime(DateTime.Now)
+                                   select new { ValueField = s.ID, TextField = s.Name }).Distinct();
+                    courses = courses.OrderByDescending(s => s.ValueField);
+                    EConnect.Utils.Common.ControlUtility.BindListObject(ddlExamName, courses, lst);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert(ex.Message, true);
+        }
+    }
+    protected void btnAllocate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            using (var context = new EConnectContext())
+            {
+                int ExamId = Convert.ToInt32(ddlExamName.SelectedValue);
+                int RCId = Convert.ToInt32(ddlRegionalCentre.SelectedValue);
+                List<DateTime> ExamDates = new List<DateTime>();
+                Dictionary<int, string> BatchList = new Dictionary<int, string> { { 1, "9:15AM" }, { 2, "11:00AM" }, { 3, "1:15Pm" }, { 4, "3:30PM" } };
+                int TotalCand = 0;
+
+                var CandidateList = context.CertificateExamApplications.
+                                    Where(s => s.ExamID == ExamId
+                                    && s.RegionalCenterID == RCId
+                                    && s.FinalSubmitted == true
+                                    && s.PaymentStatusID == 2).
+                                    Select(p => new
+                                    {
+                                        AppId = p.ID,
+                                        Gender = p.Gender,
+                                        FirstChoice = p.ExamCenter1.Code.Trim(),
+                                        SecondChoice = p.ExamCenter2.Code.Trim(),
+                                        InstituteId = (p.InstituteID != null) ? p.InstituteID : 0
+                                    }).ToList();
+                CandidateList = CandidateList.OrderBy(s => s.FirstChoice).ThenBy(s => s.SecondChoice).ToList();
+                TotalCand = CandidateList.Count();
+              
+
+                List<Allocation> SeatList = GetSeatList(ExamId, RCId, TotalCand, BatchList);
+                SeatList = SeatList.OrderBy(s => s.CityCode).ToList();
+                //--Allocation-------------------   
+                List<Int64> RemainingList = new List<Int64>();
+                List<Allocation> TempList, NewList = new List<Allocation>();
+
+                for (int i = 0, j = 0; i < TotalCand; i++)
+                {
+                    TempList = SeatList.Where(s => s.IsAllocated == false).ToList();
+                    String FirstChoice = CandidateList[i].FirstChoice;
+                    String SecondChoice = CandidateList[i].SecondChoice;
+                    int AvailableList = SeatList.Where(s => (s.CityCode == FirstChoice || s.CityCode == SecondChoice) && s.IsAllocated == false).Count();
+
+                    if (AvailableList > 0)
+                    {
+                        TempList = SeatList.Where(s => (s.CityCode == FirstChoice || s.CityCode == SecondChoice) && s.IsAllocated == false).ToList();
+                        TempList.ElementAtOrDefault(0).AppId = CandidateList[i].AppId;
+                        TempList.ElementAtOrDefault(0).FirstChoice = CandidateList[i].FirstChoice;
+                        TempList.ElementAtOrDefault(0).SecondChoice = CandidateList[i].SecondChoice;
+                        TempList.ElementAtOrDefault(0).IsAllocated = true; 
+                   
+                        SeatList.Remove(TempList.ElementAtOrDefault(0));                       
+                        NewList.Add(TempList.ElementAtOrDefault(0));
+                    }
+                    else
+                    {
+                        RemainingList.Add(CandidateList[i].AppId);
+                    }
+                }
+                var LeftCandidateList = CandidateList.Where(s => RemainingList.Contains(s.AppId));
+                if (RemainingList.Count() > 0)
+                {
+                    List<Allocation> TempList1 = new List<Allocation>();
+                    TempList1 = SeatList.Where(s => s.IsAllocated == false).ToList();
+                    foreach (var item in LeftCandidateList)
+                    {
+                        TempList1 = SeatList.Where(s => s.IsAllocated == false).OrderBy(s => s.ExamDate).ThenBy(s => s.BatchId).ToList();
+                        TempList1.ElementAtOrDefault(0).AppId = item.AppId;
+                        TempList1.ElementAtOrDefault(0).FirstChoice = item.FirstChoice;
+                        TempList1.ElementAtOrDefault(0).SecondChoice = item.SecondChoice;
+                        TempList1.ElementAtOrDefault(0).IsAllocated = false;
+
+                        SeatList.Remove(TempList1.ElementAtOrDefault(0));                      
+                        NewList.Add(TempList1.ElementAtOrDefault(0));
+                    }
+                }
+                NewList = NewList.Where(s => s.AppId != 0).OrderBy(s => s.ExamDate).ThenBy(s => s.CityCode).ThenBy(s => s.CentreCode).ToList();
+                //-------------------------------
+                //--Allocate Roll Number-------
+                List<String> RollNumberList = GenerateRollNumber(ExamId, RCId, TotalCand);
+                for (int i = 0; i < TotalCand; i++)
+                {
+                    NewList[i].RollNumber = RollNumberList[i];
+                }
+                NewList = NewList.OrderBy(s => ExamDates).ThenBy(s => s.CentreCode).ThenBy(s => s.BatchId).ToList();
+                //--------
+                if (NewList.Count() > 0)
+                {
+                    OleDbConnection connection = new OleDbConnection();
+                    OleDbCommand command = new OleDbCommand();
+                    string mdbFilePath = "";
+                    String filename = "";
+
+                    DataTable dtTbl = new DataTable();
+
+                    string regCentreCode = context.RegionalCenters.Find(RCId).Code;
+                    string ExamCode = context.Exams.Find(ExamId).Name;
+                    filename = "Exam_Centre_Allocated" + "_" + regCentreCode + "_" + DateTime.Now.ToString("ddMMyyyyHHmm") + ".accdb";
+
+                    mdbFilePath = Server.MapPath("~/Download/" + filename);
+                    if (System.IO.File.Exists(mdbFilePath))
+                        System.IO.File.Delete(mdbFilePath);
+
+                    System.IO.File.Copy(Server.MapPath("~/Download/Exam_Centre_Database.accdb"), mdbFilePath);
+
+                    string connect = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + mdbFilePath + ";Persist Security Info=False;";
+                    //string connect = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + mdbFilePath + ";Persist Security Info=False;";
+                    connection.ConnectionString = connect;
+                    connection.Open();
+                    command = new OleDbCommand("delete from  [MS Access;Database=" + mdbFilePath + "].[Exam_Centre_Allocated]", connection);
+                    command.ExecuteNonQuery();
+                    String sqlStr = "";
+
+                    for (int i = 0; i < NewList.Count(); i++)
+                    {
+                        sqlStr = " insert into [MS Access;Database=" + mdbFilePath + "].[Exam_Centre_Allocated] (Application_ID,Rollno,FirstChoice,SecondChoice,cent_allot,cent_add,batch,rep_time,examDate,is_allocated";
+
+                        sqlStr += "      ) " +
+                                        " values( '" + NewList[i].AppId + "', '" + NewList[i].RollNumber + "','" + NewList[i].FirstChoice + "','" + NewList[i].SecondChoice + "', '" + NewList[i].CentreCode + "',  '" + NewList[i].CentreAddress + "', '" + NewList[i].BatchId + "', '" + NewList[i].RepTime + "', '" + NewList[i].ExamDate + "', '" + NewList[i].IsAllocated + "'";
+                        sqlStr += ")";
+
+                        command = new OleDbCommand(sqlStr, connection);
+                        command.ExecuteNonQuery();
+                    }
+                    command.Dispose();
+                    connection.Close();
+                    connection.Dispose();
+                    Response.AddHeader("content-disposition", "attachment;filename=" + filename);
+                    Response.ContentType = "application/octet-stream";
+                    Response.Charset = "UTF-8";
+                    Response.WriteFile(mdbFilePath);
+                }
+            }
+
+
+        }
+
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    #region Comment
+    //protected static List<DateTime> GetExamDateSheet(int ExamId, int RCId)
+    //{
+    //    EConnectContext context = new EConnectContext();
+    //    int NuberofRestrictedDays = 0, NoOfRequiredDays = 0, ExatraCandCount = 0;
+    //    var DateSheet = new List<DateTime>();
+    //    DateTime Start = new DateTime(2017, 3, 30);  // Get Start date for Given ExamId
+    //    List<DateTime> RestrictedDate = new List<DateTime>() { new DateTime(2017, 3, 31) }; // Get restricted Date for given Examid
+
+    //    var CentreChoice = (from p in context.ExamCentreChoiceStats
+    //                                         where p.ExamId == ExamId && p.RegionalCentreId == RCId
+    //                                         select new
+    //                                         {
+    //                                             CityCode = p.CityCode,
+    //                                             FirstChoice = p.FirstChoiceTotal,
+    //                                             SecondChoice = p.SecondChoiceTotal
+    //                                         });
+
+    //    var CentreList = context.ExamCentreAvailableStats.
+    //                             Where(s => s.ExamId == ExamId && s.RegionalCentreId == RCId).
+    //                             GroupBy(s => s.CentreCode).                                
+    //                             Select(p => new
+    //                             {
+    //                                 CityCode = p.Key,                                   
+    //                                 OneDayExamBatchCapacity = (p.Sum(s => s.CentreBatchSize))*4,
+    //                                 OneDayExamBufferCapacity = (p.Sum(s => s.CentreBatchBufferSize))*4,                                     
+    //                             });
+    //    NuberofRestrictedDays = RestrictedDate.Count;
+    //    NoOfRequiredDays = NoOfRequiredDays + NuberofRestrictedDays;
+
+    //    //foreach (var item in CentreList)
+    //    //{
+    //    //    int ExistCentreChoice = CentreChoice.Where(s => s.CityCode == item.CityCode).Count();
+    //    //    if (ExistCentreChoice > 0)
+    //    //    {
+    //    //        var Centre = CentreChoice.Where(s => s.CityCode == item.CityCode).FirstOrDefault();
+    //    //        int totcandFirstChoice = Centre.FirstChoice;
+    //    //        int totcandSecondChoice = Centre.SecondChoice;
+    //    //        int RequiredDays = (int)(Math.Floor((double)totcandFirstChoice / item.OneDayExamBatchCapacity));
+    //    //    }
+
+    //    //}
+    //    //int OneDayCentreCapacity = CentreList.AsEnumerable().Sum(s => (s.BatchSize) * 4);
+    //    //int OneDayCentreBufferCapacity = CentreList.AsEnumerable().Sum(s => (s.BufferSize) * 4); 
+
+
+
+
+    //    //ExatraCandCount = TotalCand % OneDayCentreCapacity;
+    //    //NoOfRequiredDays += (int)(Math.Floor((double)TotalCand / OneDayCentreCapacity));
+    //    //if (ExatraCandCount > OneDayCentreBufferCapacity / 4)
+    //    //{ NoOfRequiredDays += 1; }
+
+    //    //DateTime CounterDates = new DateTime();
+    //    //for (int i = 0; i < NoOfRequiredDays; i++)
+    //    //{
+    //    //    CounterDates = Start;
+    //    //    if (RestrictedDate.Contains(CounterDates))
+    //    //    { }
+    //    //    else { DateSheet.Add(CounterDates); }
+    //    //    Start = Start.AddDays(1);
+
+    //    //}
+    //    return DateSheet;
+    //}
+    #endregion
+    protected List<String> GenerateRollNumber(int ExamId, int RegionalCentreId, int TotalCand)
+    {
+        //-----Total Length is 12 of a Roll Number------------
+        List<String> RollNumbers = new List<string>();
+        var context = new EConnectContext();
+        String ExamYear = "", ExamMonth = "", CourseCode = "", RollNumber = "", serial = "";
+        var Exam = context.Exams.Find(ExamId);
+        var RcCode = context.RegionalCenters.Find(RegionalCentreId).Code;
+
+        ExamYear = Exam.ExamYear.ToString().Substring(2, 2);
+        ExamMonth = Exam.ExamMonth.ToString();
+        if (ExamMonth.Length == 1)
+        { ExamMonth = "0" + ExamMonth; }
+        CourseCode = Exam.Course.Code;
+
+        if (CourseCode == "CCC")
+            RollNumber = RcCode + ExamYear + ExamMonth;
+        else if (CourseCode == "BCC")
+            RollNumber = RcCode + "B" + ExamYear + ExamMonth;
+        else if (CourseCode == "CCCP")
+            RollNumber = RcCode + "C" + ExamYear + ExamMonth;
+        else if (CourseCode == "ECC")
+            RollNumber = RcCode + "EC" + ExamYear + ExamMonth;
+        else if (CourseCode == "POS-EXAM")
+            RollNumber = RcCode + "I" + ExamYear + ExamMonth;
+        else
+        { }
+        String TempRollNumber = RollNumber;
+        for (int Number = 1; Number <= TotalCand; Number++)
+        {
+
+            if (CourseCode == "CCC")
+                serial = Number.ToString("D6");
+            else if (CourseCode == "BCC")
+                serial = Number.ToString("D5");
+            else if (CourseCode == "CCCP")
+                serial = Number.ToString("D5");
+            else if (CourseCode == "ECC")
+                serial = Number.ToString("D4");
+            else if (CourseCode == "POS-EXAM")
+                serial = Number.ToString("D5");
+            else { }
+            RollNumber = TempRollNumber + serial;
+            RollNumbers.Add(RollNumber);
+        }
+        return RollNumbers;
+    }
+
+    protected static List<Allocation> GetSeatList(int ExamId, int RCid, int TotalCand, Dictionary<int, string> BatchList)
+    {
+        var context = new EConnectContext();
+        List<Allocation> AllocationList = new List<Allocation>();
+        #region comment
+        //var CentreList = context.ExamCentreAvailableStats.Join(context.ExamCentreExamDates, p => p.CentreCode, q => q.CentreCode, (p, q) => new{p, q}). 
+        //                         Where(s => s.ExamId == ExamId && s.RegionalCentreId == RCid).
+        //                         Select(p => new
+        //                         {
+        //                             CityCode = p.CityCode,
+        //                             CentreCode = p.CentreCode,
+        //                             BatchSize = p.CentreBatchSize,
+        //                             BufferSize = p.CentreBatchBufferSize,
+        //                             CCCId = (p.CentreCCCId != 0) ? p.CentreCCCId : 0,
+        //                             CentreAddress = p.CentreAddress
+        //                         }); 
+        #endregion
+        var CentreList = from p in context.ExamCentreAvailableStats
+                         join q in context.ExamCentreExamDates on p.CentreCode equals q.CentreCode
+                         where p.ExamId == ExamId && p.RegionalCentreId == RCid && q.ExamId == ExamId && q.RegionalCentreId == RCid
+                         select new
+                         {
+                             CityCode = p.CityCode,
+                             CentreCode = p.CentreCode,
+                             BatchSize = p.CentreBatchSize,
+                             BufferSize = p.CentreBatchBufferSize,
+                             CCCId = (p.CentreCCCId != 0) ? p.CentreCCCId : 0,
+                             CentreAddress = p.CentreAddress,
+                             ExamDate = q.ExamDate
+                         };
+        CentreList = CentreList.OrderBy(s => s.ExamDate);
+
+        int TicketNumber = 0;
+        foreach (var item in CentreList)
+        {
+
+            //for (int i = 0; i < ExamDates.Count; i++)
+            //{
+            for (int j = 0; j < BatchList.Count; j++)
+            {
+                int BatchId = BatchList.Keys.ElementAt(j);
+                String RepTime = BatchList[BatchId];
+                for (int k = 0; k < item.BatchSize; k++)
+                {
+                    Allocation aloc = new Allocation();
+
+                    aloc.TicketNo = ++TicketNumber;
+                    aloc.AppId = 0;
+                    aloc.RollNumber = "";
+
+                    aloc.CCCId = item.CCCId;
+                    aloc.CityCode = item.CityCode;
+                    aloc.CentreCode = item.CentreCode;
+                    aloc.CentreAddress = item.CentreAddress;
+
+                    aloc.ExamDate = item.ExamDate;
+                    aloc.BatchId = BatchId;
+                    aloc.RepTime = RepTime;
+                    aloc.IsAllocated = false;
+                    AllocationList.Add(aloc);
+                }
+
+            }
+            //}
+        }
+
+        return AllocationList;
+    }
+
+    protected void ApplyRestriction()
+    {
+        // 1. Allocate to Neutral Centre First.
+        // 1. Institute candidate should be alloted to Neutral Centre (having no CCCNo), if possible.
+        // 2. Female Candidate should be given priority in Centre Choice list.
+    }
+
+}
+public class Allocation
+{
+    public Int32 TicketNo = 0;
+    public Int64 AppId;
+    public string FirstChoice;
+    public string SecondChoice;
+    public String RollNumber;
+
+    public Int64 CCCId;
+    public String CityCode;
+    public String CentreCode;
+    public String CentreAddress;
+
+    public Int32 BatchId;
+    public DateTime ExamDate;
+    public String RepTime;
+
+    public bool IsAllocated;
+}
+public class CandidateList
+{
+    public Int64 AppId;
+    public String Gender;
+    public String FirstChoice;
+    public String SecondChoice;
+    public String Nochoice;
+    public Int64? InstituteId;
+}
+
+public class CentreList { }
+
+public class CandidateChoice
+{
+    public String CityCode;
+    public int FirstChoice;
+    public int SecondChoice;
+}
+
+public class StudentList
+{
+
+    public Int64 MobileNo
+    {
+        get;
+        set;
+    }
+    public String Email
+    {
+        get;
+        set;
+    }
+    public String AppName
+    {
+        get;
+        set;
+    }
+    public String Salutation
+    {
+        get;
+        set;
+    }
+    public String ExamName
+    {
+        get;
+        set;
+    }
+    public String CourseName
+    {
+        get;
+        set;
+    }
+    public String Appno
+    {
+        get;
+        set;
+    }
+}

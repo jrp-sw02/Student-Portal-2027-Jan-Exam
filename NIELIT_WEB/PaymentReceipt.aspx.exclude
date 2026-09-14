@@ -1,0 +1,125 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="PaymentReceipt.aspx.cs" Inherits="PaymentReceipt"
+    MasterPageFile="~/MasterPages/MyInfo.master" %>
+
+<%@ Register Src="UserControl/NormalHeader.ascx" TagName="NormalHeader" TagPrefix="uc1" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="chpHeading" runat="Server">
+</asp:Content>
+<asp:Content ID="Content4" ContentPlaceHolderID="cphBreadScrum" runat="Server">
+</asp:Content>
+<asp:Content ID="Content5" ContentPlaceHolderID="cphContents" runat="Server">
+    <center>
+        <div class="sample3">
+            <table class="box" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr class="head1" align="left" style="line-height: 25px">
+                    <td>
+                        <strong>Transaction Details: </strong><span style="float: right;">Click here to go to
+                            the
+                            <asp:LinkButton ID="Lnkhome" runat="server" Height="26px" Text="Home Page" Style="vertical-align: top;
+                                color: #FFFFFF;" OnClick="Lnkhome_Click" />
+                        </span>
+                    </td>
+                </tr>
+                <tr class="gdalternate1" runat="server" id="TrdddetailE">
+                    <td style="text-align: left; font-size: 12pt; font-style: normal; color: #000099;
+                        line-height: 25px;">
+                        <asp:Label ID="Lblddmessage" runat="server" Text="You have successfully submitted the demand draft information. Please Attach the demand draft alongwith your Form and send to the NIELIT Centre as indicated in the application form before last date.  "></asp:Label>
+                        <div id="DivTransactionE" runat="server">
+                        </div>
+                    </td>
+                </tr>
+                <tr class="gdalternate1" runat="server" id="TrdddetailH">
+                    <td style="text-align: left; font-size: 12pt; font-style: normal; color: #000099;
+                        line-height: 25px;">
+                        <br />
+                        <asp:Label ID="LblddmessageH" runat="server"
+                        text = "आपने सफलतापूर्वक डिमांड ड्राफ्ट जानकारी प्रस्तुत की है. अपने आवेदन पत्र के साथ डिमांड
+                        ड्राफ्ट संलग्न करे और आवेदन पत्र में निर्दिष्ट NIELIT केंद्र को अंतिम तिथि से पहले
+                        भेजें|"></asp:Label>
+                        <br />
+                        <div id="DivTransactionH" runat="server">
+                        </div>
+                    </td>
+                </tr>
+                <tr class="gdalternate1" runat="server" id="TrneftE">
+                    <td style="text-align: left; font-size: 12pt; font-style: normal; color: #000099;
+                        line-height: 25px;">
+                        <asp:Label ID="lblmessage" runat="server" Text="You have successfully submitted the NEFT/RTGS electronic transfer information details."></asp:Label>
+                        <div id="DivNeftTransactionE" runat="server">
+                        </div>
+                    </td>
+                </tr>
+                <tr class="gdalternate1" runat="server" id="TrneftH">
+                    <td style="text-align: left; font-size: 12pt; font-style: normal; color: #000099;
+                        line-height: 25px;">
+                        <br />
+                         <asp:Label ID="lblmessageH" runat="server"
+                         text ="आपने सफलतापूर्वक एनईएफटी / आरटीजीएस इलेक्ट्रॉनिक ट्रांसफर जानकारी प्रस्तुत की है."></asp:Label>
+                        <br />
+                        <div id="DivNeftTransactionH" runat="server">
+                        </div>
+                    </td>
+                </tr>
+                <tr class="gdalternate1">
+                    <td colspan="2" align="right" style="font-size: 12pt;">
+                        <br />
+                    </td>
+                </tr>
+                <tr class="gdalternate1" id="trseparator" runat="server">
+                    <td height="25">
+                    </td>
+                </tr>
+                <tr class="gdalternate1" align="left">
+                    <td>
+                        <div id="divCSC" runat="server">
+                            <table width="100%">
+                                <tr class="head1">
+                                    <td style="text-align: left;">
+                                        <strong>Payment By CSC </strong>:
+                                    </td>
+                                </tr>
+                                <tr class="gdrow1">
+                                    <td style="text-align: left;">
+                                        CSC trans
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="DivOnline" runat="server">
+                            <table width="100%">
+                                <tr class="head1">
+                                    <td colspan="2" style="text-align: left;">
+                                        <strong>Payment By Online:</strong>
+                                    </td>
+                                </tr>
+                                <tr class="gdalternate1">
+                                    <td style="text-align: left;">
+                                        payonline transaction&nbsp;
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="DivDD" runat="server">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr class="head1" align="left">
+                                    <td>
+                                        <strong>Payment By Demand Draft: </strong>
+                                    </td>
+                                </tr>
+                                <tr class="gdalternate1">
+                                    <td align="left" width="20%" colspan="2">
+                                        <asp:Label ID="LblD" runat="server" Text="You have succesfully submitted the demand draft information. Please Attach the demand draft alongwith your Form and send to the NIELIT Centre as indicated in the application form before last date ./  आपने सफलतापूर्वक डिमांड ड्राफ्ट जानकारी प्रस्तुत की है. अपने प्रपत्र  के साथ डिमांड ड्राफ्ट संलग्न करे और आवेदन पत्र में निर्दिष्ट NIELIT केंद्र को भेजें|"></asp:Label>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="text-align: right; margin-top: 10px">
+            <%--  <asp:Button ID="BtnCancel" runat="server" Text="Cancel" />--%>
+        </div>
+    </center>
+</asp:Content>

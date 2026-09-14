@@ -1,0 +1,225 @@
+BODY {
+	PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px;  VERTICAL-ALIGN: top; PADDING-TOP: 0px
+}
+#top_header {
+	BACKGROUND: #000000; HEIGHT: 40px
+}
+.contact_no {
+	WIDTH: 100px; FONT: 10px verdana; COLOR: #ffffff
+}
+.clock {
+	WIDTH: 200px; FONT: 10px verdana; COLOR: #ffffff
+}
+#Header {
+	WIDTH: 958px; BACKGROUND: #000000 center 50%; HEIGHT: 179px
+}
+.Header2 {
+	BORDER-BOTTOM: #ffffff 1px solid; BORDER-LEFT: #ffffff 1px solid; MARGIN: 10px; WIDTH: 933px; BACKGROUND: #000000; HEIGHT: 160px; BORDER-TOP: #ffffff 1px solid; BORDER-RIGHT: #ffffff 1px solid
+}
+#inner {
+	BORDER-BOTTOM: #ffffff 1px solid; BORDER-LEFT: #ffffff 1px solid; MARGIN: 5px; WIDTH: 920px; BACKGROUND: #70a3c3; HEIGHT: 149px; BORDER-TOP: #ffffff 1px solid; BORDER-RIGHT: #ffffff 1px solid
+}
+#inner2 {
+	BORDER-BOTTOM: #ffffff 1px solid; TEXT-ALIGN: center; BORDER-LEFT: #ffffff 1px solid; MARGIN: 2px; FONT: bold 18px/24px Times New Roman; BACKGROUND: #70a3c3; HEIGHT: 30px; COLOR: #ffffff; BORDER-TOP: #ffffff 1px solid; BORDER-RIGHT: #ffffff 1px solid
+}
+.logo {
+	MARGIN: 20px 0px 0px 20px; WIDTH: 82px; HEIGHT: 120px
+}
+.heading {
+	BORDER-BOTTOM: #a77100 1px dashed; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; WIDTH: 925px; PADDING-RIGHT: 0px; FONT: 24px Times New Roman; COLOR: #82b200; MARGIN-LEFT: 20px; PADDING-TOP: 10px
+}
+.heading2 {
+	BORDER-BOTTOM: #2f5973 1px dashed; PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; FONT: 13px arial; BACKGROUND: #afcee1; FLOAT: left; COLOR: #2f5973; MARGIN-LEFT: 10px; PADDING-TOP: 2px
+}
+.heading3 {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 20px; PADDING-RIGHT: 0px; FONT: 18px/30px arial; BACKGROUND: #ff7e00; HEIGHT: 34px; COLOR: #ffffff; PADDING-TOP: 0px
+}
+.background_txt {
+	WIDTH: 1000px; BACKGROUND: url(../Images/background.jpg) repeat-y center top
+}
+.box_txt {
+	TEXT-ALIGN: left; FONT: 13px/18px arial; BACKGROUND: #afcee1; COLOR: #333333
+}
+.clear {
+	HEIGHT: 0px; CLEAR: both; FONT-SIZE: 0px; OVERFLOW: hidden
+}
+.nav {
+	TEXT-ALIGN: left; WIDTH: 550px; FONT: 24px/65px Times New Roman; FLOAT: right; COLOR: #ffffff
+}
+.nav UL {
+	PADDING-BOTTOM: 0px; LIST-STYLE-TYPE: none; MARGIN: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; LIST-STYLE-IMAGE: none; PADDING-TOP: 0px
+}
+.nav UL A {
+	LIST-STYLE-TYPE: none; LIST-STYLE-IMAGE: none
+}
+.nav LI {
+	WIDTH: 550px
+}
+.nav LI A {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 18px; PADDING-RIGHT: 0px; DISPLAY: block; COLOR: #4b4b4b; TEXT-DECORATION: none; PADDING-TOP: 0px
+}
+.nav LI A:hover {
+	DISPLAY: block; BACKGROUND: #f4f4f4; COLOR: #30638d; TEXT-DECORATION: none
+}
+.nav_02 {
+	TEXT-ALIGN: left; WIDTH: 97%; FONT: 13px/30px arial; FLOAT: left; COLOR: #ffffff
+}
+.nav_02 UL {
+	PADDING-BOTTOM: 0px; LIST-STYLE-TYPE: none; MARGIN: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 0px; LIST-STYLE-IMAGE: none; PADDING-TOP: 0px
+}
+.nav_02 UL A {
+	LIST-STYLE-TYPE: none; LIST-STYLE-IMAGE: none
+}
+.nav_02 LI {
+	BORDER-BOTTOM: #d8d8d8 1px dashed; BORDER-LEFT: #d8d8d8 1px dashed; BORDER-TOP: #d8d8d8 1px dashed; BORDER-RIGHT: #d8d8d8 1px dashed
+}
+.nav_02 LI A {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 18px; PADDING-RIGHT: 0px; DISPLAY: block; COLOR: #4b4b4b; TEXT-DECORATION: none; PADDING-TOP: 0px
+}
+.nav_02 LI A:hover {
+	DISPLAY: block; BACKGROUND: #f4f4f4; COLOR: #30638d; TEXT-DECORATION: none
+}
+.btn_feedback {
+	WIDTH: 90px; HEIGHT: 20px
+}
+.btn_feedback A {
+	WIDTH: 90px; DISPLAY: block; BACKGROUND: url(../Images/feedback.jpg) no-repeat center top; HEIGHT: 20px
+}
+.btn_feedback A:hover {
+	WIDTH: 90px; BACKGROUND-POSITION: center bottom; HEIGHT: 20px
+}
+.btn_GetFilledForm {
+	WIDTH: 156px; BACKGROUND: url(../Images/btn_01.jpg) no-repeat center top; HEIGHT: 54px
+}
+.btn_GetFilledForm A {
+	WIDTH: 156px; DISPLAY: block; BACKGROUND: url(../Images/btn_01.jpg) no-repeat center top; HEIGHT: 54px
+}
+.btn_GetFilledForm A:hover {
+	WIDTH: 156px; BACKGROUND-POSITION: center bottom; HEIGHT: 54px
+}
+.btn_PrintAdmissionCard {
+	WIDTH: 156px; BACKGROUND: url(../Images/btn_02.jpg) no-repeat center top; HEIGHT: 59px
+}
+.btn_PrintAdmissionCard A {
+	WIDTH: 156px; DISPLAY: block; BACKGROUND: url(../images/btn_02.jpg) no-repeat center top; HEIGHT: 59px
+}
+.btn_PrintAdmissionCard A:hover {
+	WIDTH: 156px; BACKGROUND-POSITION: center bottom; HEIGHT: 59px
+}
+.btn_CheckTokenStatus {
+	WIDTH: 151px; BACKGROUND: url(../Images/btn_03.jpg) no-repeat center top; FLOAT: left; HEIGHT: 60px
+}
+.btn_CheckTokenStatus A {
+	WIDTH: 151px; DISPLAY: block; BACKGROUND: url(../Images/btn_03.jpg) no-repeat center top; HEIGHT: 60px
+}
+.btn_CheckTokenStatus A:hover {
+	WIDTH: 151px; BACKGROUND-POSITION: center bottom; HEIGHT: 60px
+}
+.btn_GetResult {
+	WIDTH: 151px; BACKGROUND: url(../Images/btn_04.jpg) no-repeat center top; HEIGHT: 62px
+}
+.btn_GetResult A {
+	WIDTH: 151px; DISPLAY: block; BACKGROUND: url(../Images/btn_04.jpg) no-repeat center top; HEIGHT: 62px
+}
+.btn_GetResult A:hover {
+	WIDTH: 151px; BACKGROUND-POSITION: center bottom; HEIGHT: 62px
+}
+.menu_div {
+	WIDTH: 571px; BACKGROUND: url(../Images/menu_backgound.jpg) no-repeat left top; HEIGHT: 27px
+}
+.menu_div UL {
+	PADDING-BOTTOM: 0px; LIST-STYLE-TYPE: none; MARGIN: 0px; PADDING-LEFT: 20px; PADDING-RIGHT: 0px; FONT: 11px/25px verdana; LIST-STYLE-IMAGE: none; PADDING-TOP: 0px
+}
+.menu_div UL LI {
+	PADDING-BOTTOM: 2px; PADDING-LEFT: 55px; PADDING-RIGHT: 0px; FLOAT: left; PADDING-TOP: 2px
+}
+.menu_div UL LI A {
+	COLOR: #fff; TEXT-DECORATION: none
+}
+.menu_div UL LI A:hover {
+	COLOR: #cccccc
+}
+.menu_div UL LI#active A {
+	BACKGROUND: #c80202; COLOR: #fff
+}
+.txt_marque {
+	WIDTH: 950px; FONT: 13px arial; HEIGHT: 20px; COLOR: #337c9d; MARGIN-LEFT: 24px
+}
+.txt_marque2 {
+	WIDTH: 892px; FONT: 13px arial; HEIGHT: 20px; COLOR: #337c9d
+}
+.footer {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 10px; PADDING-RIGHT: 0px; FONT: 13px arial; COLOR: #ffffff; VERTICAL-ALIGN: middle; PADDING-TOP: 0px
+}
+.footer A {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 10px; PADDING-RIGHT: 0px; FONT: 13px arial; COLOR: #ffffff; VERTICAL-ALIGN: middle; TEXT-DECORATION: none; PADDING-TOP: 0px
+}
+.footer A:hover {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 10px; PADDING-RIGHT: 0px; FONT: 13px arial; HEIGHT: 30px; COLOR: #84d1f3; VERTICAL-ALIGN: middle; PADDING-TOP: 0px
+}
+.footer2 {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 10px; PADDING-RIGHT: 0px; FONT: 13px arial; BACKGROUND: #3783a5; COLOR: #ffffff; VERTICAL-ALIGN: middle; PADDING-TOP: 0px
+}
+.footer2 A {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 10px; PADDING-RIGHT: 0px; FONT: 13px arial; BACKGROUND: #3783a5; COLOR: #ffffff; VERTICAL-ALIGN: middle; TEXT-DECORATION: none; PADDING-TOP: 0px
+}
+.footer2 A:hover {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 10px; PADDING-RIGHT: 0px; FONT: 13px arial; BACKGROUND: #3783a5; HEIGHT: 30px; COLOR: #84d1f3; VERTICAL-ALIGN: middle; PADDING-TOP: 0px
+}
+.Buttons {
+	BORDER-BOTTOM: #045abe 1px solid; BORDER-LEFT: #045abe 1px solid; MARGIN: 1px 0px 1px 5px; BACKGROUND: #3783a5; COLOR: #ffffff; BORDER-TOP: #045abe 1px solid; CURSOR: hand; BORDER-RIGHT: #045abe 1px solid
+}
+.txt {
+	FONT: 13px/18px arial; COLOR: #333333
+}
+.txt A {
+	FONT: 13px/18px arial; COLOR: #333333; TEXT-DECORATION: none
+}
+.txt A:hover {
+	FONT: 13px/18px arial; COLOR: #c80202; TEXT-DECORATION: none
+}
+.txt2 {
+	FONT: 12px/18px verdana; COLOR: #000000
+}
+.txt_small {
+	FONT: 10px/18px verdana; COLOR: #000000
+}
+.txtbox {
+	BORDER-BOTTOM: #cccccc 1px solid; BORDER-LEFT: #cccccc 1px solid; FONT: 13px/18px arial; COLOR: #333333; BORDER-TOP: #cccccc 1px solid; BORDER-RIGHT: #cccccc 1px solid
+}
+.heading_small {
+	FONT: 18px/18px arial; COLOR: #333333
+}
+.sample {
+	BORDER-BOTTOM: #f5f5f5 1px solid; BORDER-LEFT: #f5f5f5 1px solid; FONT: 13px arial; COLOR: #f5f6f7; BORDER-TOP: #f5f5f5 1px solid; BORDER-RIGHT: #f5f5f5 1px solid
+}
+.sample TH {
+	PADDING-BOTTOM: 6px; PADDING-LEFT: 1px; PADDING-RIGHT: 1px; BACKGROUND: #70a3c3; PADDING-TOP: 6px
+}
+.sample TD.topBorder {
+	BORDER-TOP: lightgray 1px solid
+}
+.sample TR.odd {
+	FONT: 13px arial; BACKGROUND: #f5f5f5; HEIGHT: 30px; COLOR: #000000
+}
+.sample TR.even {
+	FONT: 13px arial; BACKGROUND: #ffffff; HEIGHT: 30px; COLOR: #000000
+}
+.heading_small1 {
+	FONT: bold 14px/18px arial; COLOR: #333333
+}
+.login_header {
+	FONT: 13px arial; BACKGROUND: url(../images/login_background.jpg) repeat-x; HEIGHT: 33px; COLOR: #ffffff
+}
+.signout2 {
+	PADDING-BOTTOM: 0px; PADDING-LEFT: 0px; PADDING-RIGHT: 10px; FONT: 11px arial; COLOR: #ffffff; PADDING-TOP: 5px
+}
+.signout2 A {
+	FONT: 11px arial; COLOR: #427ba9; TEXT-DECORATION: none
+}
+.signout2 A:hover {
+	FONT: 11px arial; COLOR: #0e3159
+}
+.txtDat {
+	BORDER-BOTTOM: #99ccff 1px solid; BORDER-LEFT: #99ccff 1px solid; BACKGROUND-COLOR: #ffffff; WIDTH: 82%; MARGIN-BOTTOM: 10px; FONT-SIZE: 12px; BORDER-TOP: #99ccff 1px solid; BORDER-RIGHT: #99ccff 1px solid
+}

@@ -1,0 +1,524 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="council.aspx.cs" Inherits="council" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+    <style type="text/css">
+      table,td
+      {
+      	
+        	border: 1px solid black;
+      }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div style = " overflow:scroll; height:610px" >
+    
+        <p align="center" 
+            style="font-size: medium; font-family: 'Times New Roman'; color: rgb(0, 0, 0); font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-size-adjust: auto; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255);">
+            <b><font color="brown" size="4"><u><font color="brown" size="4">Governing 
+            Council</font></u></font></b><br />
+            <br />
+        </p>
+        <table align="center" border="1" cellpadding="0" cellspacing="0" 
+            style="font-family: 'Times New Roman'; letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-size-adjust: auto; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255);" 
+            width="95%">
+            <tr>
+                <td height="30">
+                    <div align="center" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small; color: rgb(153, 51, 0);">
+                        <font size="2.7">Name</font></div>
+                </td>
+                <td height="36">
+                    <div align="center" class="style7" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small; color: rgb(153, 51, 0);">
+                        <font size="2.7">Designation</font></div>
+                </td>
+                <td height="36">
+                    <div align="center" class="style7" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small; color: rgb(153, 51, 0);">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td height="34">
+                    <div align="center" class="style3" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <p style="font-size: 12pt; font-family: 'Times New Roman';">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            <b>Shri Kapil Sibal</b></span></p>
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    <p align="center" class="style4" 
+                        style="font-size: x-small; font-family: Arial, Helvetica, sans-serif;">
+                        <br />
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Chairman<br />
+                        Hon&#39;ble Minister of Communications &amp; Information Technology,<br />
+                        Electronics Niketan, 6, CGO Complex<span class="Apple-converted-space">&nbsp;</span><br />
+                        New Delhi-110003<br />
+                        <br />
+                        </span>
+                    </p>
+                </td>
+                <td align="center">
+                    <img alt="Shri Kapil Sibal" border="0" 
+                        src="WebImages/Chairman.jpg" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. J. Satyanarayana, IAS<span class="Apple-converted-space">&nbsp;</span><br />
+                        <br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <br />
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Vice Chairman<span class="Apple-converted-space">&nbsp;</span><br />
+                        Secretary<span class="Apple-converted-space">&nbsp;</span><br />
+                        Department of Electronics &amp; Information Technology<span 
+                            class="Apple-converted-space">&nbsp;</span><br />
+                        Electronics Niketan, 6, CGO Complex<span class="Apple-converted-space">&nbsp;</span><br />
+                        New Delhi-110003</span><p 
+                            style="font-size: 12pt; font-family: 'Times New Roman';">
+                        </p>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="J_Satyanarayana" border="0" 
+                        src="WebImages/ViceChairman.jpg"" /></td>
+            </tr>
+            <tr>
+                <td height="78">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <strong>Shri. R. Bhattacharya, IAS</strong></span></div>
+                </td>
+                <td height="78">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p class="style4" 
+                            style="font-size: x-small; font-family: Arial, Helvetica, sans-serif;">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            Member<br />
+                            Special Secretary &amp; Financial Adviser,<br />
+                            Department of Electronics &amp; Information Technology<br />
+                            Electronics Niketan, 6, CGO Complex<span class="Apple-converted-space">&nbsp;</span><br />
+                            New Delhi-110003</span></p>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="R_Bhattacharya" border="0" 
+                        src="WebImages/Member1.jpg"" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Dr. (Mrs.) Anita Bhatnagar Jain, IAS<br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <br />
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<br />
+                        Joint Secretary<br />
+                        Department of Electronics &amp; Information Technology<br />
+                        Electronics Niketan, 6, CGO Complex<span class="Apple-converted-space">&nbsp;</span><br />
+                        New Delhi-110003</span><p 
+                            style="font-size: 12pt; font-family: 'Times New Roman';">
+                        </p>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="Dr.  Anita Bhatnagar Jain" border="0" height="100" 
+                        src="WebImages/Member2.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td height="78">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p style="font-size: 12pt; font-family: 'Times New Roman';">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            <strong>Dr. S.S. Mantha</strong></span></p>
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>
+                        <br />
+                        </b></span>
+                    </div>
+                </td>
+                <td height="78">
+                    <div align="center">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<br />
+                        Chairman, All India Council for Technical Education<br />
+                        7th Floor, Chanderlok building, Janpath<span class="Apple-converted-space">&nbsp;</span><br />
+                        New Delhi-110001</span></div>
+                </td>
+                <td align="center">
+                    <img alt="S_S_Mantha" border="0" 
+                        src="WebImages/Member3.jpg" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. Som Mittal<span class="Apple-converted-space">&nbsp;</span><br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<br />
+                        President, NASSCOM<br />
+                        International Youth Centre<br />
+                        Teen Murti Marg, Chanakyapuri<br />
+                        New Delhi-110021<br />
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="Som_Mittal" border="0" 
+                        src="WebImages/Member4.jpg" /></td>
+            </tr>
+            <tr>
+                <td height="98">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. N.K.Sinha, IAS</b></span></div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<br />
+                        Additional Secretary<br />
+                        Ministry of Human Resources Development,<br />
+                        Shastri Bhawan,<br />
+                        New Delhi-110001<br />
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="Shri. N.K Sinha" border="0" height="100" 
+                        src="WebImages/Member5.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p style="font-size: 12pt; font-family: 'Times New Roman';">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            <br />
+                            <br />
+                            <b>Dr. (Mrs) N.A. Kazmi</b></span></p>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p align="center" class="style4" 
+                            style="font-size: x-small; font-family: Arial, Helvetica, sans-serif;">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            Member<br />
+                            Secretary<br />
+                            University Grants Commission<br />
+                            2, Bahadur Shah Zafar Marg<br />
+                            New Delhi – 110002<br />
+                            <br />
+                            </span>
+                        </p>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="Dr . N.A Kazmi" border="0" height="100" 
+                        src="WebImages/Member6.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. Sharda Prasad<span class="Apple-converted-space">&nbsp;</span><br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <br />
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<br />
+                        Director General, Employment &amp; Training,<br />
+                        Ministry of Labour &amp; Employment, Shram Shakti Bhawan, Rafi Marg<span 
+                            class="Apple-converted-space">&nbsp;</span><br />
+                        New Delhi- 110001<br />
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="Shri Sharda Prasad" border="0" height="100" 
+                        src="WebImages/Member7.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p style="font-size: 12pt; font-family: 'Times New Roman';">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            <b>Shri R.K. Gupta</b></span></p>
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>
+                        <br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p style="font-size: 12pt; font-family: 'Times New Roman';">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            Member<br />
+                            President<br />
+                            Institution of Electronics &amp; Telecommunication Engineers,<span 
+                                class="Apple-converted-space">&nbsp;</span><br />
+                            IETE HQ, 2, Institutional Area, Lodi Road,<br />
+                            New Delhi- 110003<br />
+                            <br />
+                            </span>
+                        </p>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="shri. R K Gupta" border="0" height="100" 
+                        src="WebImages/Member8.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td height="83">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Prof. N.J. Rao</b></span></div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p style="font-size: 12pt; font-family: 'Times New Roman';">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            Member<br />
+                            Former Chairman, CEDT<br />
+                            Indian Institute of Science<br />
+                            Malleshwaram<span class="Apple-converted-space">&nbsp;</span><br />
+                            Bangalore - 560012<br />
+                            <br />
+                            </span>
+                        </p>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="N_J_Rao" border="0" height="100" 
+                        src="WebImages/Member9.gif" width="80" /></td>
+            </tr>
+            <tr>
+                <td height="82">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. Vijay Thadani<br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<br />
+                        Chief Executive Officer<br />
+                        NIIT Ltd.<br />
+                        85, Sector-32, Institutional Area<br />
+                        Gurgaon-122001<span class="Apple-converted-space">&nbsp;</span><br />
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td align="center">
+                    &nbsp;<img alt="Vijay_Thadani" border="0" 
+                        src="WebImages/Member10.jpg" /></td>
+            </tr>
+            <tr>
+                <td height="66">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. Laxmi Narayanan<span class="Apple-converted-space">&nbsp;</span><br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<br />
+                        Vice Chairman<br />
+                        Cognizant Technology Solutions<br />
+                        Baghmane Tech Park<br />
+                        65/2 - 1, Adj. LRDE, Byrasandra<br />
+                        C.V. Raman Nagar, Bangalore-560093</span></div>
+                </td>
+                <td align="center">
+                    &nbsp;<img alt="pvg_menon" border="0" height="100" 
+                        src="WebImages/Member11.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td height="50">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. PVG Menon<br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <br />
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<span class="Apple-converted-space">&nbsp;</span><br />
+                        President<br />
+                        India Semiconductor Association<br />
+                        UNI Building<span class="Apple-converted-space">&nbsp;</span><br />
+                        Millers Tank Bund Road<br />
+                        Banglalore - 560052<span class="Apple-converted-space">&nbsp;</span><br />
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td align="center">
+                    &nbsp;<img alt="pvg_menon" border="0" height="100" 
+                        src="WebImages/Member12.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td height="50">
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>Shri. Deepak Puri<br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <br />
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member<span class="Apple-converted-space">&nbsp;</span><br />
+                        Chairman &amp; Managing Director<br />
+                        Moser Baer India Ltd.<br />
+                        43-B, Okhla Industrial Estate<span class="Apple-converted-space">&nbsp;</span><br />
+                        New Delhi- 110020<span class="Apple-converted-space">&nbsp;</span><br />
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td align="center">
+                    &nbsp;<img alt="Deepak_Puri" border="0" height="100" 
+                        src="WebImages/Member13.jpg" width="80" /></td>
+            </tr>
+            <tr>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <p style="font-size: 12pt; font-family: 'Times New Roman';">
+                            <span class="style3" 
+                                style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                            <b>Dr. Ashwini Kumar Sharma</b></span></p>
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        <b>
+                        <br />
+                        </b></span>
+                    </div>
+                </td>
+                <td>
+                    <div align="center" class="style4" 
+                        style="font-family: Arial, Helvetica, sans-serif; font-size: x-small;">
+                        <br />
+                        <span class="style3" 
+                            style="font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: x-small;">
+                        Member Secretary<span class="Apple-converted-space">&nbsp;</span><br />
+                        Managing Director, NIELIT<br />
+                        Electronics Niketan, 6, CGO Complex,<span class="Apple-converted-space">&nbsp;</span><br />
+                        New Delhi-110003<br />
+                        <br />
+                        </span>
+                    </div>
+                </td>
+                <td align="center">
+                    <img alt="Ashwani_Kumar" border="0" height="100" 
+                        src="WebImages/MemberSec.jpg" " width="80" /></td>
+            </tr>
+        </table>
+        <br class="Apple-interchange-newline" />
+    
+    </div>
+    </form>
+</body>
+</html>

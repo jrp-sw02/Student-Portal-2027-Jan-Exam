@@ -1,0 +1,19 @@
+<table>
+	<tr class="head1">
+		<th align="center" colspan="14" width="100%"> UnImported Data</th>
+	</tr><tr class="head1">
+		<th align="center" colspan="14" width="100%"> Generated on: Wednesday, July 2, 2025</th>
+	</tr><tr class="head1">
+		<th align="center" width="1%">#</th><th align="center" width="10%">Id</th><th align="center" width="15%">UIDSE Code</th><th align="center" width="5%">Class</th><th align="center" width="15%">Roll Number</th><th align="center" width="15%">Field 4</th><th align="center" width="15%">Field 5</th><th align="center" width="20%">Name</th><th align="center" width="20%">Date of Birth</th><th align="center" width="5%">Reason</th>
+	</tr><tr class="gdalternate1">
+		<td align="center" width="1%">1</td><td align="left" width="4%">195</td><td align="center" width="5%">10023</td><td align="center" width="5%">null</td><td align="center" width="5%">amit1</td><td align="left" width="4%">rahul</td><td align="left" width="4%">up-120 5</td><td align="center" width="5%">pinky</td><td align="center" width="20%">8/20/2006 12:00:00 AM</td><td align="center" width="15%">Missing or invalid fields (NULL value detected): Class</td>
+	</tr><tr class="gdrow1">
+		<td align="center" width="1%">2</td><td align="left" width="4%">196</td><td align="center" width="5%">10023</td><td align="center" width="5%">null</td><td align="center" width="5%">amit1</td><td align="left" width="4%">rahul</td><td align="left" width="4%">up-120 5</td><td align="center" width="5%">pinky</td><td align="center" width="20%">8/21/2006 12:00:00 AM</td><td align="center" width="15%">Missing or invalid fields (NULL value detected): Class</td>
+	</tr><tr class="gdalternate1">
+		<td align="center" width="1%">3</td><td align="left" width="4%">197</td><td align="center" width="5%">10023</td><td align="center" width="5%">null</td><td align="center" width="5%">amit1</td><td align="left" width="4%">rahul</td><td align="left" width="4%">up-120 5</td><td align="center" width="5%">pinky</td><td align="center" width="20%">8/22/2006 12:00:00 AM</td><td align="center" width="15%">Missing or invalid fields (NULL value detected): Class</td>
+	</tr><tr class="gdrow1">
+		<td align="center" width="1%">4</td><td align="left" width="4%">198</td><td align="center" width="5%">10023</td><td align="center" width="5%">null</td><td align="center" width="5%">amit1</td><td align="left" width="4%">rahul</td><td align="left" width="4%">up-120 5</td><td align="center" width="5%">pinky</td><td align="center" width="20%">8/23/2006 12:00:00 AM</td><td align="center" width="15%">Missing or invalid fields (NULL value detected): Class</td>
+	</tr><tr class="gdalternate1">
+		<td align="center" width="1%">5</td><td align="left" width="4%">199</td><td align="center" width="5%">10023</td><td align="center" width="5%">null</td><td align="center" width="5%">amit1</td><td align="left" width="4%">rahul</td><td align="left" width="4%">up-120 5</td><td align="center" width="5%">pinky</td><td align="center" width="20%">8/24/2006 12:00:00 AM</td><td align="center" width="15%">Missing or invalid fields (NULL value detected): Class</td>
+	</tr>
+</table>

@@ -1,0 +1,54 @@
+﻿/* Grid View Skin StyleShee-------Harshit*/
+
+	/*.gdbody	{font-size: 14px; Width:100%;color: Black;}*/
+	
+	.gdheader{background:url(Images/header_background.jpg) repeat-x top left; font:normal 12px arial; color:#ffffff; height:20px; text-align: center; line-height:18px;}
+
+	.browserIE .gdheader{background:url(Images/header_background.jpg) repeat-x top left; font:normal 8px arial; color:#ffffff; height:20px; text-align: center; line-height:18px;}
+	.gdheader th a{font:normal 8px arial; color:#ffffff;text-decoration:none;}
+	.gdalternate
+	{
+	    font:normal 12px arial;
+	    background-color : #E6F0F0;
+	    color :#000000;
+	    border:1px solid #e5e6e8;
+	}
+	.gdalternate a
+	{
+	    background-color:#E6F0F0;
+	    font:normal 12px arial;
+	    color: #000000;
+	    text-decoration:none;
+	}
+	.gdalternate a:hover
+	{
+		cursor: pointer; 
+        text-decoration:underline;
+        color: #000000;
+	}
+	
+	.gdfooter
+	{   font-weight : bold;
+	    color: White; 
+	}
+	.gdrow
+	{
+	    background-color:#c9d7e2;
+	    border:1px solid #e5e6e8;
+	    font:normal 12px arial;
+	    color: #000000;
+	}
+	.gdrow a
+	{
+	    background-color:#c9d7e2;
+	    color: #000000;
+	    text-decoration:none;
+	}
+	.gdrow a:hover
+	{
+		cursor: pointer; 
+ 	    text-decoration:underline;
+        color: #000000;
+	}
+	
+	

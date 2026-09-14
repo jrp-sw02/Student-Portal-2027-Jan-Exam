@@ -1,0 +1,21 @@
+.sample {
+	FONT: bold 13px/26px arial; BACKGROUND: #ffffff; COLOR: #313e10
+}
+ 
+.sample TH {
+	PADDING-BOTTOM: 2px; PADDING-LEFT: 2px; PADDING-RIGHT: 2px; HEIGHT: 28px; PADDING-TOP: 2px
+}
+.sample TD {
+	border-width: 2px;
+    padding: 1px;
+    BACKGROUND-COLOR: #ffffff;
+}
+.sample TD.odd {
+	FONT: 13px/24px verdana; BACKGROUND: #afcee1; HEIGHT: 28px; COLOR: #195672
+}
+.sample TD.odd1 {
+	FONT: 13px/24px verdana; BACKGROUND: #f5f6f7; COLOR: #333333
+}
+.sample TD.even {
+	FONT: 13px/24px verdana; BACKGROUND: #ffffff; HEIGHT: 28px; COLOR: #333333
+}

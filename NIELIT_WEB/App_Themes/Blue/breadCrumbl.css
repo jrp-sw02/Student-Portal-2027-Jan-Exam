@@ -1,0 +1,18 @@
+ 
+
+.browserIE7 #breadcrumb  { float: left; display: block; margin: -12px 0 -2px -26px; padding:15px 0 0 0 ; }
+#breadcrumb  { float: left; display: block; margin: -12px 0 -2px -26px; padding:0; }
+ 
+#breadcrumb ul  { list-style: none; }
+
+.crumbs { display: block; }
+.crumbs li {  display: inline; }
+.crumbs li.first { padding-left: 8px; }
+.crumbs li a, .crumbs li a:link, .crumbs li a:visited { color: #000000; display: block; float: left; font-size: 12px; margin-left: -13px; padding: 7px 12px 11px 17px; position: relative; text-decoration: none; }
+/*.browserIE .crumbs li a, .crumbs li a:link, .crumbs li a:visited { color: #000000; display: block; float: left; font-size: 12px; margin-left: -15px; padding: 7px 12px 11px 17px; position: relative; text-decoration: none; }*/
+.crumbs li a { background-image: url('Images/bg-crumbs-blue.png');  background-repeat: no-repeat; background-position: 100% -96px; position: relative; }
+.crumbs li a:hover { color: #CC3300; background-position: 100% -48px; cursor: pointer; }
+.crumbs li a:active { color: #CC3300; background-position: 100% -0; }
+.crumbs li.first a span { height: 29px; width: 1px; border-left: 1px solid #d9d9d9; position: absolute; top: 0px; left: 0px; }
+
+

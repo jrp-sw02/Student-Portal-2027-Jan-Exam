@@ -1,0 +1,37 @@
+https://jsfiddle.net/i_like_robots/6JbtX/
+.nav navbar-nav {
+    width:200px;
+    list-style-type:none;
+}
+    .dropdown-toggle {
+        display:block;
+        padding:0 10px;
+        line-height:2;
+        color:#fff;
+        text-decoration:none;      
+    }
+
+    /* Dropdowns */
+    .dropdown {
+        position:relative;
+        z-index:200;
+    }
+        .dropdown-menu {
+            position:absolute;
+            top:0;
+            left:0;
+            display:none;
+            width:200px;
+            list-style-type:none;
+            padding-top:2em;
+            z-index:200;
+        }
+            .hover .dropdown-menu {
+                display:block;
+            }
+            .dropdown-menu a {
+                display:block;
+                padding:5px;
+                color:#fff;
+                text-decoration:none;               
+            }

@@ -1,0 +1,906 @@
+﻿using System;
+using System.Data.SqlClient;                         //November_2024
+using System.Globalization;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web.UI;
+using EConnect;
+using EConnect.DAL;
+using EConnect.NIELIT;
+
+public partial class OfflinePaymentResponse : System.Web.UI.Page
+{
+    String txnResponseCode = "";
+    //String ResponseParameters = "";
+    String txnResponseMsg = "";
+    String retunChecksumValue = "";
+    String checkSumKey = "ggrLJ5I34HDeXGTF6BbOUniIgHnfcJdv";
+    Int64 transactionID = 0;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //Response Message description:
+        //MerchantID|CustomerID|TxnReferenceNo|BankReferenceNo|TxnAmount|BankID|BankMerchantID|TxnType|
+        //CurrencyName|ItemCode|SecurityType|SecurityID|SecurityPassword|TxnDate|AuthStatus|SettlementType|
+        //AdditionalInfo1|AdditionalInfo2|AdditionalInfo3|AdditionalInfo4|AdditionalInfo5|AdditionalInfo6|
+        //AdditionalInfo7|ErrorStatus|ErrorDescription|CheckSum
+
+        //Sample Response Message
+        //ABCD|123456789012|MSBI0412001668|NA|0000100.00|SBI|22270726|NA|INR|NA|NA|NA|NA|12-12-2010 16:08:56|0300|NA| 2375613|XYZ |NA|NA|NA|NA|NA|NA|NA|3734835005
+        //NIELIT|25|MCIT2900449538|117144-010894|2.00|CIT|22270726|NA|INR|DIRECT|NA|NA|NA|21-01-2013 12:40:10|0300|NA|25|EXAM01|NA|NA|NA|NA|NA|NA|Success|AB3BDFBD503FC028C554520776A3EDBBC129CDF8EDA56D9E7476C06FF13C4281 
+        //NIELIT|44|MCIT2929147585|120240-098407|2.00|CIT|22270726|NA|INR|DIRECT|NA|NA|NA|25-02-2013 17:06:53|0300|NA|44|REGN01|NA|NA|NA|NA|NA|NA|Success|83BD984FF8496F75DA49F2C0EDAD445B703BCB61F36C0F9ED222FCC0B1CAE156
+        try
+        {
+            //Response.Write(Request["msg"].ToString());
+            if (!Page.IsPostBack)
+            {
+                if (Request["msg"] != null)
+                {
+                    using (EConnectContext context = new EConnectContext())
+                    {
+                        String[] arrayResponse = Request["msg"].ToString().Split('|');
+                        Page currentPage = (Page)System.Web.HttpContext.Current.Handler;
+                        //			string sMsg = "alert('test');";
+                        //			string sMsg = "alert('" + arrayResponse .Count ().ToString () + "');";
+
+                        txnResponseCode = arrayResponse[14].ToString();
+
+                        retunChecksumValue = arrayResponse[25].ToString();
+                        String s = Request["msg"].ToString().Substring(0, Request["msg"].ToString().Length - (retunChecksumValue.Length + 1)).ToString();
+                        //string sMsg = "alert('" + s.Length.ToString()  + "');";
+                        //currentPage.ClientScript.RegisterClientScriptBlock(currentPage.GetType(), "", sMsg ,true);
+                        SHASample dataprg = new SHASample();
+                        String hash = dataprg.GetHMACSHA256(s.ToUpper(), checkSumKey).ToUpper();
+                        //string sMsg = "alert('" + hash.Length.ToString()  + "');";
+                        //			currentPage.ClientScript.RegisterClientScriptBlock(currentPage.GetType(), "", sMsg ,true);
+                        txnResponseMsg = GetResponseDescription(txnResponseCode);
+
+                        OnlineTransaction objtransaction = new OnlineTransaction();
+                        objtransaction = context.OnlineTransaction.Find(Convert.ToInt32(arrayResponse[1].ToString()));
+                        transactionID = objtransaction.ID;
+                        //string sMsg = "alert('" + transactionID.ToString() + "');";
+                      //  currentPage.ClientScript.RegisterClientScriptBlock(currentPage.GetType(), "", sMsg, true);
+                        objtransaction.ResponseParameters = Request["msg"].ToString();
+ 			//string sMsg = "alert('" + arrayResponse[13].Length.ToString() + "');";
+                        //currentPage.ClientScript.RegisterClientScriptBlock(currentPage.GetType(), "", sMsg, true);
+
+			if(arrayResponse[13].Length >8)
+                        objtransaction.ResponseDate = GetDate(arrayResponse[13].ToString());
+
+                        objtransaction.ReferenceNumber = arrayResponse[2].ToString();
+                        objtransaction.ResponseStatusCode = txnResponseCode;
+                        objtransaction.ResponseStatusMessage = txnResponseMsg;
+                        //  objtransaction.Amount = Convert.ToDecimal(arrayResponse[4].ToString());
+			// string sMsg = "alert('" + transactionID.ToString() + "');";
+                        //    currentPage.ClientScript.RegisterClientScriptBlock(currentPage.GetType(), "", sMsg, true);
+                        if (hash == retunChecksumValue)
+                        {
+                           
+                            if (txnResponseCode == "0300")//successfull Transaction
+                            {
+                                divResponse.Visible = true;
+                                lblError.Visible = true;
+                                lblError.Text = "Your transaction has been successfuly completed. Please note below details for reference.";
+                                txnResponseMsg = GetResponseDescription(txnResponseCode);
+
+                                DemandNote objdemandNote = context.DemandNotes.Find(objtransaction.DemandNoteID);
+                                objdemandNote.OnlineTransactionID = objtransaction.ID;
+                                objdemandNote.PaymentStatusID = Convert.ToInt32(enmPaymentStatus.PaidButNotVerified);
+                                objdemandNote.PaymentModeID = Convert.ToInt32(enmPaymentMode.Online);
+                                Int32 statusID = 0;
+
+                                if (objdemandNote.enmApplicationType == enmApplicationType.CertificateExamApplication)
+                                {
+                                    if (objdemandNote.enmDemandNoteType == enmDemandNoteType.Single)
+                                    { statusID = Convert.ToInt32(enmCertificateExamApplicationStatus.FeeDepositedByCandidateButApplicationNotReceivedByRegionalCentre); }
+                                    else
+                                    {
+                                        if (context.CertificateExamApplications.Where(t => t.DemandNoteID.Value == objdemandNote.ID).FirstOrDefault().Exam.IsDispatchable)
+                                        { statusID = Convert.ToInt32(enmCertificateExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToRegionalCentre); }
+                                        else
+                                        { statusID = Convert.ToInt32(enmCertificateExamApplicationStatus.ApplicationDispatchedByTheInstituteToRegionalCentre); }
+                                    }
+                                    //context.Database.ExecuteSqlCommand("Update Certificate_Exam_Application set Application_Status_ID = " + statusID
+                                    //    + ", Payment_Status_ID = " + Convert.ToInt32(enmPaymentStatus.PaidButNotVerified) + " where Demand_Note_ID = " + objdemandNote.ID);
+
+                                    //November_2024
+                                    SqlParameter[] param1 = { new SqlParameter("@statusID", statusID),
+                                                                new SqlParameter("@paymentStatus", Convert.ToInt32(enmPaymentStatus.PaidButNotVerified)),
+                                                                 new SqlParameter("@demandNoteID", objdemandNote.ID)       };
+                                    context.Database.ExecuteSqlCommand("Update Certificate_Exam_Application set Application_Status_ID = @statusID "
+                                        + ", Payment_Status_ID =@paymentStatus where Demand_Note_ID =@demandNoteID ",param1);
+
+                                    //checking whether to show message or not
+                                    if (context.CertificateExamApplications.Where(t => t.DemandNoteID.Value == objdemandNote.ID).FirstOrDefault().Exam.IsBatchProcessable)
+                                    { trExam.Visible = true; }
+                                    else
+                                    { trExam.Visible = false; }
+                                }
+                                else if (objdemandNote.enmApplicationType == enmApplicationType.CourseRegistrationApplication)
+                                {
+                                    if (objdemandNote.enmDemandNoteType == enmDemandNoteType.Single)
+                                    {
+                                        Int32 applicantType = context.CourseRegistrationApplications.Where(c => c.DemandNoteID == objdemandNote.ID).FirstOrDefault().ApplicantTypeID;
+
+                                        if ((enmApplicantType)applicantType == enmApplicantType.Institute)
+                                        { statusID = Convert.ToInt32(enmCourseApplicationStatus.AppliedButPendingForInstituteVerification); }
+                                        else
+                                        { statusID = Convert.ToInt32(enmCourseApplicationStatus.FeeDepositedByCandidateButApplicationNotReceivedByNIELIT); }
+                                    }
+                                    else
+                                    { statusID = Convert.ToInt32(enmCourseApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT); }
+                                    
+                                    //context.Database.ExecuteSqlCommand("Update Course_Registration_Application set Application_Status_ID = " + statusID
+                                    //    + ", Payment_Status_ID = " + Convert.ToInt32(enmPaymentStatus.PaidButNotVerified) + " where Demand_Note_ID = " + objdemandNote.ID);
+
+                                    //November_2024
+                                    SqlParameter[] param2 = { new SqlParameter("@statusID", statusID),
+                                                                new SqlParameter("@paymentStatus", Convert.ToInt32(enmPaymentStatus.PaidButNotVerified)),
+                                                                                                    new SqlParameter("@demandNoteID",  objdemandNote.ID)      };
+                                    context.Database.ExecuteSqlCommand("Update Course_Registration_Application set Application_Status_ID =@statusID "
+                                                            + ", Payment_Status_ID = @paymentStatus  where Demand_Note_ID = @demandNoteID ", param2);
+
+                                    trExam.Visible = false;
+                                }
+                                else if (objdemandNote.enmApplicationType == enmApplicationType.CourseExamApplication)
+                                {
+                                    if (objdemandNote.enmDemandNoteType == enmDemandNoteType.Single)
+                                    {
+                                        Int32 applicantType = context.CourseExamApplications.Where(c => c.DemandNoteID == objdemandNote.ID).FirstOrDefault().ApplicantTypeID;
+
+                                        if ((enmApplicantType)applicantType == enmApplicantType.Institute)
+                                        { statusID = Convert.ToInt32(enmCourseExamApplicationStatus.AppliedButPendingForInstituteVerification); }
+                                        else
+                                        { statusID = Convert.ToInt32(enmCourseExamApplicationStatus.FeeDepositedByCandidateButApplicationNotReceivedByNIELIT); }
+                                    }
+                                    else
+                                    { statusID = Convert.ToInt32(enmCourseExamApplicationStatus.FeePaidByInstituteButApplicationPendingToDispatchToNIELIT); }
+                                    
+                                    //context.Database.ExecuteSqlCommand("Update Course_Exam_Application set Application_Status_ID = " + statusID
+                                    //    + ", Payment_Status_ID = " + Convert.ToInt32(enmPaymentStatus.PaidButNotVerified) + " where Demand_Note_ID = " + objdemandNote.ID);
+
+                                    //November_2024
+                                    SqlParameter[] param3 = { new SqlParameter("@statusID", statusID),
+                                                                new SqlParameter("@paymentStatus", Convert.ToInt32(enmPaymentStatus.PaidButNotVerified)),
+                                                                                                    new SqlParameter("@demandNoteID",  objdemandNote.ID)      };
+                                    context.Database.ExecuteSqlCommand("Update Course_Exam_Application set Application_Status_ID = @statusID "
+                                                        + ", Payment_Status_ID = @paymentStatus  where Demand_Note_ID = @demandNoteID ", param3);
+
+                                }
+                                else if (objdemandNote.enmApplicationType == enmApplicationType.ModuleCertificateRequest)
+                                {
+                                    //context.Database.ExecuteSqlCommand("Update ModuleCertificateRequest set Payment_Status_ID = " + Convert.ToInt32(enmPaymentStatus.PaidButNotVerified) + " where Demand_Note_ID = " + objdemandNote.ID);
+                                    
+                                    //November_2024
+                                    SqlParameter[] param4 = {  new SqlParameter("@paymentStatus", Convert.ToInt32(enmPaymentStatus.PaidButNotVerified)),
+                                                                                                    new SqlParameter("@demandNoteID",  objdemandNote.ID)   };
+                                    context.Database.ExecuteSqlCommand("Update ModuleCertificateRequest set Payment_Status_ID = @paymentStatus where Demand_Note_ID = @demandNoteID ", param4);
+                                }
+                            }
+                            else //transaction failed
+                            {
+                                divResponse.Visible = true;
+                                lblError.Visible = true;
+                                lblError.Text = "Your transaction could not be completed. Reason: " + txnResponseMsg + "<br>Please note below details for reference.";
+                            }
+                        }
+                        else
+                        {
+                           // string sMsg = "alert('" + transactionID.ToString() + "');";
+                            //currentPage.ClientScript.RegisterClientScriptBlock(currentPage.GetType(), "", sMsg, true);
+                            divResponse.Visible = true;
+                            lblError.Visible = true;
+                            lblError.Text = "Your transaction could not be completed. Reason: " + txnResponseMsg + "(Data Tempered)<br>Please note below details for reference.";
+                        }
+                        context.SaveChanges();
+                    };
+                    ShowSuccessMessage(transactionID);
+                }
+                else
+                {
+                    divResponse.Visible = false;
+                    throw new Exception("Your transaction could not be completed. Reason: Invalid request/No response received from payment gateway. Please try again.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            lblError.Text = ex.Message;
+            lblError.Visible = true;
+            imPrint.Visible = false;
+        }
+    }
+    protected string GetInitCap(string str)
+    {
+        try
+        {
+            return new CultureInfo("en").TextInfo.ToTitleCase(str.ToLower());
+            //return System.Globalization.CultureInfo.CurrentUICulture.TextInfo.ToTitleCase(str.ToLower());
+            //return str.Substring(0, 1).ToUpper() + str.Substring(1, str.Length).ToLower();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected void ShowSuccessMessage(Int64 onlineTransactionID)
+    {
+        try
+        {
+            divResponse.Visible = true;
+            lblError.Visible = true;
+            string msg = "";
+            string emailAddress = "";
+            Int64 mobileNumber; string mobileMsg = "";
+            Boolean allowSendingEmail = false;
+            Boolean allowSendingSms = false;
+            using (EConnectContext context = new EConnectContext())
+            {
+                var evnt = context.NotificationEvent.Find(Convert.ToInt32(enmNotificationEvents.AfterMakingPayment));
+                if (evnt.SendEmail == true)
+                    allowSendingEmail = true;
+                if (evnt.SendSms == true)
+                    allowSendingSms = true;
+                OnlineTransaction ot = context.OnlineTransaction.Find(onlineTransactionID);
+                DemandNote demandNote = context.DemandNotes.Find(ot.DemandNoteID);
+                if (demandNote != null)
+                {
+                    if (demandNote.enmPaymentMode == enmPaymentMode.Online)
+                    {
+                        tdDemandNumber.InnerHtml = demandNote.ID.ToString() + " <i>Dated:</i> " + demandNote.ApplicationDate.ToString("dd-MMM-yyyy");
+                        tdMode.InnerText = EConnect.Utils.Common.EnumUtility.GetDescription(demandNote.enmPaymentMode);
+
+                        tdRefNo.InnerText = ot.ReferenceNumber;
+                        tdRefDate.InnerText = ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt");
+                        tdAmount.InnerHtml = ot.Amount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ")</i>";
+                        tdPaymentDescription.InnerHtml = "";
+                        tdStatus.InnerText = ot.ResponseStatusMessage;
+                        if (demandNote.enmDemandNoteType == enmDemandNoteType.Single)
+                        {
+                            if (demandNote.enmApplicationType == enmApplicationType.CourseRegistrationApplication)
+                            {
+                                tdPaymentDescription.InnerText = "Registration Fee ";
+                                var payee = (from p in context.CourseRegistrationApplications
+                                             where p.DemandNoteID == demandNote.ID
+                                             select new { ApplNo = p.Number, ApplDate = p.ApplicationDate, FeeDetail = p.Course.Name + " (" + p.Course.Code + ")", Name = p.Salutation + " " + p.Name, FatherName = p.FatherName, MotherName = p.MotherName, DOB = p.DateOfBirth, p.GuardianName, Email = p.EmailAddress, Mobile = p.MobileNumber }).FirstOrDefault();
+                                if (payee != null)
+                                {
+                                    tdPayeeName.InnerText = GetInitCap(payee.Name);
+                                    if (payee.GuardianName != null)
+                                        tdPayeeFatherName.InnerText = GetInitCap(payee.GuardianName) + " (Guardian)";
+                                    else
+                                    {
+                                        if (payee.FatherName != null)
+                                            tdPayeeFatherName.InnerText = "Mr. " + GetInitCap(payee.FatherName);
+                                        if (payee.MotherName != null)
+                                            tdPayeeMotherName.InnerText = "Mrs. " + GetInitCap(payee.MotherName);
+                                    }
+                                    if (payee.DOB != null)
+                                        tdPayeeDOB.InnerText = payee.DOB.ToString("dd-MMM-yyyy");
+                                    tdPaymentDescription.InnerText = "Registration Fee: " + payee.FeeDetail;
+                                    tdPaymentDescription.InnerHtml += "<br>(Application Number: " + payee.ApplNo.ToString() + "  Dated: " + payee.ApplDate.ToString("dd-MMM-yyyy") + ")";
+                                }
+                                else
+                                {
+                                    tdPayeeName.InnerText = "NA";
+                                    tdPayeeFatherName.InnerText = "NA";
+                                    tdPayeeMotherName.InnerText = "NA";
+                                    tdPayeeDOB.InnerText = "NA";
+                                    tdPaymentDescription.InnerText = "NA";
+                                }
+                                // code to send mail to applicant
+                                emailAddress = payee.Email;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    msg = "Dear " + GetInitCap(payee.Name) + ",<br/><br/>" + " You have successfully deposited" + GetInitCap(payee.FeeDetail) + " course registration fee on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " through payment. " + "<br/>" + "Your Transaction Number is " + ot.ReferenceNumber + " and your Transaction Amount is " + ot.Amount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ")</i> for the Application Number :- " + payee.ApplNo;
+                                    if (allowSendingEmail == true)
+                                    {
+                                        try
+                                        {
+                                            //sending Email 
+                                            if (emailAddress.Trim().Length > 0)
+                                            {
+                                                EConnect.NIELIT.Email mail = new Email("Course Registration Fee Submission:NIELIT", msg, emailAddress);
+                                                mail.Send();
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                                // code to send sms to applicant
+                                mobileNumber = payee.Mobile;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    //  mobileMsg = " Fee Received for " + GetInitCap(payee.FeeDetail) + " registration on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ", transaction number is : " + ot.ReferenceNumber + " and amount is " + ot.Amount.ToString("F");
+                                    mobileMsg = "Fee Received for  " + GetInitCap(payee.FeeDetail) + " registration on  " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " transaction number is  " + ot.ReferenceNumber + "   and amount is  " + ot.Amount.ToString("F") + "-NIELIT";
+                                    if (allowSendingSms == true)
+                                    {
+                                        try
+                                        {
+                                            //sending SMS 
+                                            if (mobileNumber != 0)
+                                            {
+                                                EConnect.NIELIT.SMS message = new SMS(mobileMsg, mobileNumber.ToString(), "1307160940715461622", SmsServiceType.SignleSMS);
+                                                int sentMessageCount;
+                                                message.sendSingleSMS(out sentMessageCount);
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                            }
+                            else if (demandNote.enmApplicationType == enmApplicationType.CertificateExamApplication)
+                            {
+                                var payee = (from p in context.CertificateExamApplications
+                                             where p.DemandNoteID == demandNote.ID
+                                             select new { ApplNo = p.Number, ApplDate = p.ApplicationDate, FeeDetail = p.Course.Name + " (" + p.Course.Code + ")", Name = p.Salutation + " " + p.Name, FatherName = p.FatherName, MotherName = p.MotherName, DOB = p.DateOfBirth, p.GuardianName, Email = p.EmailAddress, ExamName = p.Exam.Name, Mobile = p.MobileNumber, Feedetail1 = p.Course.Code }).FirstOrDefault();
+                                if (payee != null)
+                                {
+                                    tdPayeeName.InnerText = GetInitCap(payee.Name);
+                                    if (payee.GuardianName != null)
+                                        tdPayeeFatherName.InnerText = payee.GuardianName + " (Guardian)";
+                                    else
+                                    {
+                                        if (payee.FatherName != null)
+                                            tdPayeeFatherName.InnerText = "Mr. " + (payee.FatherName);
+                                        if (payee.MotherName != null)
+                                            tdPayeeMotherName.InnerText = "Mrs. " + GetInitCap(payee.MotherName);
+                                    }
+                                    if (payee.DOB != null)
+                                        tdPayeeDOB.InnerText = payee.DOB.ToString("dd-MMM-yyyy");
+                                    tdPaymentDescription.InnerText = "Registration Cum Examination Fee: " + payee.FeeDetail;
+                                    tdPaymentDescription.InnerHtml += "<br>Application Number: " + payee.ApplNo.ToString() + "  Dated: " + payee.ApplDate.ToString("dd-MMM-yyyy");
+                                }
+                                else
+                                {
+                                    tdPayeeName.InnerText = "NA";
+                                    tdPayeeFatherName.InnerText = "NA";
+                                    tdPayeeMotherName.InnerText = "NA";
+                                    tdPayeeDOB.InnerText = "NA";
+                                    tdPaymentDescription.InnerText = "NA";
+                                }
+                                // code to send mail to  applicant
+                                emailAddress = payee.Email;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    msg = "Dear " + GetInitCap(payee.Name) + ",<br/><br/>" + " You have successfully deposited " + payee.Feedetail1.ToUpper() + " certificate examination fee for " + GetInitCap(payee.ExamName) + " Exam on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " through payment " + "<br/>" + "Your Transaction Number is " + ot.ReferenceNumber + " and your Transaction Amount is " + ot.Amount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ")</i> for the Application Number :- " + payee.ApplNo;
+                                    if (allowSendingEmail == true)
+                                    {
+                                        try
+                                        {
+                                            //sending Email 
+                                            if (emailAddress.Trim().Length > 0)
+                                            {
+                                                EConnect.NIELIT.Email mail = new Email("Certificate Examination Fee Submission:NIELIT", msg, emailAddress);
+                                                mail.Send();
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                                // code to send sms to applicant
+                                mobileNumber = payee.Mobile;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    // mobileMsg = "Fee Received for " + payee.Feedetail1.ToUpper() + "," + GetInitCap(payee.ExamName) + " examination on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ",transaction number is: " + ot.ReferenceNumber + " and amount is " + ot.Amount.ToString("F");
+                                    mobileMsg = "Fee Received for  " + payee.Feedetail1.ToUpper() + " , " + GetInitCap(payee.ExamName) + " examination on  " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " ,transaction number is: " + ot.ReferenceNumber + " and amount is " + ot.Amount.ToString("F") + "-NIELIT";
+                                    if (allowSendingSms == true)
+                                    {
+                                        try
+                                        {
+                                            //sending Email 
+                                            if (mobileNumber != 0)
+                                            {
+                                                EConnect.NIELIT.SMS message = new SMS(mobileMsg, mobileNumber.ToString(), "1307160940720021539", SmsServiceType.SignleSMS);
+                                                int sentMessageCount;
+                                                message.sendSingleSMS(out sentMessageCount);
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                            }
+                            else if (demandNote.enmApplicationType == enmApplicationType.CourseExamApplication)
+                            {
+                                var payee = (from p in context.CourseExamApplications
+                                             join c in context.Candidates on p.CandidateID equals c.ID
+                                             where p.DemandNoteID == demandNote.ID
+                                             select new { ApplNo = p.Number, ApplDate = p.ApplicationDate, FeeDetail = p.Exam.Name + " (" + p.Course.Name + ")", Name = c.Salutation + " " + c.Name, FatherName = c.FatherName, MotherName = c.MotherName, DOB = c.DateOfBirth, c.GuardianName, Email = c.ContactDetails.FirstOrDefault().EmailAddress, Mobile = c.ContactDetails.FirstOrDefault().MobileNumber }).FirstOrDefault();
+                                if (payee != null)
+                                {
+                                    tdPayeeName.InnerText = GetInitCap(payee.Name);
+                                    if (payee.GuardianName != null)
+                                        tdPayeeFatherName.InnerText = payee.GuardianName + " (Guardian)";
+                                    else
+                                    {
+                                        if (payee.FatherName != null)
+                                            tdPayeeFatherName.InnerText = "Mr. " + GetInitCap(payee.FatherName);
+                                        if (payee.MotherName != null)
+                                            tdPayeeMotherName.InnerText = "Mrs. " + GetInitCap(payee.MotherName);
+                                    }
+                                    if (payee.DOB != null)
+                                        tdPayeeDOB.InnerText = payee.DOB.ToString("dd-MMM-yyyy");
+                                    tdPaymentDescription.InnerText = "Examination Fee: " + payee.FeeDetail;
+                                    tdPaymentDescription.InnerHtml += "<br>Application Number: " + payee.ApplNo.ToString() + "  Dated: " + payee.ApplDate.ToString("dd-MMM-yyyy");
+                                }
+                                else
+                                {
+                                    tdPayeeName.InnerText = "NA";
+                                    tdPayeeFatherName.InnerText = "NA";
+                                    tdPayeeMotherName.InnerText = "NA";
+                                    tdPayeeDOB.InnerText = "NA";
+                                    tdPaymentDescription.InnerText = "NA";
+                                }
+                                // code to send mail to applicant
+                                emailAddress = payee.Email;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    msg = "Dear " + GetInitCap(payee.Name) + ",<br/><br/>" + " You have successfully deposited " + GetInitCap(payee.FeeDetail) + " course examination fee on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " through payment " + "<br/>" + " Your Transaction Number is " + ot.ReferenceNumber + " and your Transaction Amount is " + ot.Amount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ")</i> for the Application Number:- " + payee.ApplNo;
+                                    if (allowSendingEmail == true)
+                                    {
+                                        try
+                                        {
+                                            //sending Email 
+                                            if (emailAddress.Trim().Length > 0)
+                                            {
+                                                EConnect.NIELIT.Email mail = new Email("Course Examination Fee Submission:NIELIT", msg, emailAddress);
+                                                mail.Send();
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                                // code to send sms to applicant
+                                mobileNumber = payee.Mobile.Value;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    //mobileMsg = "Fee Received for " + GetInitCap(payee.FeeDetail) + " examination on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ", transaction number is: " + ot.ReferenceNumber + " and amount is " + ot.Amount.ToString("F");
+                                    mobileMsg = "Fee Received for  " + GetInitCap(payee.FeeDetail) + "   examination on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " transaction number is: " + ot.ReferenceNumber + "  and amount is  " + ot.Amount.ToString("F") + "-NIELIT";
+                                    if (allowSendingSms == true)
+                                    {
+                                        try
+                                        {
+                                            //sending SMS 
+                                            if (mobileNumber != 0)
+                                            {
+                                                EConnect.NIELIT.SMS message = new SMS(mobileMsg, mobileNumber.ToString(), "1307160940723312932", SmsServiceType.SignleSMS);
+                                                int sentMessageCount;
+                                                message.sendSingleSMS(out sentMessageCount);
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                            }
+                            else if (demandNote.enmApplicationType == enmApplicationType.ModuleCertificateRequest)
+                            {
+                                var payee = (from p in context.ModuleCertificateRequests
+                                             join c in context.Candidates on p.RegistrationNo equals c.RegistrationDetails.FirstOrDefault().RegistrationNo
+                                             where p.DemandNoteID == demandNote.ID
+                                             select new { ApplNo = p.ID, ApplDate = p.RequestDate, FeeDetail = "Module Certificate" + " (" + p.Course.Name + ")", Name = c.Salutation + " " + c.Name, FatherName = c.FatherName, MotherName = c.MotherName, DOB = c.DateOfBirth, c.GuardianName, Email = c.ContactDetails.FirstOrDefault().EmailAddress, Mobile = c.ContactDetails.FirstOrDefault().MobileNumber }).FirstOrDefault();
+                                if (payee != null)
+                                {
+                                    tdPayeeName.InnerText = GetInitCap(payee.Name);
+                                    if (payee.GuardianName != null)
+                                        tdPayeeFatherName.InnerText = payee.GuardianName + " (Guardian)";
+                                    else
+                                    {
+                                        if (payee.FatherName != null)
+                                            tdPayeeFatherName.InnerText = "Mr. " + GetInitCap(payee.FatherName);
+                                        if (payee.MotherName != null)
+                                            tdPayeeMotherName.InnerText = "Mrs. " + GetInitCap(payee.MotherName);
+                                    }
+                                    if (payee.DOB != null)
+                                        tdPayeeDOB.InnerText = payee.DOB.ToString("dd-MMM-yyyy");
+                                    tdPaymentDescription.InnerText = payee.FeeDetail;
+                                    tdPaymentDescription.InnerHtml += "<br>Request Id: " + payee.ApplNo.ToString() + "  Dated: " + payee.ApplDate.ToString("dd-MMM-yyyy");
+                                }
+                                else
+                                {
+                                    tdPayeeName.InnerText = "NA";
+                                    tdPayeeFatherName.InnerText = "NA";
+                                    tdPayeeMotherName.InnerText = "NA";
+                                    tdPayeeDOB.InnerText = "NA";
+                                    tdPaymentDescription.InnerText = "NA";
+                                }
+                                // code to send mail to applicant
+                                emailAddress = payee.Email;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    msg = "Dear " + GetInitCap(payee.Name) + ",<br/><br/>" + " You have successfully deposited " + GetInitCap(payee.FeeDetail) + " fee on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " through  payment " + "<br/>" + " Your Transaction Number is " + ot.ReferenceNumber + " and your Transaction Amount is " + ot.Amount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ")</i> for the Application Number:- " + payee.ApplNo;
+                                    if (allowSendingEmail == true)
+                                    {
+                                        try
+                                        {
+                                            //sending Email 
+                                            if (emailAddress.Trim().Length > 0)
+                                            {
+                                                EConnect.NIELIT.Email mail = new Email("Module Certificate Fee Submission:NIELIT", msg, emailAddress);
+                                                mail.Send();
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                                // code to send sms to applicant
+                                mobileNumber = payee.Mobile.Value;
+                                if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                {
+                                    //mobileMsg = "Fee Received for " + GetInitCap(payee.FeeDetail) + " on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ", transaction number is: " + ot.ReferenceNumber + " and amount is " + ot.Amount.ToString("F");
+                                    mobileMsg = "Fee Received for " + GetInitCap(payee.FeeDetail) + " on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " , transaction number is:  " + ot.ReferenceNumber + "  and amount is " + ot.Amount.ToString("F") + "-NIELIT";
+                                    if (allowSendingSms == true)
+                                    {
+                                        try
+                                        {
+                                            //sending SMS 
+                                            if (mobileNumber != 0)
+                                            {
+                                                EConnect.NIELIT.SMS message = new SMS(mobileMsg, mobileNumber.ToString(), "1307160940726919065", SmsServiceType.SignleSMS);
+                                                int sentMessageCount;
+                                                message.sendSingleSMS(out sentMessageCount);
+                                            }
+                                        }
+                                        catch (Exception) { }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            tdNameCaption.InnerText = "Name of Institute";
+                            tdFnameCaption.InnerText = "Address Line 1";
+                            tdMNameCaption.InnerText = "Address Line 2";
+                            tdDobCaption.InnerText = "Address Line 3";
+                            if (demandNote.enmApplicationType == enmApplicationType.CourseRegistrationApplication)
+                            {
+                                tdPaymentDescription.InnerText = "Registration Fee ";
+                                var payee = (from p in context.CourseRegistrationApplications
+                                             where p.DemandNoteID == demandNote.ID
+                                             select new
+                                             {
+                                                 FeeDetail = p.Course.Name + " (" + p.Course.Code + ")",
+                                                 Name = p.Institute.Name,
+                                                 Address1 = p.Institute.AddressLine1 + " " + p.Institute.AddressLine2,
+                                                 Address2 = p.Institute.AddressLine3 + " " + p.Institute.CityName,
+                                                 State = p.Institute.State.Name,
+                                                 Pin = p.Institute.PinCode
+                                             }).FirstOrDefault();
+                                tdPayeeName.InnerText = payee.Name.ToUpper();
+                                if (payee.Address1 != null)
+                                    tdPayeeFatherName.InnerText = payee.Address1.ToUpper();
+                                if (payee.Address2 != null)
+                                    tdPayeeMotherName.InnerText = payee.Address2.ToUpper();
+                                if (payee.State != null)
+                                    tdPayeeDOB.InnerText = payee.State.ToUpper();
+                                if (payee.Pin.HasValue)
+                                    tdPayeeDOB.InnerText += ", Pin: " + payee.Pin.Value.ToString();
+                                tdPaymentDescription.InnerText = "Registration Fee: " + payee.FeeDetail;
+
+                                // code to send mail to all applicants
+                                var emaillist = (from p in context.CourseRegistrationApplications
+                                                 where p.DemandNoteID == demandNote.ID
+                                                 select new
+                                                 {
+                                                     Appid = p.ID,
+                                                     Email = p.EmailAddress,
+                                                     Name = p.Name,
+                                                     FeeAmount = p.FeeAmount.Value,
+                                                     FeeDetail = p.Course.Name + " (" + p.Course.Code + ")",
+                                                     mobile = p.MobileNumber,
+                                                     appl_no = p.Number
+                                                 }).ToList();
+                                foreach (var list in emaillist)
+                                {
+
+                                    emailAddress = list.Email;
+                                    if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                    {
+                                        msg = "Dear " + GetInitCap(list.Name) + ",<br/><br/>" + " your " + GetInitCap(list.FeeDetail) + " course registration fee has been successfully deposited by the " + GetInitCap(payee.Name) + " on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " through payment " + "<br/>" + " Your Transaction Number is " + ot.ReferenceNumber + " and your Transaction Amount is " + list.FeeAmount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ") </i> for the Application Number:-" + list.appl_no;
+                                        if (allowSendingEmail == true)
+                                        {
+                                            try
+                                            {
+                                                //sending Email 
+                                                if (emailAddress.Trim().Length > 0)
+                                                {
+                                                    EConnect.NIELIT.Email mail = new Email("Course Registration Fee Submission:NIELIT", msg, emailAddress);
+                                                    mail.Send();
+                                                }
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                    }
+                                }
+                                string var1 = "-";
+                                // code to send sms to applicant
+                                foreach (var list1 in emaillist)
+                                {
+
+                                    mobileNumber = list1.mobile;
+                                    if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                    {
+
+                                        //mobileMsg = "Your" + GetInitCap(list1.FeeDetail) + " registration fee received through institute on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ", transaction number is: " + ot.ReferenceNumber + " and amount is " + list1.FeeAmount.ToString("F");
+                                        mobileMsg = "Your" + GetInitCap(list1.FeeDetail) + " (" + var1 + ") registration fee received through institute on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ", transaction number is: " + ot.ReferenceNumber + " and amount is " + list1.FeeAmount.ToString("F");
+                                        if (allowSendingSms == true)
+                                        {
+                                            try
+                                            {
+                                                //sending SMS 
+                                                if (mobileNumber != 0)
+                                                {
+                                                    EConnect.NIELIT.SMS message = new SMS(mobileMsg, mobileNumber.ToString(), "1307159090392909693", SmsServiceType.SignleSMS);
+                                                    int sentMessageCount;
+                                                    message.sendSingleSMS(out sentMessageCount);
+                                                }
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                    }
+                                }
+                            }
+                            else if (demandNote.enmApplicationType == enmApplicationType.CertificateExamApplication)
+                            {
+                                var payee = (from p in context.CertificateExamApplications
+                                             where p.DemandNoteID == demandNote.ID
+                                             select new
+                                             {
+                                                 FeeDetail = p.Exam.Name + " (" + p.Course.Code + ")",
+                                                 Name = p.Institute.Name,
+                                                 Address1 = p.Institute.AddressLine1 + " " + p.Institute.AddressLine2,
+                                                 Address2 = p.Institute.AddressLine3 + " " + p.Institute.CityName,
+                                                 State = p.Institute.State.Name,
+                                                 Pin = p.Institute.PinCode
+                                             }).FirstOrDefault();
+                                if (payee != null)
+                                {
+                                    tdPayeeName.InnerText = payee.Name.ToUpper();
+                                    if (payee.Address1 != null)
+                                        tdPayeeFatherName.InnerText = payee.Address1.ToUpper();
+                                    if (payee.Address2 != null)
+                                        tdPayeeMotherName.InnerText = payee.Address2.ToUpper();
+                                    if (payee.State != null)
+                                        tdPayeeDOB.InnerText = payee.State.ToUpper();
+                                    if (payee.Pin.HasValue)
+                                        tdPayeeDOB.InnerText += ", Pin: " + payee.Pin.Value.ToString();
+                                    tdPaymentDescription.InnerText = "Registration Cum Examination Fee: " + payee.FeeDetail;
+                                }
+                                else
+                                {
+                                    tdPayeeName.InnerText = "NA";
+                                    tdPayeeFatherName.InnerText = "NA";
+                                    tdPayeeMotherName.InnerText = "NA";
+                                    tdPayeeDOB.InnerText = "NA";
+                                    tdPaymentDescription.InnerText = "NA";
+                                }
+                                // code to send mail to all applicants
+                                var emaillist = (from p in context.CertificateExamApplications
+                                                 where p.DemandNoteID == demandNote.ID
+                                                 select new
+                                                 {
+                                                     Appid = p.ID,
+                                                     Email = p.EmailAddress,
+                                                     Name = p.Name,
+                                                     FeeAmount = p.TotalFeeAmount.Value,
+                                                     FeeDetail = p.Course.Code,
+                                                     examName = p.Exam.Name,
+                                                     mobile = p.MobileNumber,
+                                                     appl_no = p.Number
+                                                 }).ToList();
+                                foreach (var list in emaillist)
+                                {
+
+                                    emailAddress = list.Email;
+                                    if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                    {
+                                        msg = "Dear " + GetInitCap(list.Name) + ",<br/><br/>" + " your " + list.FeeDetail.ToUpper() + " certificate examination fee for " + GetInitCap(list.examName) + " Exam has been successfully deposited by the " + GetInitCap(payee.Name) + " on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " through  payment " + "<br/>" + " Your  Transaction Number is " + ot.ReferenceNumber + " and your Transaction Amount is " + list.FeeAmount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ")</i> for the Application Number :- " + list.appl_no;
+                                        if (allowSendingEmail == true)
+                                        {
+                                            try
+                                            {
+                                                //sending Email 
+                                                if (emailAddress.Trim().Length > 0)
+                                                {
+                                                    EConnect.NIELIT.Email mail = new Email("Certificate Examination Fee:NIELIT", msg, emailAddress);
+                                                    mail.Send();
+                                                }
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                    }
+                                }
+                                // code to send sms to applicant
+                                foreach (var list1 in emaillist)
+                                {
+
+                                    mobileNumber = list1.mobile;
+                                    if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                    {
+                                        mobileMsg = "Your " + list1.FeeDetail.ToUpper() + " certificate examination fee for " + GetInitCap(list1.examName) + " received through institute on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ",transaction number is: " + ot.ReferenceNumber + " and amount is " + list1.FeeAmount.ToString("F");
+                                        if (allowSendingSms == true)
+                                        {
+                                            try
+                                            {
+                                                //sending SMS 
+                                                if (mobileNumber != 0)
+                                                {
+                                                    EConnect.NIELIT.SMS message = new SMS(mobileMsg, mobileNumber.ToString(), "1307159090386641393", SmsServiceType.SignleSMS);
+                                                    int sentMessageCount;
+                                                    message.sendSingleSMS(out sentMessageCount);
+                                                }
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                    }
+                                }
+                            }
+                            else if (demandNote.enmApplicationType == enmApplicationType.CourseExamApplication)
+                            {
+                                var payee = (from p in context.CourseExamApplications
+                                             where p.DemandNoteID == demandNote.ID
+                                             select new
+                                             {
+                                                 FeeDetail = p.Exam.Name + " (" + p.Course.Name + ")",
+                                                 Name = p.Institute.Name,
+                                                 Address1 = p.Institute.AddressLine1 + " " + p.Institute.AddressLine2,
+                                                 Address2 = p.Institute.AddressLine3 + " " + p.Institute.CityName,
+                                                 State = p.Institute.State.Name,
+                                                 Pin = p.Institute.PinCode
+                                             }).FirstOrDefault();
+                                if (payee != null)
+                                {
+                                    tdPayeeName.InnerText = payee.Name.ToUpper();
+                                    if (payee.Address1 != null)
+                                        tdPayeeFatherName.InnerText = payee.Address1.ToUpper();
+                                    if (payee.Address2 != null)
+                                        tdPayeeMotherName.InnerText = payee.Address2.ToUpper();
+                                    if (payee.State != null)
+                                        tdPayeeDOB.InnerText = payee.State.ToUpper();
+                                    if (payee.Pin.HasValue)
+                                        tdPayeeDOB.InnerText += ", Pin: " + payee.Pin.Value.ToString();
+                                    tdPaymentDescription.InnerText = "Examination Fee: " + payee.FeeDetail;
+                                }
+                                else
+                                {
+                                    tdPayeeName.InnerText = "NA";
+                                    tdPayeeFatherName.InnerText = "NA";
+                                    tdPayeeMotherName.InnerText = "NA";
+                                    tdPayeeDOB.InnerText = "NA";
+                                    tdPaymentDescription.InnerText = "NA";
+                                }
+                                // code to send mail to all applicants
+
+                                var emaillist = (from p in context.CourseExamApplications
+                                                 join c in context.Candidates on p.CandidateID equals c.ID
+                                                 join cd in context.CandidateContactDetails on c.ID equals cd.CandidateID
+                                                 where p.DemandNoteID == demandNote.ID
+                                                 select new
+                                                 {
+                                                     Appid = p.ID,
+                                                     Email = cd.EmailAddress,
+                                                     Name = c.Name,
+                                                     FeeAmount = p.FeeAmount,
+                                                     FeeDetail = p.Exam.Name + " (" + p.Course.Name + ")",
+                                                     mobile = cd.MobileNumber,
+                                                     appl_no = p.Number
+                                                 }).ToList();
+
+                                foreach (var list in emaillist)
+                                {
+
+                                    emailAddress = list.Email;
+                                    if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                    {
+                                        msg = "Dear " + GetInitCap(list.Name) + ",<br/><br/>" + " your " + GetInitCap(list.FeeDetail) + " course examination fee has been successfully deposited by the " + GetInitCap(payee.Name) + " on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + " through  payment " + "<br/>" + " Your  Transaction Number is " + ot.ReferenceNumber + " and your Transaction Amount is " + list.FeeAmount.ToString("F") + " <i> (" + EConnect.Utils.Conversion.ConversionUtility.NumberToText(ot.Amount.ToString(), EConnect.Utils.Conversion.ConversionType.IndianRupees, enmLanguage.English) + ")</i> for the Application Number:- " + list.appl_no;
+                                        if (allowSendingEmail == true)
+                                        {
+                                            try
+                                            {
+                                                //sending Email 
+                                                if (emailAddress.Trim().Length > 0)
+                                                {
+                                                    EConnect.NIELIT.Email mail = new Email("Course Examination Fee Submission:NIELIT", msg, emailAddress);
+                                                    mail.Send();
+                                                }
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                    }
+                                }
+                                // code to send sms to all applicant
+                                foreach (var list1 in emaillist)
+                                {
+
+                                    mobileNumber = list1.mobile.Value;
+                                    if (ot.ResponseStatusCode.ToUpper().Trim() == "0300".ToUpper().Trim())
+                                    {
+                                        //mobileMsg = "Your" + GetInitCap(list1.FeeDetail) + " examination fee " + " received through institute on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ", transaction number is: " + ot.ReferenceNumber + " and amount is " + list1.FeeAmount.ToString("F");
+                                        mobileMsg = "Your " + GetInitCap(list1.FeeDetail) + " examination fee " + " received through institute on " + ot.ResponseDate.Value.ToString("dd-MMM-yyyy hh:mm tt") + ", transaction number is: " + ot.ReferenceNumber + " and amount is " + list1.FeeAmount.ToString("F") + "-NIELIT";
+                                        if (allowSendingSms == true)
+                                        {
+                                            try
+                                            {
+                                                //sending SMS 
+                                                if (mobileNumber != 0)
+                                                {
+                                                    EConnect.NIELIT.SMS message = new SMS(mobileMsg, mobileNumber.ToString(), "1307160940731343722", SmsServiceType.SignleSMS);
+                                                    int sentMessageCount;
+                                                    message.sendSingleSMS(out sentMessageCount);
+                                                }
+                                            }
+                                            catch (Exception) { }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    protected DateTime GetDate(string dt)
+    {
+        //21-01-2013 12:40:10
+        string[] dtAttray = dt.Split(' ');
+        string date = dtAttray[0];
+        string time = dtAttray[1];
+        string[] arrDate = date.Split('-');
+        string[] arrTime = time.Split(':');
+        return new DateTime(Convert.ToInt32(arrDate[2]), Convert.ToInt32(arrDate[1]), Convert.ToInt32(arrDate[0]), Convert.ToInt32(arrTime[0]), Convert.ToInt32(arrTime[1]), Convert.ToInt32(arrTime[2]));
+    }
+    public String GetResponseDescription(String responseCode)
+    {
+        String response = "unknown";
+        switch (responseCode)
+        {
+            case "0300": response = "Success";
+                break;
+            case "0399": response = "Invalid Authentication at Bank";
+                break;
+            case "NA": response = "Invalid Input in the Request Message";
+                break;
+            case "0002": response = "Payment Gateway is waiting for Response from Bank";
+                break;
+            case "0001": response = "Error at Payment Gateway";
+                break;
+        }
+        return response;
+    }
+    protected void btnHome_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("MainPage.aspx");
+    }
+}
+public class SHASample
+{
+    public SHASample() { }
+
+
+    public string GetHMACSHA256(string text, string key)
+    {
+        UTF8Encoding encoder = new UTF8Encoding();
+
+        byte[] hashValue;
+        byte[] keybyt = encoder.GetBytes(key);
+        byte[] message = encoder.GetBytes(text);
+
+        HMACSHA256 hashString = new HMACSHA256(keybyt);
+        string hex = "";
+
+        hashValue = hashString.ComputeHash(message);
+        foreach (byte x in hashValue)
+        {
+            hex += String.Format("{0:x2}", x);
+        }
+        return hex;
+    }
+
+}
+
+
