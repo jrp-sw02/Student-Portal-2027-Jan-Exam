@@ -8,8 +8,24 @@ using System.Web.UI.WebControls;
 
 public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
 {
-    private readonly string connStr = ConfigurationManager.ConnectionStrings["ExamConnectionString"].ConnectionString;
+    private readonly string connStr = GetConnectionString();
     private const string IAS_COURSE_IDS = "1,2,3,4";
+
+    private static string GetConnectionString()
+    {
+        ConnectionStringSettings connectionString = ConfigurationManager.ConnectionStrings["ExamConnectionString"];
+        if (connectionString == null || string.IsNullOrWhiteSpace(connectionString.ConnectionString))
+        {
+            connectionString = ConfigurationManager.ConnectionStrings["EConnectContext"];
+        }
+
+        if (connectionString == null || string.IsNullOrWhiteSpace(connectionString.ConnectionString))
+        {
+            throw new ConfigurationErrorsException("A valid database connection string for RC_ExamCentreDashboard was not found.");
+        }
+
+        return connectionString.ConnectionString;
+    }
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -47,7 +63,7 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         {
             string sql =
                 "SELECT DISTINCT Exam_Month, Exam_Year " +
-                "FROM NIELIT.dbo.Exam " +
+                "FROM NIELIT_PREPROD.dbo.Exam " +
                 "WHERE Course_ID IN (" + IAS_COURSE_IDS + ") " +
                 "ORDER BY Exam_Year DESC, Exam_Month DESC";
 
@@ -118,9 +134,9 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         {
             string sql =
                 "SELECT DISTINCT ec.ID AS pref_id, ec.Code AS city_code, ec.Name AS city_name " +
-                "FROM NIELIT.dbo.Exam_Wise_Exam_Center wec " +
-                "INNER JOIN NIELIT.dbo.Exam_Center ec ON ec.ID = wec.Exam_Center_ID " +
-                "INNER JOIN NIELIT.dbo.Exam ex ON ex.id = wec.Exam_ID " +
+                "FROM NIELIT_PREPROD.dbo.Exam_Wise_Exam_Center wec " +
+                "INNER JOIN NIELIT_PREPROD.dbo.Exam_Center ec ON ec.ID = wec.Exam_Center_ID " +
+                "INNER JOIN NIELIT_PREPROD.dbo.Exam ex ON ex.id = wec.Exam_ID " +
                 "WHERE ex.Exam_Month = @exam_month AND ex.Exam_Year = @exam_year " +
                 "  AND ex.Course_ID IN (" + IAS_COURSE_IDS + ") " +
                 "ORDER BY ec.Code";
@@ -138,7 +154,7 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
 
         DataTable dtLast3 = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
-        using (SqlCommand cmd = new SqlCommand("NIELIT.dbo.USP_City_MaxCapacity_LastN", conn))
+        using (SqlCommand cmd = new SqlCommand("NIELIT_PREPROD.dbo.USP_City_MaxCapacity_LastN", conn))
         {
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@Course_IDs", IAS_COURSE_IDS);
@@ -151,7 +167,7 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
 
         DataTable dtCurrent = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
-        using (SqlCommand cmd = new SqlCommand("NIELIT.dbo.USP_City_CurrentCycle_Filled", conn))
+        using (SqlCommand cmd = new SqlCommand("NIELIT_PREPROD.dbo.USP_City_CurrentCycle_Filled", conn))
         {
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@Exam_Month", month);
@@ -235,8 +251,8 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
             {
                 string sql =
                     "SELECT loc.Name AS district_name " +
-                    "FROM NIELIT.dbo.Exam_Center ec " +
-                    "INNER JOIN NIELIT.dbo.Location loc ON loc.ID = ec.District_ID " +
+                    "FROM NIELIT_PREPROD.dbo.Exam_Center ec " +
+                    "INNER JOIN NIELIT_PREPROD.dbo.Location loc ON loc.ID = ec.District_ID " +
                     "WHERE ec.ID = @exam_center_id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -423,7 +439,7 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
                 string sql =
                     "SELECT v.es_name, v.es_phone, v.es_mail, v.centre_name, v.district_name, ec.Code AS city_code " +
                     "FROM tblVenue v " +
-                    "INNER JOIN NIELIT.dbo.Exam_Center ec ON ec.ID = v.pref_id " +
+                    "INNER JOIN NIELIT_PREPROD.dbo.Exam_Center ec ON ec.ID = v.pref_id " +
                     "WHERE v.venue_id = @venue_id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
