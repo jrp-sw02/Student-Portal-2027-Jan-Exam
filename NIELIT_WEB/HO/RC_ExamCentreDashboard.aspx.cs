@@ -1,258 +1,92 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Globalization;
-using System.Web.UI;
+using System.Configuration;
 using System.Web.UI.WebControls;
 
-public partial class RC_ExamCentreDashboard : Page
+public partial class RC_ExamCentreDashboard : System.Web.UI.Page
 {
-    private readonly string connStr = ConfigurationManager.ConnectionStrings["ExamConnectionString"].ConnectionString;
-    private const string IAS_COURSE_IDS = "1,2,3,4";
-
-    protected override void OnInit(EventArgs e)
-    {
-        base.OnInit(e);
-        Load += Page_Load;
-    }
+    private string connStr = ConfigurationManager.ConnectionStrings["EConnectContext"].ConnectionString;
+    private const string CURRENT_EXAM_CYCLE = "JUL-2026";
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        Session["rc_code"] = "GO";
+        Session["rc_name"] = "RC Gorakhpur";
+
         if (!IsPostBack)
         {
-            BindExamCycleDropdown();
             BindCityPreferenceGrid();
             phVenuePanel.Visible = false;
             phPrevCentresPanel.Visible = false;
         }
     }
 
-    private int? CurrentRCId
+    private void BindCityPreferenceGrid()
     {
-        get
-        {
-            object v = Session["rc_id"];
-            if (v != null)
-            {
-                int id;
-                if (int.TryParse(v.ToString(), out id))
-                {
-                    return id;
-                }
-            }
-
-            return null;
-        }
-    }
-
-    private void BindExamCycleDropdown()
-    {
+        string rcCode = Session["rc_code"].ToString();
         DataTable dt = new DataTable();
+
         using (SqlConnection conn = new SqlConnection(connStr))
         {
             string sql =
-                "SELECT DISTINCT Exam_Month, Exam_Year " +
-                "FROM NIELIT.dbo.Exam " +
-                "WHERE Course_ID IN (" + IAS_COURSE_IDS + ") " +
-                "ORDER BY Exam_Year DESC, Exam_Month DESC";
+                "SELECT cp.pref_id, cp.city_code, cp.city_name, " +
+                "       es.last3_avg_per_session AS PerSessionMaxLast3, " +
+                "       es.current_filled_per_session AS PerSessionMaxCurrent " +
+                "FROM tblCityPreference cp " +
+                "INNER JOIN tblExamSession es ON es.pref_id = cp.pref_id " +
+                "INNER JOIN tblRCMaster rc ON rc.rc_id = cp.rc_id " +
+                "WHERE rc.rc_code = @rc_code AND cp.is_active = 1 " +
+                "ORDER BY cp.city_code";
 
             using (SqlCommand cmd = new SqlCommand(sql, conn))
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
             {
+                cmd.Parameters.AddWithValue("@rc_code", rcCode);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(dt);
             }
         }
 
-        ddlExamCycle.Items.Clear();
-        foreach (DataRow row in dt.Rows)
+        if (dt.Rows.Count > 0)
         {
-            int mn = Convert.ToInt32(row["Exam_Month"]);
-            int yr = Convert.ToInt32(row["Exam_Year"]);
-            string cycleLabel = MonthCode(mn) + "-" + yr.ToString();
-            ddlExamCycle.Items.Add(new ListItem(cycleLabel, cycleLabel));
-        }
-
-        if (ddlExamCycle.Items.Count > 0)
-        {
-            ddlExamCycle.ClearSelection();
-            ddlExamCycle.Items[0].Selected = true;
-        }
-    }
-
-    private string MonthCode(int m)
-    {
-        return CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(m).ToUpperInvariant();
-    }
-
-    private string SelectedExamCycle
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(ddlExamCycle.SelectedValue))
-            {
-                return ddlExamCycle.SelectedValue;
-            }
-
-            return string.Empty;
-        }
-    }
-
-    private Tuple<int, int> GetCurrentExamCycle()
-    {
-        int mn = 7;
-        int yr = 2026;
-        return Tuple.Create(mn, yr);
-    }
-
-    private void BindCityPreferenceGrid()
-    {
-        Tuple<int, int> cycle = GetCurrentExamCycle();
-        int mn = cycle.Item1;
-        int yr = cycle.Item2;
-        if (mn == 0 || yr == 0)
-        {
-            gvCityPreference.Visible = false;
-            lblNoData.Visible = true;
-            lblNoData.Text = "No exam cycle found for this course group.";
-            return;
-        }
-
-        DataTable dtCities = new DataTable();
-        using (SqlConnection conn = new SqlConnection(connStr))
-        {
-            string sql =
-                "SELECT DISTINCT ec.ID AS pref_id, ec.Code AS city_code, ec.Name AS city_name " +
-                "FROM NIELIT.dbo.Exam_Wise_Exam_Center wec " +
-                "INNER JOIN NIELIT.dbo.Exam_Center ec ON ec.ID = wec.Exam_Center_ID " +
-                "INNER JOIN NIELIT.dbo.Exam ex ON ex.id = wec.Exam_ID " +
-                "WHERE ex.Exam_Month = @exam_month AND ex.Exam_Year = @exam_year " +
-                "  AND ex.Course_ID IN (" + IAS_COURSE_IDS + ") " +
-                "ORDER BY ec.Code";
-
-            using (SqlCommand cmd = new SqlCommand(sql, conn))
-            {
-                cmd.Parameters.AddWithValue("@exam_month", mn);
-                cmd.Parameters.AddWithValue("@exam_year", yr);
-                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                {
-                    da.Fill(dtCities);
-                }
-            }
-        }
-
-        DataTable dtLast3 = new DataTable();
-        using (SqlConnection conn = new SqlConnection(connStr))
-        using (SqlCommand cmd = new SqlCommand("NIELIT.dbo.USP_City_MaxCapacity_LastN", conn))
-        {
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@Course_IDs", IAS_COURSE_IDS);
-            cmd.Parameters.AddWithValue("@NumCycles", 3);
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-            {
-                da.Fill(dtLast3);
-            }
-        }
-
-        DataTable dtCurrent = new DataTable();
-        using (SqlConnection conn = new SqlConnection(connStr))
-        using (SqlCommand cmd = new SqlCommand("NIELIT.dbo.USP_City_CurrentCycle_Filled", conn))
-        {
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@Exam_Month", mn);
-            cmd.Parameters.AddWithValue("@Exam_Year", yr);
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-            {
-                da.Fill(dtCurrent);
-            }
-        }
-
-        Dictionary<string, int> last3ByCity = new Dictionary<string, int>();
-        foreach (DataRow row in dtLast3.Rows)
-        {
-            string code = row["city_code"].ToString();
-            int capVal = Convert.ToInt32(row["max_applied_capacity"]);
-            if (!last3ByCity.ContainsKey(code) || capVal > last3ByCity[code])
-            {
-                last3ByCity[code] = capVal;
-            }
-        }
-
-        Dictionary<string, int> currentByCity = new Dictionary<string, int>();
-        foreach (DataRow row in dtCurrent.Rows)
-        {
-            string code = row["city_code"].ToString();
-            currentByCity[code] = Convert.ToInt32(row["current_filled_per_session"]);
-        }
-
-        DataTable result = new DataTable();
-        result.Columns.Add("pref_id", typeof(int));
-        result.Columns.Add("city_code", typeof(string));
-        result.Columns.Add("city_name", typeof(string));
-        result.Columns.Add("PerSessionMaxLast3", typeof(int));
-        result.Columns.Add("PerSessionMaxCurrent", typeof(int));
-
-        foreach (DataRow row in dtCities.Rows)
-        {
-            string code = row["city_code"].ToString();
-            DataRow nr = result.NewRow();
-            nr["pref_id"] = row["pref_id"];
-            nr["city_code"] = code;
-            nr["city_name"] = row["city_name"];
-            nr["PerSessionMaxLast3"] = last3ByCity.ContainsKey(code) ? last3ByCity[code] : 0;
-            nr["PerSessionMaxCurrent"] = currentByCity.ContainsKey(code) ? currentByCity[code] : 0;
-            result.Rows.Add(nr);
-        }
-
-        if (result.Rows.Count > 0)
-        {
-            gvCityPreference.Visible = true;
+            divGrid.Visible = true;
             lblNoData.Visible = false;
-            gvCityPreference.DataSource = result;
+            gvCityPreference.DataSource = dt;
             gvCityPreference.DataBind();
         }
         else
         {
-            gvCityPreference.Visible = false;
+            divGrid.Visible = false;
             lblNoData.Visible = true;
-            lblNoData.Text = "No city preference data found.";
         }
     }
 
     protected void gvCityPreference_RowCommand(object sender, GridViewCommandEventArgs e)
     {
         string[] args = e.CommandArgument.ToString().Split('|');
-        int examCenterId = Convert.ToInt32(args[0]);
+        int prefId = Convert.ToInt32(args[0]);
         string cityCode = args[1];
 
         if (e.CommandName == "ToggleVenues")
         {
-            hdnPrefId.Value = examCenterId.ToString();
+            hdnPrefId.Value = prefId.ToString();
             hdnVenueId.Value = "0";
             lblActiveCityCode.Text = cityCode;
             litFormTitle.Text = "Add Venue";
 
             ClearVenueForm();
-            BindExamCycleDropdown();
-            BindVenues(examCenterId);
+            BindVenues(prefId);
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string sql =
-                    "SELECT loc.Name AS district_name " +
-                    "FROM NIELIT.dbo.Exam_Center ec " +
-                    "INNER JOIN NIELIT.dbo.Location loc ON loc.ID = ec.District_ID " +
-                    "WHERE ec.ID = @exam_center_id";
+                string sql = "SELECT district_name FROM tblCityPreference WHERE pref_id = @pref_id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@exam_center_id", examCenterId);
+                    cmd.Parameters.AddWithValue("@pref_id", prefId);
                     conn.Open();
-                    object districtResult = cmd.ExecuteScalar();
-                    if (districtResult != null && districtResult != DBNull.Value)
-                    {
-                        txtDistrict.Text = districtResult.ToString();
-                    }
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                        txtDistrict.Text = result.ToString();
                 }
             }
 
@@ -261,25 +95,12 @@ public partial class RC_ExamCentreDashboard : Page
         }
         else if (e.CommandName == "TogglePrevCentres")
         {
-            hdnPrefId.Value = examCenterId.ToString();
+            hdnPrefId.Value = prefId.ToString();
             lblPrevCityCode.Text = cityCode;
-
-            BindPreviousCentres(examCenterId);
+            BindPreviousCentres(prefId);
             phPrevCentresPanel.Visible = true;
             phVenuePanel.Visible = false;
         }
-    }
-
-    protected void ddlExamCycle_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        int examCenterId;
-        if (int.TryParse(hdnPrefId.Value, out examCenterId))
-        {
-            ClearVenueForm();
-            BindVenues(examCenterId);
-        }
-
-        phVenuePanel.Visible = true;
     }
 
     protected void btnCancelVenue_Click(object sender, EventArgs e)
@@ -287,24 +108,24 @@ public partial class RC_ExamCentreDashboard : Page
         phVenuePanel.Visible = false;
     }
 
-    private void BindVenues(int examCenterId)
+    private void BindVenues(int prefId)
     {
         DataTable dt = new DataTable();
+
         using (SqlConnection conn = new SqlConnection(connStr))
         {
             string sql =
-                "SELECT venue_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name " +
+                "SELECT venue_id, es_name, es_phone, es_mail, centre_name, district_name " +
                 "FROM tblVenue " +
                 "WHERE pref_id = @pref_id AND is_active = 1 AND exam_cycle = @exam_cycle " +
                 "ORDER BY venue_id";
+
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
-                cmd.Parameters.AddWithValue("@pref_id", examCenterId);
-                cmd.Parameters.AddWithValue("@exam_cycle", SelectedExamCycle);
-                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                {
-                    da.Fill(dt);
-                }
+                cmd.Parameters.AddWithValue("@pref_id", prefId);
+                cmd.Parameters.AddWithValue("@exam_cycle", CURRENT_EXAM_CYCLE);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
             }
         }
 
@@ -325,8 +146,8 @@ public partial class RC_ExamCentreDashboard : Page
     protected void gvVenues_RowCommand(object sender, GridViewCommandEventArgs e)
     {
         int venueId = Convert.ToInt32(e.CommandArgument);
-        int examCenterId;
-        int.TryParse(hdnPrefId.Value, out examCenterId);
+        int prefId;
+        int.TryParse(hdnPrefId.Value, out prefId);
 
         if (e.CommandName == "EditVenue")
         {
@@ -352,7 +173,6 @@ public partial class RC_ExamCentreDashboard : Page
                     }
                 }
             }
-
             phVenuePanel.Visible = true;
         }
         else if (e.CommandName == "DeleteVenue")
@@ -367,30 +187,29 @@ public partial class RC_ExamCentreDashboard : Page
                     cmd.ExecuteNonQuery();
                 }
             }
-
-            BindVenues(examCenterId);
+            BindVenues(prefId);
             phVenuePanel.Visible = true;
         }
     }
 
-    private void BindPreviousCentres(int examCenterId)
+    private void BindPreviousCentres(int prefId)
     {
         DataTable dt = new DataTable();
+
         using (SqlConnection conn = new SqlConnection(connStr))
         {
             string sql =
-                "SELECT venue_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name, exam_cycle " +
+                "SELECT venue_id, es_name, es_phone, es_mail, centre_name, district_name, exam_cycle " +
                 "FROM tblVenue " +
                 "WHERE pref_id = @pref_id AND is_active = 1 AND (exam_cycle <> @exam_cycle OR exam_cycle IS NULL) " +
                 "ORDER BY exam_cycle DESC, venue_id";
+
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
-                cmd.Parameters.AddWithValue("@pref_id", examCenterId);
-                cmd.Parameters.AddWithValue("@exam_cycle", SelectedExamCycle);
-                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                {
-                    da.Fill(dt);
-                }
+                cmd.Parameters.AddWithValue("@pref_id", prefId);
+                cmd.Parameters.AddWithValue("@exam_cycle", CURRENT_EXAM_CYCLE);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
             }
         }
 
@@ -418,16 +237,15 @@ public partial class RC_ExamCentreDashboard : Page
         if (e.CommandName == "UsePrevCentre")
         {
             int venueId = Convert.ToInt32(e.CommandArgument);
-            int examCenterId;
-            int.TryParse(hdnPrefId.Value, out examCenterId);
+            int prefId;
+            int.TryParse(hdnPrefId.Value, out prefId);
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string sql =
-                    "SELECT v.es_name, v.es_phone, v.es_mail, v.centre_name, v.district_name, ec.Code AS city_code " +
-                    "FROM tblVenue v " +
-                    "INNER JOIN NIELIT.dbo.Exam_Center ec ON ec.ID = v.pref_id " +
-                    "WHERE v.venue_id = @venue_id";
+                string sql = "SELECT es_name, es_phone, es_mail, centre_name, district_name, city_code_lookup.city_code " +
+                             "FROM tblVenue v " +
+                             "CROSS APPLY (SELECT cp.city_code FROM tblCityPreference cp WHERE cp.pref_id = v.pref_id) AS city_code_lookup " +
+                             "WHERE v.venue_id = @venue_id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@venue_id", venueId);
@@ -447,126 +265,49 @@ public partial class RC_ExamCentreDashboard : Page
                 }
             }
 
-            hdnPrefId.Value = examCenterId.ToString();
+            hdnPrefId.Value = prefId.ToString();
             hdnVenueId.Value = "0";
             litFormTitle.Text = "Add Venue";
-            BindExamCycleDropdown();
-            BindVenues(examCenterId);
+
+            BindVenues(prefId);
+
             phPrevCentresPanel.Visible = false;
             phVenuePanel.Visible = true;
         }
     }
 
-    private string GenerateNextVenueCode(SqlConnection conn, string cityCode)
-    {
-        string sql = "SELECT venue_code FROM tblVenue WHERE venue_code LIKE @prefix + '%'";
-        int maxSeq = 0;
-
-        using (SqlCommand cmd = new SqlCommand(sql, conn))
-        {
-            cmd.Parameters.AddWithValue("@prefix", cityCode);
-            using (SqlDataReader rdr = cmd.ExecuteReader())
-            {
-                while (rdr.Read())
-                {
-                    string code = rdr["venue_code"].ToString();
-                    string suffix = code.Substring(cityCode.Length);
-                    int seqNum;
-                    if (int.TryParse(suffix, out seqNum))
-                    {
-                        if (seqNum > maxSeq)
-                        {
-                            maxSeq = seqNum;
-                        }
-                    }
-                }
-            }
-        }
-
-        int nextSeq = maxSeq + 1;
-        string seqStr = nextSeq.ToString();
-        if (nextSeq < 10)
-        {
-            seqStr = "0" + seqStr;
-        }
-
-        return cityCode + seqStr;
-    }
-
     protected void btnSaveVenue_Click(object sender, EventArgs e)
     {
-        int examCenterId;
-        if (!int.TryParse(hdnPrefId.Value, out examCenterId))
-        {
-            return;
-        }
+        int prefId;
+        if (!int.TryParse(hdnPrefId.Value, out prefId)) return;
 
         int venueId;
         int.TryParse(hdnVenueId.Value, out venueId);
 
-        if (txtEsName.Text.Trim() == string.Empty)
+        if (txtEsName.Text.Trim() == "")
         {
-            BindVenues(examCenterId);
+            BindVenues(prefId);
             phVenuePanel.Visible = true;
             return;
         }
 
-        string cityCode = lblActiveCityCode.Text.Trim();
-
         using (SqlConnection conn = new SqlConnection(connStr))
         {
-            conn.Open();
             string sql;
 
             if (venueId > 0)
-            {
                 sql = "UPDATE tblVenue SET es_name=@es_name, es_phone=@es_phone, es_mail=@es_mail, centre_name=@centre_name, district_name=@district_name WHERE venue_id=@venue_id";
-            }
             else
-            {
-                sql = "INSERT INTO tblVenue (pref_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name, created_by, created_on, exam_cycle, is_active) " +
-                      "VALUES (@pref_id, @venue_code, @es_name, @es_phone, @es_mail, @centre_name, @district_name, @created_by, GETDATE(), @exam_cycle, 1)";
-            }
+                sql = " INSERT INTO tblVenue (pref_id, es_name, es_phone, es_mail, centre_name, district_name, created_by, created_on, exam_cycle, is_active) " +
+                      "VALUES (@pref_id, @es_name, @es_phone, @es_mail, @centre_name, @district_name, @created_by, GETDATE(), @exam_cycle, 1)";
 
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@es_name", txtEsName.Text.Trim());
-
-                if (txtEsPhone.Text.Trim() == string.Empty)
-                {
-                    cmd.Parameters.AddWithValue("@es_phone", DBNull.Value);
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("@es_phone", txtEsPhone.Text.Trim());
-                }
-
-                if (txtEsMail.Text.Trim() == string.Empty)
-                {
-                    cmd.Parameters.AddWithValue("@es_mail", DBNull.Value);
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("@es_mail", txtEsMail.Text.Trim());
-                }
-
-                if (txtCentreName.Text.Trim() == string.Empty)
-                {
-                    cmd.Parameters.AddWithValue("@centre_name", DBNull.Value);
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("@centre_name", txtCentreName.Text.Trim());
-                }
-
-                if (txtDistrict.Text.Trim() == string.Empty)
-                {
-                    cmd.Parameters.AddWithValue("@district_name", DBNull.Value);
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("@district_name", txtDistrict.Text.Trim());
-                }
+                cmd.Parameters.AddWithValue("@es_phone", txtEsPhone.Text.Trim() == "" ? (object)DBNull.Value : txtEsPhone.Text.Trim());
+                cmd.Parameters.AddWithValue("@es_mail", txtEsMail.Text.Trim() == "" ? (object)DBNull.Value : txtEsMail.Text.Trim());
+                cmd.Parameters.AddWithValue("@centre_name", txtCentreName.Text.Trim() == "" ? (object)DBNull.Value : txtCentreName.Text.Trim());
+                cmd.Parameters.AddWithValue("@district_name", txtDistrict.Text.Trim() == "" ? (object)DBNull.Value : txtDistrict.Text.Trim());
 
                 if (venueId > 0)
                 {
@@ -574,13 +315,12 @@ public partial class RC_ExamCentreDashboard : Page
                 }
                 else
                 {
-                    string newVenueCode = GenerateNextVenueCode(conn, cityCode);
-                    cmd.Parameters.AddWithValue("@venue_code", newVenueCode);
-                    cmd.Parameters.AddWithValue("@pref_id", examCenterId);
+                    cmd.Parameters.AddWithValue("@pref_id", prefId);
                     cmd.Parameters.AddWithValue("@created_by", "ADMIN");
-                    cmd.Parameters.AddWithValue("@exam_cycle", SelectedExamCycle);
+                    cmd.Parameters.AddWithValue("@exam_cycle", CURRENT_EXAM_CYCLE);
                 }
 
+                conn.Open();
                 cmd.ExecuteNonQuery();
             }
         }
@@ -593,34 +333,33 @@ public partial class RC_ExamCentreDashboard : Page
                 string sql = "SELECT MAX(venue_id) FROM tblVenue WHERE pref_id = @pref_id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@pref_id", examCenterId);
+                    cmd.Parameters.AddWithValue("@pref_id", prefId);
                     conn.Open();
-                    object maxResult = cmd.ExecuteScalar();
-                    if (maxResult != null && maxResult != DBNull.Value)
-                    {
-                        venueIdForLink = Convert.ToInt32(maxResult);
-                    }
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                        venueIdForLink = Convert.ToInt32(result);
                 }
             }
         }
 
-        txtConsentLink.Text = ResolveUrl("~/ExamCentreConsent.aspx") + "?venue_id=" + venueIdForLink;
+        txtConsentLink.Text = ResolveUrl("~/HO/ExamCentreConsent_v2.aspx") + "?venue_id=" + venueIdForLink;
         lblCopyStatus.Visible = false;
         hdnShowConsentPopup.Value = "1";
 
         ClearVenueForm();
-        BindVenues(examCenterId);
+        BindVenues(prefId);
         BindCityPreferenceGrid();
+
         phVenuePanel.Visible = true;
     }
 
     private void ClearVenueForm()
     {
-        txtEsName.Text = string.Empty;
-        txtEsPhone.Text = string.Empty;
-        txtEsMail.Text = string.Empty;
-        txtCentreName.Text = string.Empty;
-        txtDistrict.Text = string.Empty;
+        txtEsName.Text = "";
+        txtEsPhone.Text = "";
+        txtEsMail.Text = "";
+        txtCentreName.Text = "";
+        txtDistrict.Text = "";
         hdnVenueId.Value = "0";
         litFormTitle.Text = "Add Venue";
     }
