@@ -1,4 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="RC_ExamCentreDashboard.aspx.cs"
+﻿
+<%@ Page Language="C#" AutoEventWireup="true" CodeFile="RC_ExamCentreDashboard.aspx.cs"
     Inherits="RC_ExamCentreDashboard" MasterPageFile="~/MasterPages/MyInfo.master" Debug="false" %>
 
 <%@ Register Src="../UserControl/BreadCrumb.ascx" TagName="BreadCrumb" TagPrefix="uc1" %>
