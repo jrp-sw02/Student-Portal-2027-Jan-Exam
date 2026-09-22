@@ -61,11 +61,17 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         DataTable dt = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
         {
+            //string sql =
+            //    "SELECT DISTINCT Exam_Month, Exam_Year " +
+            //    "FROM NIELIT_PREPROD.dbo.Exam " +
+            //    "WHERE Course_ID IN (" + IAS_COURSE_IDS + ") " +
+            //    "ORDER BY Exam_Year DESC, Exam_Month DESC";
+
             string sql =
-                "SELECT DISTINCT Exam_Month, Exam_Year " +
-                "FROM NIELIT_PREPROD.dbo.Exam " +
-                "WHERE Course_ID IN (" + IAS_COURSE_IDS + ") " +
-                "ORDER BY Exam_Year DESC, Exam_Month DESC";
+                    "SELECT DISTINCT Exam_Month, Exam_Year " +
+                    "FROM NIELIT.dbo.Exam " +
+                    "WHERE Course_ID IN (" + IAS_COURSE_IDS + ") " +
+                    "ORDER BY Exam_Year DESC, Exam_Month DESC";
 
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             using (SqlDataAdapter da = new SqlDataAdapter(cmd))
@@ -132,6 +138,15 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         DataTable dtCities = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
         {
+            //string sql =
+            //    "SELECT DISTINCT ec.ID AS pref_id, ec.Code AS city_code, ec.Name AS city_name " +
+            //   "FROM NIELIT_PREPROD.dbo.Exam_Wise_Exam_Center wec " +
+            //    "INNER JOIN NIELIT_PREPROD.dbo.Exam_Center ec ON ec.ID = wec.Exam_Center_ID " +
+            //    "INNER JOIN NIELIT_PREPROD.dbo.Exam ex ON ex.id = wec.Exam_ID " +
+            //    "WHERE ex.Exam_Month = @exam_month AND ex.Exam_Year = @exam_year " +
+            //  "  AND ex.Course_ID IN (" + IAS_COURSE_IDS + ") " +
+            //   "ORDER BY ec.Code";
+
             string sql =
                 "SELECT DISTINCT ec.ID AS pref_id, ec.Code AS city_code, ec.Name AS city_name " +
                 "FROM NIELIT_PREPROD.dbo.Exam_Wise_Exam_Center wec " +
@@ -140,7 +155,6 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
                 "WHERE ex.Exam_Month = @exam_month AND ex.Exam_Year = @exam_year " +
                 "  AND ex.Course_ID IN (" + IAS_COURSE_IDS + ") " +
                 "ORDER BY ec.Code";
-
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@exam_month", month);
@@ -155,6 +169,8 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         DataTable dtLast3 = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
         using (SqlCommand cmd = new SqlCommand("NIELIT_PREPROD.dbo.USP_City_MaxCapacity_LastN", conn))
+        //using (SqlCommand cmd = new SqlCommand("NIELIT.dbo.USP_City_MaxCapacity_LastN", conn))
+
         {
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@Course_IDs", IAS_COURSE_IDS);
@@ -168,6 +184,7 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         DataTable dtCurrent = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
         using (SqlCommand cmd = new SqlCommand("NIELIT_PREPROD.dbo.USP_City_CurrentCycle_Filled", conn))
+        //using (SqlCommand cmd = new SqlCommand("NIELIT.dbo.USP_City_CurrentCycle_Filled", conn))    
         {
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@Exam_Month", month);
@@ -249,11 +266,17 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
+                //string sql =
+                //    "SELECT loc.Name AS district_name " +
+                //    "FROM NIELIT_PREPROD.dbo.Exam_Center ec " +
+                //    "INNER JOIN NIELIT_PREPROD.dbo.Location loc ON loc.ID = ec.District_ID " +
+                //    "WHERE ec.ID = @exam_center_id";
+
                 string sql =
-                    "SELECT loc.Name AS district_name " +
-                    "FROM NIELIT_PREPROD.dbo.Exam_Center ec " +
-                    "INNER JOIN NIELIT_PREPROD.dbo.Location loc ON loc.ID = ec.District_ID " +
-                    "WHERE ec.ID = @exam_center_id";
+                        "SELECT loc.Name AS district_name " +
+                        "FROM NIELIT.dbo.Exam_Center ec " +
+                        "INNER JOIN NIELIT.dbo.Location loc ON loc.ID = ec.District_ID " +
+                        "WHERE ec.ID = @exam_center_id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -303,11 +326,26 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         DataTable dt = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
         {
+            //string sql =
+            //    "SELECT venue_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name " +
+            //    "FROM tblVenue " +
+            //    "WHERE pref_id = @pref_id AND is_active = 1 AND exam_cycle = @exam_cycle " +
+            //    "ORDER BY venue_id";
+
             string sql =
-                "SELECT venue_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name " +
-                "FROM tblVenue " +
-                "WHERE pref_id = @pref_id AND is_active = 1 AND exam_cycle = @exam_cycle " +
-                "ORDER BY venue_id";
+                    "SELECT ID AS venue_id, " +
+                    "       Venue_ID AS venue_code, " +          // adjust if Venue_ID is not the code
+                    "       ES_Name AS es_name, " +
+                    "       ES_Phone AS es_phone, " +
+                    "       ES_Mail AS es_mail, " +
+                    "       City_Name AS centre_name, " +        // or use Address if that's the real centre name
+                    "       District_Name AS district_name " +
+                    "FROM NIELIT.dbo.Exam_Venues " +
+                    "WHERE Pref_Id = @pref_id " +
+                    "  AND Is_Active = 1 " +
+                    "  AND Exam_Month = @exam_month " +
+                    "  AND Exam_Year = @exam_year " +
+                    "ORDER BY ID";
 
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
@@ -344,7 +382,17 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         {
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string sql = "SELECT es_name, es_phone, es_mail, centre_name, district_name FROM tblVenue WHERE venue_id = @venue_id";
+                //string sql = "SELECT es_name, es_phone, es_mail, centre_name, district_name FROM tblVenue WHERE venue_id = @venue_id";
+
+                string sql =
+                    "SELECT ES_Name AS es_name, " +
+                    "       ES_Phone AS es_phone, " +
+                    "       ES_Mail AS es_mail, " +
+                    "       City_Name AS centre_name, " +      // or Address if preferred
+                    "       District_Name AS district_name " +
+                    "FROM NIELIT.dbo.Exam_Venues " +
+                    "WHERE ID = @venue_id";
+
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@venue_id", venueId);
@@ -371,7 +419,10 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         {
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string sql = "UPDATE tblVenue SET is_active = 0 WHERE venue_id = @venue_id";
+                //string sql = "UPDATE tblVenue SET is_active = 0 WHERE venue_id = @venue_id";
+
+                string sql = "UPDATE NIELIT.dbo.Exam_Venues SET Is_Active = 0 WHERE ID = @venue_id";
+
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@venue_id", venueId);
@@ -390,11 +441,27 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         DataTable dt = new DataTable();
         using (SqlConnection conn = new SqlConnection(connStr))
         {
+            //string sql =
+            //    "SELECT venue_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name, exam_cycle " +
+            //    "FROM tblVenue " +
+            //    "WHERE pref_id = @pref_id AND is_active = 1 AND (exam_cycle <> @exam_cycle OR exam_cycle IS NULL) " +
+            //    "ORDER BY exam_cycle DESC, venue_id";
+
+
             string sql =
-                "SELECT venue_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name, exam_cycle " +
-                "FROM tblVenue " +
-                "WHERE pref_id = @pref_id AND is_active = 1 AND (exam_cycle <> @exam_cycle OR exam_cycle IS NULL) " +
-                "ORDER BY exam_cycle DESC, venue_id";
+                "SELECT ID AS venue_id, " +
+                "       Venue_ID AS venue_code, " +               // confirm if Venue_ID is the code
+                "       ES_Name AS es_name, " +
+                "       ES_Phone AS es_phone, " +
+                "       ES_Mail AS es_mail, " +
+                "       City_Name AS centre_name, " +
+                "       District_Name AS district_name, " +
+                "       CONCAT(LEFT(DATENAME(MONTH, DATEFROMPARTS(Exam_Year, Exam_Month, 1)), 3), '-', Exam_Year) AS exam_cycle " +
+                "FROM NIELIT.dbo.Exam_Venues " +
+                "WHERE Pref_Id = @pref_id " +
+                "  AND Is_Active = 1 " +
+                "  AND (Exam_Month <> @exam_month OR Exam_Year <> @exam_year) " +
+                "ORDER BY Exam_Year DESC, Exam_Month DESC, ID";
 
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
@@ -436,11 +503,22 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
+                //string sql =
+                //    "SELECT v.es_name, v.es_phone, v.es_mail, v.centre_name, v.district_name, ec.Code AS city_code " +
+                //    "FROM tblVenue v " +
+                //    "INNER JOIN NIELIT_PREPROD.dbo.Exam_Center ec ON ec.ID = v.pref_id " +
+                //    "WHERE v.venue_id = @venue_id";
+
                 string sql =
-                    "SELECT v.es_name, v.es_phone, v.es_mail, v.centre_name, v.district_name, ec.Code AS city_code " +
-                    "FROM tblVenue v " +
-                    "INNER JOIN NIELIT_PREPROD.dbo.Exam_Center ec ON ec.ID = v.pref_id " +
-                    "WHERE v.venue_id = @venue_id";
+                        "SELECT v.ES_Name AS es_name, " +
+                        "       v.ES_Phone AS es_phone, " +
+                        "       v.ES_Mail AS es_mail, " +
+                        "       v.City_Name AS centre_name, " +
+                        "       v.District_Name AS district_name, " +
+                        "       ec.Code AS city_code " +
+                        "FROM NIELIT.dbo.Exam_Venues v " +
+                        "INNER JOIN NIELIT.dbo.Exam_Center ec ON ec.ID = v.Pref_Id " +
+                        "WHERE v.ID = @venue_id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -473,7 +551,10 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
 
     private string GenerateNextVenueCode(SqlConnection conn, string cityCode)
     {
-        string sql = "SELECT venue_code FROM tblVenue WHERE venue_code LIKE @prefix + '%'";
+        //string sql = "SELECT venue_code FROM tblVenue WHERE venue_code LIKE @prefix + '%'";
+
+        string sql = "SELECT Venue_ID AS venue_code FROM NIELIT.dbo.Exam_Venues WHERE Venue_ID LIKE @prefix + '%'";
+
         int maxSeq = 0;
 
         using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -531,19 +612,32 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
 
             if (venueId > 0)
             {
-                sql = "UPDATE tblVenue SET es_name=@es_name, es_phone=@es_phone, es_mail=@es_mail, centre_name=@centre_name, district_name=@district_name WHERE venue_id=@venue_id";
+                //sql = "UPDATE tblVenue SET es_name=@es_name, es_phone=@es_phone, es_mail=@es_mail, centre_name=@centre_name, district_name=@district_name WHERE venue_id=@venue_id";
+                sql = "UPDATE NIELIT.dbo.Exam_Venues " +
+                      "SET ES_Name = @es_name, " +
+                      "    ES_Phone = @es_phone, " +
+                      "    ES_Mail = @es_mail, " +
+                      "    City_Name = @centre_name, " +
+                      "    District_Name = @district_name " +
+                      "WHERE ID = @venue_id";
             }
             else
             {
-                sql = "INSERT INTO tblVenue (pref_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name, created_by, created_on, exam_cycle, is_active) " +
-                      "VALUES (@pref_id, @venue_code, @es_name, @es_phone, @es_mail, @centre_name, @district_name, @created_by, GETDATE(), @exam_cycle, 1)";
+                //sql = "INSERT INTO tblVenue (pref_id, venue_code, es_name, es_phone, es_mail, centre_name, district_name, created_by, created_on, exam_cycle, is_active) " +
+                //      "VALUES (@pref_id, @venue_code, @es_name, @es_phone, @es_mail, @centre_name, @district_name, @created_by, GETDATE(), @exam_cycle, 1)";
+                sql = "INSERT INTO NIELIT.dbo.Exam_Venues " +
+                      "(Pref_Id, Venue_ID, ES_Name, ES_Phone, ES_Mail, City_Name, District_Name, " +
+                      " Created_By, Created_On, Exam_Month, Exam_Year, Is_Active) " +
+                      "VALUES " +
+                      "(@pref_id, @venue_code, @es_name, @es_phone, @es_mail, @centre_name, @district_name, " +
+                      " @created_by, GETDATE(), @exam_month, @exam_year, 1)";
             }
 
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@es_name", txtEsName.Text.Trim());
                 cmd.Parameters.AddWithValue("@es_phone", txtEsPhone.Text.Trim() == string.Empty ? (object)DBNull.Value : txtEsPhone.Text.Trim());
-                cmd.Parameters.AddWithValue("@es_mail", txtEsMail.Text.Trim() == string.Empty ? (object)DBNull.Value : txtEsMail.Text.Trim());
+                cmd.Parameters.AddWithValue("@es_mail`", txtEsMail.Text.Trim() == string.Empty ? (object)DBNull.Value : txtEsMail.Text.Trim());
                 cmd.Parameters.AddWithValue("@centre_name", txtCentreName.Text.Trim() == string.Empty ? (object)DBNull.Value : txtCentreName.Text.Trim());
                 cmd.Parameters.AddWithValue("@district_name", txtDistrict.Text.Trim() == string.Empty ? (object)DBNull.Value : txtDistrict.Text.Trim());
 
@@ -569,7 +663,8 @@ public partial class HO_RC_ExamCentreDashboard : System.Web.UI.Page
         {
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string sql = "SELECT MAX(venue_id) FROM tblVenue WHERE pref_id = @pref_id";
+                //string sql = "SELECT MAX(venue_id) FROM tblVenue WHERE pref_id = @pref_id";
+                string sql = "SELECT MAX(ID) FROM NIELIT.dbo.Exam_Venues WHERE Pref_Id = @pref_id";
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@pref_id", examCenterId);
